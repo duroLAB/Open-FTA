@@ -123,7 +123,7 @@ namespace OpenFTA
         {
             if (textBoxTag.Text.Contains(" "))
             {
-                MessageBox.Show("Tag must be a single word; no spaces allowed.", "Invalid Tag", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("TAG must be a single word; no spaces allowed.", "Invalid TAG", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 // Nastavíme DialogResult ako Cancel, aby sa vrátilo späť do hlavného (editovacieho) okna
                 this.DialogResult = DialogResult.Cancel;
                 this.Close();
@@ -138,7 +138,7 @@ namespace OpenFTA
                 if (textBoxTag.Text.Contains(" "))
                 {
                     // Nastavíme chybovú správu na ErrorProvider
-                    errorProvider1.SetError(textBoxTag, "Tag must be a single word; no spaces allowed.");
+                    errorProvider1.SetError(textBoxTag, "TAG must be a single word; no spaces allowed.");
                 }
                 else
                 {

@@ -32,7 +32,7 @@
             label4 = new Label();
             errorProvider1 = new ErrorProvider(components);
             textBoxTag = new TextBox();
-            Tag = new Label();
+            TAG = new Label();
             comboBoxUnits = new ComboBox();
             buttonDatabase = new Button();
             textBoxFrequency = new TextBox();
@@ -86,15 +86,15 @@
             textBoxTag.Size = new Size(139, 23);
             textBoxTag.TabIndex = 21;
             // 
-            // Tag
+            // TAG
             // 
-            Tag.AutoSize = true;
-            Tag.Location = new Point(74, 111);
-            Tag.Margin = new Padding(4, 0, 4, 0);
-            Tag.Name = "Tag";
-            Tag.Size = new Size(25, 15);
-            Tag.TabIndex = 20;
-            Tag.Text = "Tag";
+            TAG.AutoSize = true;
+            TAG.Location = new Point(74, 111);
+            TAG.Margin = new Padding(4, 0, 4, 0);
+            TAG.Name = "TAG";
+            TAG.Size = new Size(25, 15);
+            TAG.TabIndex = 20;
+            TAG.Text = "TAG";
             // 
             // comboBoxUnits
             // 
@@ -314,7 +314,7 @@
             ClientSize = new Size(490, 473);
             Controls.Add(label4);
             Controls.Add(textBoxTag);
-            Controls.Add(Tag);
+            Controls.Add(TAG);
             Controls.Add(textBoxDescription);
             Controls.Add(label2);
             Controls.Add(comboBoxEventType);
@@ -347,7 +347,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         public System.Windows.Forms.TextBox textBoxTag;
-        private System.Windows.Forms.Label Tag;
+        private System.Windows.Forms.Label TAG;
         public System.Windows.Forms.TextBox textBoxDescription;
         private System.Windows.Forms.Label label2;
         public System.Windows.Forms.ComboBox comboBoxEventType;

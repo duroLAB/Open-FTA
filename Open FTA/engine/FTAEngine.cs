@@ -741,7 +741,7 @@ public class FTAlogic
         {
             Debug.WriteLine("Node Details:");
             Debug.WriteLine($"  Name: {item.Name}");
-            Debug.WriteLine($"  Tag: {item.Tag}");
+            Debug.WriteLine($"  TAG: {item.Tag}");
             Debug.WriteLine($"  Parent: {item.Parent}");
             Debug.WriteLine($"  ItemType: {item.ItemType}");
             Debug.WriteLine($"  GateType: {item.GateType}");

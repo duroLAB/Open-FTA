@@ -10,9 +10,9 @@ using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
-class DrawingEngine
+class DrawingEngine(FTAlogic f)
 {
-    FTAlogic EngineLogic;
+    readonly FTAlogic EngineLogic = f;
     public int offsetX = 0;
     public int offsetY = 0;
     public double GlobalZoom = 1;
@@ -20,13 +20,9 @@ class DrawingEngine
     private int FTAHeight;
     public bool SelectedEventDrag;
 
+    readonly string picPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
     public static bool UseTechnicalGates { get; set; } = MainAppSettings.Current.Technicalgates;
-
-
-    public DrawingEngine(FTAlogic f)
-    {
-        EngineLogic = f;
-    }
 
     public void SetDimensions(int fTAWidth, int fTAHeight)
     {
@@ -215,7 +211,7 @@ class DrawingEngine
     {
         float maxFontSize = 10f;
         float minFontSize = 6f;
-        Font font = null;
+        Font font;
 
         for (float fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 0.5f)
         {
@@ -368,7 +364,7 @@ class DrawingEngine
 
 
         // Find the event that was clicked.
-        FTAitem clickedEvent = null;
+        FTAitem? clickedEvent = null;      
         foreach (var evt in EngineLogic.FTAStructure.Values)
         {
 
@@ -412,6 +408,7 @@ class DrawingEngine
                         EngineLogic.SelectedEvents.Clear();
                     }
                     clickedEvent.IsSelected = true;
+                    if(EngineLogic.SelectedEvents!=null)
                     EngineLogic.SelectedEvents.Add(clickedEvent);
                 }
             }
@@ -447,12 +444,12 @@ class DrawingEngine
         if (!evt.IsHidden)
             return false;
 
-        if (evt.Parent != null && EngineLogic.FTAStructure.TryGetValue(evt.Parent, out FTAitem parent) && parent.IsHidden)
+        if (evt.Parent != null && EngineLogic.FTAStructure.TryGetValue(evt.Parent, out FTAitem? parent) && parent!=null &&  parent.IsHidden)
             return false;
 
         foreach (var childGuid in evt.Children)
         {
-            if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child) && !child.IsHidden)
+            if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem? child) && child !=null && !child.IsHidden)
                 return false;
         }
 
@@ -548,7 +545,7 @@ class DrawingEngine
         yreal = (int)((p.Y - offsetY) / GlobalZoom);
     }
 
-    private void DrawEventBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.5f, float scaleFactorHeight = 0.5f, Pen fallbackPen = null)
+    private void DrawEventBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.5f, float scaleFactorHeight = 0.5f, Pen? fallbackPen = null)
     {
         // Calculate the image dimensions based on the rectangle dimensions using separate scale factors.
         int imageWidth = (int)(r.Width * scaleFactorWidth);
@@ -559,9 +556,7 @@ class DrawingEngine
         int imageY = r.Y + r.Height + verticalOffset;
         Rectangle imageRect = new Rectangle(imageX, imageY, imageWidth, imageHeight);
 
-        // Build the absolute path to the image.
-        string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-        string picPath = System.IO.Path.GetDirectoryName(exePath);
+        // Build the absolute path to the image.       
         string imagePath = System.IO.Path.Combine(picPath, imageFilename);
 
         if (System.IO.File.Exists(imagePath))
@@ -582,7 +577,7 @@ class DrawingEngine
         }
     }
 
-    private void DrawGateBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.6f, float scaleFactorHeight = 0.5f, Pen fallbackPen = null)
+    private void DrawGateBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.6f, float scaleFactorHeight = 0.5f, Pen? fallbackPen = null)
     {
         // Vypočítame rozmery bitmapy podľa veľkosti brány
         int imageWidth = (int)(r.Width) / 3;
@@ -593,9 +588,7 @@ class DrawingEngine
         int imageY = r.Y + r.Height + verticalOffset;
         Rectangle imageRect = new Rectangle(imageX, imageY, imageWidth, imageHeight);
 
-        // Získanie cesty k obrázku
-        string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-        string picPath = System.IO.Path.GetDirectoryName(exePath);
+        // Získanie cesty k obrázku        
         string imagePath = System.IO.Path.Combine(picPath, imageFilename);
 
         if (System.IO.File.Exists(imagePath))
@@ -628,7 +621,7 @@ class DrawingEngine
 
         foreach (var childGuid in root.Children)
         {
-            if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
+            if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem? child) && child is not null)
             {
                 subtree.AddRange(GetSubtreeItems(child));
             }

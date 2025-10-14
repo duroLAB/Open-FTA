@@ -64,7 +64,7 @@ class UIlogic
     }
 
 
-    //(ParentGuid,Event type,Gatetype,freqvency,xPosition,yPosition,Tag)
+    //(ParentGuid,Event type,Gatetype,freqvency,xPosition,yPosition,TAG)
     public void GenerateSampleTree2()
     {
         Guid A = EngineLogic.AddNewEvent(EngineLogic.TopEventGuid, "Intermediate event 1", 1, 2, 0, 100, 270, "IE1");
