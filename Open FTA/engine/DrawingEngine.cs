@@ -20,7 +20,8 @@ class DrawingEngine(FTAlogic f)
     private int FTAHeight;
     public bool SelectedEventDrag;
 
-    readonly string picPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+    readonly string picPath = AppContext.BaseDirectory;
+
 
     public static bool UseTechnicalGates { get; set; } = MainAppSettings.Current.Technicalgates;
 
@@ -35,6 +36,7 @@ class DrawingEngine(FTAlogic f)
         DrawBackGround(e);
         DrawEvents(e);
         DrawLinesAndGates(e);
+        
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
