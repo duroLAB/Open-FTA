@@ -259,7 +259,7 @@ public class FTAlogic
             else
             {
                 FI.X = GetItem(ParentEvent.Children[ParentEvent.Children.Count - 1]).X + Constants.EventWidth;
-                FI.Y = ParentEvent.Y;
+                FI.Y = ParentEvent.Y+150;
             }
         }
         AddItem(FI);
