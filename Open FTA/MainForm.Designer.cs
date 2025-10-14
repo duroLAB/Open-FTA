@@ -58,6 +58,8 @@
             toolStripSeparator8 = new ToolStripSeparator();
             toolStripButtonSettings = new ToolStripButton();
             panelBottom = new Panel();
+            statusStrip1 = new StatusStrip();
+            toolStripStatusLabelCoordinates = new ToolStripStatusLabel();
             splitter1 = new Splitter();
             panelMain = new Panel();
             panelRight = new Panel();
@@ -75,6 +77,8 @@
             panelLeft = new Panel();
             treeView1 = new TreeView();
             toolStrip1.SuspendLayout();
+            panelBottom.SuspendLayout();
+            statusStrip1.SuspendLayout();
             panelMain.SuspendLayout();
             panelRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -306,17 +310,33 @@
             // 
             // panelBottom
             // 
+            panelBottom.Controls.Add(statusStrip1);
             panelBottom.Dock = DockStyle.Bottom;
-            panelBottom.Location = new Point(0, 541);
+            panelBottom.Location = new Point(0, 594);
             panelBottom.Margin = new Padding(4, 3, 4, 3);
             panelBottom.Name = "panelBottom";
-            panelBottom.Size = new Size(1068, 82);
+            panelBottom.Size = new Size(1068, 29);
             panelBottom.TabIndex = 2;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelCoordinates });
+            statusStrip1.Location = new Point(0, 7);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(1068, 22);
+            statusStrip1.TabIndex = 0;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabelCoordinates
+            // 
+            toolStripStatusLabelCoordinates.Name = "toolStripStatusLabelCoordinates";
+            toolStripStatusLabelCoordinates.Size = new Size(50, 17);
+            toolStripStatusLabelCoordinates.Text = "x=1,y=1";
             // 
             // splitter1
             // 
             splitter1.Dock = DockStyle.Bottom;
-            splitter1.Location = new Point(0, 538);
+            splitter1.Location = new Point(0, 591);
             splitter1.Margin = new Padding(4, 3, 4, 3);
             splitter1.Name = "splitter1";
             splitter1.Size = new Size(1068, 3);
@@ -332,7 +352,7 @@
             panelMain.Location = new Point(0, 77);
             panelMain.Margin = new Padding(4, 3, 4, 3);
             panelMain.Name = "panelMain";
-            panelMain.Size = new Size(1068, 461);
+            panelMain.Size = new Size(1068, 514);
             panelMain.TabIndex = 4;
             // 
             // panelRight
@@ -342,7 +362,7 @@
             panelRight.Location = new Point(237, 0);
             panelRight.Margin = new Padding(4, 3, 4, 3);
             panelRight.Name = "panelRight";
-            panelRight.Size = new Size(831, 461);
+            panelRight.Size = new Size(831, 514);
             panelRight.TabIndex = 2;
             // 
             // pictureBox1
@@ -352,7 +372,7 @@
             pictureBox1.Location = new Point(0, 0);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(831, 461);
+            pictureBox1.Size = new Size(831, 514);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
@@ -441,7 +461,7 @@
             splitter2.Location = new Point(233, 0);
             splitter2.Margin = new Padding(4, 3, 4, 3);
             splitter2.Name = "splitter2";
-            splitter2.Size = new Size(4, 461);
+            splitter2.Size = new Size(4, 514);
             splitter2.TabIndex = 1;
             splitter2.TabStop = false;
             // 
@@ -452,7 +472,7 @@
             panelLeft.Location = new Point(0, 0);
             panelLeft.Margin = new Padding(4, 3, 4, 3);
             panelLeft.Name = "panelLeft";
-            panelLeft.Size = new Size(233, 461);
+            panelLeft.Size = new Size(233, 514);
             panelLeft.TabIndex = 0;
             // 
             // treeView1
@@ -462,7 +482,7 @@
             treeView1.Location = new Point(0, 0);
             treeView1.Margin = new Padding(4, 3, 4, 3);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(233, 461);
+            treeView1.Size = new Size(233, 514);
             treeView1.TabIndex = 0;
             // 
             // MainForm
@@ -481,6 +501,10 @@
             Load += MainForm_Load;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
+            panelBottom.ResumeLayout(false);
+            panelBottom.PerformLayout();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             panelMain.ResumeLayout(false);
             panelRight.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
@@ -536,6 +560,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_HIDEUNHIDE;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_CENTERTREE;
         private System.Windows.Forms.ToolStripComboBox toolStripMenuItem_ALIGN;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel toolStripStatusLabelCoordinates;
     }
 }
 

@@ -542,7 +542,7 @@ class DrawingEngine
     }
 
 
-    void PixelToRealPosition(Point p, ref int xreal, ref int yreal)
+    public void PixelToRealPosition(Point p, ref int xreal, ref int yreal)
     {
         xreal = (int)((p.X - offsetX) / GlobalZoom);
         yreal = (int)((p.Y - offsetY) / GlobalZoom);

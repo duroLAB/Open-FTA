@@ -116,6 +116,12 @@ namespace OpenFTA
                 TreeEngine.Mouse_DragEvent(e.Location);
                 pictureBox1.Invalidate();
             }
+
+            int X = 0;
+            int Y = 0;
+            TreeEngine.PixelToRealPosition(e.Location, ref X, ref Y);
+            String str = "X:"+X+", Y:"+Y+")";
+            toolStripStatusLabelCoordinates.Text = str;
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
