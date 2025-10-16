@@ -19,6 +19,9 @@ class DrawingEngine(FTAlogic f)
     private int FTAWidth;
     private int FTAHeight;
     public bool SelectedEventDrag;
+    public bool IsDraggingTree = false;
+    private Point LastMousePosition;
+    private Point _lastDragPosition;
 
     readonly string picPath = AppContext.BaseDirectory;
 
@@ -190,6 +193,22 @@ class DrawingEngine(FTAlogic f)
                                   (evt.Frequency < 0.001) ? evt.Frequency.ToString("0.0000E+0") :
                                   evt.Frequency.ToString("F6");
 
+                        if(evt.ItemType>1)
+                        {
+
+                            freqText = evt.UserMetricType switch
+                            {
+                                0 => "f=",
+                                1 => "P=",
+                                2 => "R=",
+                                3 => "λ=",
+                                _ => ""
+                            };
+                            freqText += (evt.UserMetricValue < 0.001) ? evt.UserMetricValue.ToString("0.0000E+0") :  evt.UserMetricValue.ToString("F6");
+                            if (evt.UserMetricType == 0 || evt.UserMetricType == 3) { freqText += " " + EngineLogic.MetricUnitsList[evt.UserMetricUnit]; }
+
+                        }
+
                         Font freqFont = FindFittingFont(g, freqText, bottomRect);
                         SizeF freqSize = g.MeasureString(freqText, freqFont);
                         PointF freqPos = new PointF(
@@ -352,9 +371,7 @@ class DrawingEngine(FTAlogic f)
             }
         }
     }
-
-    public bool IsDraggingTree = false;
-    private Point LastMousePosition;
+   
     public bool Mouse_SelectEvent(Point mouseCoordinates)
     {
         int X = 0;
@@ -459,7 +476,6 @@ class DrawingEngine(FTAlogic f)
     }
 
 
-
     private GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)//Methode for rounding corners of events
     {
         GraphicsPath path = new GraphicsPath();
@@ -477,8 +493,7 @@ class DrawingEngine(FTAlogic f)
 
         return path;
     }
-    private Point _lastDragPosition;
-
+   
     public void Mouse_DragEvent(Point mouseCoordinates)
     {
         if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)
@@ -520,7 +535,6 @@ class DrawingEngine(FTAlogic f)
             LastMousePosition = mouseCoordinates;
         }
     }
-
 
     public void Mouse_Up()
     {
