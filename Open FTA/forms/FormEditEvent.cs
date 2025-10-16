@@ -33,12 +33,26 @@ namespace OpenFTA
             comboBoxEventType.DisplayMember = "Value";
             comboBoxEventType.ValueMember = "Key";
 
+            comboBoxMetricType.DataSource = new BindingSource(EngineLogic.MetricList, null);
+            comboBoxMetricType.DisplayMember = "Value";
+            comboBoxMetricType.ValueMember = "Key";
+
+            comboBoxUnits.DataSource = new BindingSource(EngineLogic.MetricUnitsList, null);
+            comboBoxUnits.DisplayMember = "Value";
+            comboBoxUnits.ValueMember = "Key";
+
             comboBoxEventType.SelectedValue = 2;
             comboBoxGates.SelectedValue = 2;
+            comboBoxMetricType.SelectedIndex = 0;
+            comboBoxUnits.SelectedIndex = 0;
 
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
+
+            tabControlfailure_metrics.Appearance = TabAppearance.FlatButtons;
+            tabControlfailure_metrics.ItemSize = new Size(0, 1);
+            tabControlfailure_metrics.SizeMode = TabSizeMode.Fixed;
 
             int count = EngineLogic.SelectedEvents.Count;
             if (count == 1)
@@ -56,13 +70,8 @@ namespace OpenFTA
                 textBoxTag.Text = "NewTag";
                 textBoxName.Text = "";
                 textBoxFrequency.Text = "0";
-
-
             }
-            comboBoxUnits.Items.Add("y⁻¹");
-            comboBoxUnits.Items.Add("h⁻¹");
-            comboBoxUnits.Items.Add("s⁻¹");
-            comboBoxUnits.SelectedIndex = 0;
+        
         }
 
         private void comboBoxGates_SelectedIndexChanged(object sender, EventArgs e)
@@ -101,9 +110,16 @@ namespace OpenFTA
                 tabControl1.Enabled = true;
 
                 if (comboBoxEventType.SelectedIndex < 2)
+                {
                     tabControl1.SelectedTab = tabControl1.TabPages["tabPageIntermediate"];
+                    groupBoxDetailSettings.Text = "Gate definition";
+                }
                 else
+
+                {
                     tabControl1.SelectedTab = tabControl1.TabPages["tabPageBasic"];
+                    groupBoxDetailSettings.Text = "Reliability Metrics";
+                }
             }
 
 
@@ -113,9 +129,9 @@ namespace OpenFTA
         {
             {
                 // Vytvoríme novú inštanciu formulára pre databázové rozhranie.
-             /*   Database dbForm = new Database();
-                // Otvoríme formulár ako modálny dialóg, takže používateľ musí s ním interagovať, kým sa nevráti do hlavného okna.
-                dbForm.ShowDialog();*/
+                /*   Database dbForm = new Database();
+                   // Otvoríme formulár ako modálny dialóg, takže používateľ musí s ním interagovať, kým sa nevráti do hlavného okna.
+                   dbForm.ShowDialog();*/
             }
         }
 
@@ -139,6 +155,8 @@ namespace OpenFTA
                 {
                     // Nastavíme chybovú správu na ErrorProvider
                     errorProvider1.SetError(textBoxTag, "TAG must be a single word; no spaces allowed.");
+                    button1.Enabled = false;
+
                 }
                 else
                 {
@@ -213,6 +231,55 @@ namespace OpenFTA
         {
 
         }
+
+        private void comboBoxUnits_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonDatabase_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBoxFrequency_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabPage3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBoxMetricType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            tabControlfailure_metrics.SelectedIndex = comboBoxMetricType.SelectedIndex;
+            textBoxFrequency.Parent = tabControlfailure_metrics.TabPages[comboBoxMetricType.SelectedIndex];
+            comboBoxUnits.Parent = textBoxFrequency.Parent;
+
+            if (comboBoxMetricType.SelectedIndex == 0 || comboBoxMetricType.SelectedIndex == 3)
+                comboBoxUnits.Visible = true;
+            else comboBoxUnits.Visible = false;
+
+        }
+
+      
     }
 
 }

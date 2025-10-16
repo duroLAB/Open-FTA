@@ -418,16 +418,7 @@ namespace OpenFTA
                 Guid A = EngineLogic.AddNewEvent(Parent.GuidCode, "", 0, 0, 0);
                 var newEvent = EngineLogic.GetItem(A);
 
-                newEvent.Name = edit.textBoxName.Text;
-                newEvent.Tag = edit.textBoxTag.Text;
-                newEvent.GateType = Convert.ToInt32(edit.comboBoxGates.SelectedValue);
-                newEvent.ItemType = Convert.ToInt32(edit.comboBoxEventType.SelectedValue);
-
-                double inputFreq = Convert.ToDouble(edit.textBoxFrequency.Text);
-                string selectedUnit = edit.comboBoxUnits.SelectedItem.ToString();
-                newEvent.Frequency = ConvertToYears(inputFreq, selectedUnit);
-
-                newEvent.Description = edit.textBoxDescription.Text;
+                ReadInfoFromEditForm(edit, newEvent);
 
                 UIEngine.FillTreeView(treeView1);
             }
@@ -459,28 +450,48 @@ namespace OpenFTA
             edit.textBoxName.Text = selectedEvent.Name;
             edit.comboBoxGates.SelectedValue = selectedEvent.GateType;
             edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
-            edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
+           // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
             edit.textBoxTag.Text = selectedEvent.Tag;
+
+            edit.textBoxFrequency.Text = selectedEvent.UserMetricValue.ToString();
+            edit.comboBoxMetricType.SelectedIndex = selectedEvent.UserMetricType;
+            edit.comboBoxUnits.SelectedIndex = selectedEvent.UserMetricUnit;
 
             SaveStateForUndo();
 
             if (DialogResult.OK == edit.ShowDialog())
             {
-                selectedEvent.Name = edit.textBoxName.Text;
-                selectedEvent.Tag = edit.textBoxTag.Text;
-                selectedEvent.GateType = Convert.ToInt32(edit.comboBoxGates.SelectedValue);
-                selectedEvent.ItemType = Convert.ToInt32(edit.comboBoxEventType.SelectedValue);
 
-                double inputFreq = Convert.ToDouble(edit.textBoxFrequency.Text);
-                string selectedUnit = edit.comboBoxUnits.SelectedItem.ToString();
-                selectedEvent.Frequency = ConvertToYears(inputFreq, selectedUnit);
-                selectedEvent.Description = edit.textBoxDescription.Text;
-
+                ReadInfoFromEditForm(edit, selectedEvent);
                 UIEngine.FillTreeView(treeView1);
+                EngineLogic.AssignLevelsToAllEvents();
+                pictureBox1.Invalidate();
             }
 
-            EngineLogic.AssignLevelsToAllEvents();
-            pictureBox1.Invalidate();
+        
+        }
+
+        private void ReadInfoFromEditForm(FormEditEvent edit,FTAitem item)
+        {
+            item.Name = edit.textBoxName.Text;
+            item.Tag = edit.textBoxTag.Text;
+            item.GateType = Convert.ToInt32(edit.comboBoxGates.SelectedValue);
+            item.ItemType = Convert.ToInt32(edit.comboBoxEventType.SelectedValue);
+
+            /* double inputFreq = Convert.ToDouble(edit.textBoxFrequency.Text);
+             string selectedUnit = edit.comboBoxUnits.SelectedItem.ToString();*/
+
+            //TODO: add comp
+            //selectedEvent.Frequency = ConvertToYears(inputFreq, selectedUnit);
+
+            item.Description = edit.textBoxDescription.Text;
+
+            if (item.ItemType > 1)
+            {
+                item.UserMetricValue = Convert.ToDouble(edit.textBoxFrequency.Text.ToString());
+                item.UserMetricType = edit.comboBoxMetricType.SelectedIndex;
+                item.UserMetricUnit = edit.comboBoxUnits.SelectedIndex;
+            }
         }
 
         private double ConvertToYears(double freq, string unit)

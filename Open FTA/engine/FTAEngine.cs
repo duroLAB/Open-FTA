@@ -12,11 +12,14 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 public class FTAlogic
 {
-    public Dictionary<Guid, FTAitem> FTAStructure;
+    public Dictionary<Guid, FTAitem> FTAStructure { get; set; }  = new Dictionary<Guid, FTAitem>();
     public Guid TopEventGuid;
-    public Dictionary<int, String> GatesList;
-    public Dictionary<int, String> EventsList;
-    public Dictionary<Guid, FTAitem> MCSStructure { get; private set; }
+    public Dictionary<int, String> GatesList {  get; private set; } = new Dictionary<int, String>();
+    public Dictionary<int, String> EventsList { get; private set; } = new Dictionary<int, String>();
+    public Dictionary<int, String> MetricList { get; private set; } = new Dictionary<int, String>();
+    public Dictionary<int, String> MetricUnitsList { get; private set; } = new Dictionary<int, String>();
+
+    public Dictionary<Guid, FTAitem> MCSStructure { get; private set; } = new Dictionary<Guid, FTAitem>();
     public List<FTAitem> SelectedEvents { get; set; } = new List<FTAitem>();
     public List<FTAitem> CopiedEvents { get; set; } = new List<FTAitem>();
     public bool IsHidden { get; set; } = false;
@@ -29,12 +32,10 @@ public class FTAlogic
 
     public FTAlogic()
     {
-        FTAStructure = new Dictionary<Guid, FTAitem>();
-        MCSStructure = new Dictionary<Guid, FTAitem>();
 
         //Create Top Event
         FTAitem FI = new FTAitem();
-        FI.Name = "Top Event ";
+        FI.Name = "Top Event";
         FI.ItemType = 0;
         FI.GateType = 1;
         FI.X = 200;
@@ -42,11 +43,10 @@ public class FTAlogic
         TopEventGuid = FI.GuidCode;
         AddItem(FI);
 
-        GatesList = new Dictionary<int, string>();
-        EventsList = new Dictionary<int, string>();
-
         GenerateGatesList();
         GenerateEvetsList();
+        GenerateMetrics();
+        GenereteMetricUnitsList();
     }
 
 
@@ -188,11 +188,27 @@ public class FTAlogic
         EventsList.Add(-1, "Not set");
         EventsList.Add(1, "Intermediate");
         EventsList.Add(2, "Basic");
-        /* EventsList.Add(3, "House");
-         EventsList.Add(4, "Undeveloped");
-         EventsList.Add(5, "Conditioning");*/
+        /*EventsList.Add(3, "House");
+        EventsList.Add(4, "Undeveloped");
+        EventsList.Add(5, "Conditioning");*/
+    }
+    private void GenerateMetrics()
+    {
+       
+        MetricList.Add(0, "Frequency(f)");
+        MetricList.Add(1, "Probability(P)");
+        MetricList.Add(2, "Reliability(R)");
+        MetricList.Add(3, "Failure rate(λ)");
     }
 
+    private void GenereteMetricUnitsList()
+    {
+        MetricUnitsList.Add(0,"y⁻¹");
+        MetricUnitsList.Add(1,"d⁻¹");
+        MetricUnitsList.Add(2,"h⁻¹");
+        MetricUnitsList.Add(3,"s⁻¹");
+
+    }
 
     public void FindAllChilren()
     {
@@ -767,6 +783,9 @@ public class FTAitem
     public int GateType; // GateType - 1-AND 2-OR
     public string Tag;
     public double Frequency;
+    public double UserMetricValue;
+    public int UserMetricType;        // 0-Frequency 1-Probability 2-Reliability 3-Failure rate
+    public int UserMetricUnit;
     public List<Guid> Children;
     public int level { get; set; }
     public double X1;
@@ -790,20 +809,7 @@ public class FTAitem
         }
     }
 
-    public void Method()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void Method1()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void Method2()
-    {
-        throw new System.NotImplementedException();
-    }
+   
 }
 
 public static class Constants
