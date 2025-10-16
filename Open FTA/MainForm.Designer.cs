@@ -102,8 +102,7 @@
             toolStrip1.RenderMode = ToolStripRenderMode.Professional;
             toolStrip1.Size = new Size(1068, 77);
             toolStrip1.TabIndex = 1;
-            toolStrip1.Text = "toolStrip1";
-            toolStrip1.ItemClicked += toolStrip1_ItemClicked;
+            toolStrip1.Text = "toolStrip1";            
             // 
             // toolStripSeparator7
             // 
@@ -440,7 +439,6 @@
             toolStripMenuItem_HIDEUNHIDE.Name = "toolStripMenuItem_HIDEUNHIDE";
             toolStripMenuItem_HIDEUNHIDE.Size = new Size(160, 22);
             toolStripMenuItem_HIDEUNHIDE.Text = "Hide";
-            toolStripMenuItem_HIDEUNHIDE.Click += toolStripMenuItem_HIDEUNHIDE_Click;
             // 
             // toolStripMenuItem_CENTERTREE
             // 
