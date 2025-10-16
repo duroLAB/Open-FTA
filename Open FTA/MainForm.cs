@@ -17,7 +17,11 @@ namespace OpenFTA
         FTAlogic EngineLogic;
         UIlogic UIEngine;
         DrawingEngine TreeEngine;
-       // Settingsform APPSet;
+        // Settingsform APPSet;
+
+        private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
+        private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -41,7 +45,6 @@ namespace OpenFTA
         }
 
        
-
         private void MainForm_Load(object sender, EventArgs e)
         {
             UIEngine.FillTreeView(treeView1);
@@ -131,12 +134,19 @@ namespace OpenFTA
         }
         private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
         {
-            TreeEngine.GlobalZoom = TreeEngine.GlobalZoom * (1 + e.Delta * 0.001);
+            TreeEngine.offsetX += (int)(TreeEngine.GlobalZoom*0.05 *(0.5*pictureBox1.Width - e.X));
+            TreeEngine.offsetY += (int)(TreeEngine.GlobalZoom*0.05 *(0.5*pictureBox1.Height - e.Y));
+            TreeEngine.GlobalZoom = TreeEngine.GlobalZoom * (1 + e.Delta * 0.0005);
             pictureBox1.Invalidate();
         }
-        #endregion
-        #region Controls
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            TreeEngine.DrawFTA(e.Graphics);
+        }
 
+        #endregion
+
+        #region Controls
         private void toolStripButtonSave_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -163,11 +173,6 @@ namespace OpenFTA
                     MessageBox.Show("Error saving structure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        {
-            TreeEngine.DrawFTA(e.Graphics);
         }
 
         private void toolStripButtonLoad_Click(object sender, EventArgs e)
@@ -253,10 +258,7 @@ namespace OpenFTA
             redoStack.Clear();
         }
 
-        private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
-        private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
-
-        private void toolStripButtonCenter_Click(object sender, EventArgs e)
+         private void toolStripButtonCenter_Click(object sender, EventArgs e)
         {
             Centertree();
 
@@ -266,7 +268,108 @@ namespace OpenFTA
         {
 
         }
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            Undo();
+        }
 
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            Redo();
+        }
+        private void toolStripMenuItem_NEW_Click(object sender, EventArgs e)
+        {
+            int selectedCount = EngineLogic.SelectedEvents.Count;
+
+            if (selectedCount == 0)
+            {
+                MessageBox.Show("No parent selected. Please select one parent.", "Error");
+                return;
+            }
+            else if (selectedCount > 1)
+            {
+                MessageBox.Show("You can choose only one parent!", "Error");
+                return;
+            }
+
+            var parent = EngineLogic.SelectedEvents[0];
+            if (parent.ItemType == 2)
+            {
+                MessageBox.Show("Please select a non-basic event as parent.", "Error");
+                return;
+            }
+
+
+            var Parent = EngineLogic.SelectedEvents[0];
+
+            FormEditEvent edit = new FormEditEvent(EngineLogic);
+            edit.EngineLogic = EngineLogic;
+
+            edit.textBoxName.Text = "New Item";
+            edit.comboBoxGates.SelectedValue = 1;
+            edit.comboBoxEventType.SelectedValue = 1;
+            edit.textBoxFrequency.Text = "0";
+            edit.textBoxTag.Text = "NewTag";
+
+
+            SaveStateForUndo();
+
+            if (DialogResult.OK == edit.ShowDialog())
+            {
+                Guid A = EngineLogic.AddNewEvent(Parent.GuidCode, "", 0, 0, 0);
+                var newEvent = EngineLogic.GetItem(A);
+
+                ReadInfoFromEditForm(edit, newEvent);
+
+                UIEngine.FillTreeView(treeView1);
+            }
+
+            EngineLogic.AssignLevelsToAllEvents();
+            pictureBox1.Invalidate();
+        }
+
+        private void toolStripMenuItem_EDIT_Click(object sender, EventArgs e)
+        {
+            int selectedCount = EngineLogic.SelectedEvents.Count;
+            if (selectedCount == 0)
+            {
+                MessageBox.Show("No event selected!", "Error");
+                return;
+            }
+            else if (selectedCount > 1)
+            {
+                MessageBox.Show("You can only edit one event at a time!", "Error");
+                return;
+            }
+
+            var selectedEvent = EngineLogic.SelectedEvents[0];
+
+            FormEditEvent edit = new FormEditEvent(EngineLogic);
+            edit.EngineLogic = EngineLogic;
+
+            edit.textBoxName.Text = selectedEvent.Name;
+            edit.comboBoxGates.SelectedValue = selectedEvent.GateType;
+            edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
+           // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
+            edit.textBoxTag.Text = selectedEvent.Tag;
+
+            edit.textBoxFrequency.Text = selectedEvent.UserMetricValue.ToString();
+            edit.comboBoxMetricType.SelectedIndex = selectedEvent.UserMetricType;
+            edit.comboBoxUnits.SelectedIndex = selectedEvent.UserMetricUnit;
+
+            SaveStateForUndo();
+
+            if (DialogResult.OK == edit.ShowDialog())
+            {
+
+                ReadInfoFromEditForm(edit, selectedEvent);
+                UIEngine.FillTreeView(treeView1);
+                EngineLogic.AssignLevelsToAllEvents();
+                pictureBox1.Invalidate();
+            }
+
+        
+        }
         #endregion
 
         public void ArrangeMainTreeHierarchically()
@@ -325,16 +428,6 @@ namespace OpenFTA
             return Math.Max(totalWidth, Constants.EventWidth);
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            Undo();
-        }
-
-        private void toolStripButton2_Click(object sender, EventArgs e)
-        {
-            Redo();
-        }
-
         private void Undo()
         {
             if (undoStack.Count > 0)
@@ -375,102 +468,7 @@ namespace OpenFTA
                 pictureBox1.Invalidate();
             }
         }
-
-        private void toolStripMenuItem_NEW_Click(object sender, EventArgs e)
-        {
-            int selectedCount = EngineLogic.SelectedEvents.Count;
-
-            if (selectedCount == 0)
-            {
-                MessageBox.Show("No parent selected. Please select one parent.", "Error");
-                return;
-            }
-            else if (selectedCount > 1)
-            {
-                MessageBox.Show("You can choose only one parent!", "Error");
-                return;
-            }
-
-            var parent = EngineLogic.SelectedEvents[0];
-            if (parent.ItemType == 2)
-            {
-                MessageBox.Show("Please select a non-basic event as parent.", "Error");
-                return;
-            }
-
-
-            var Parent = EngineLogic.SelectedEvents[0];
-
-            FormEditEvent edit = new FormEditEvent(EngineLogic);
-            edit.EngineLogic = EngineLogic;
-
-            edit.textBoxName.Text = "New Item";
-            edit.comboBoxGates.SelectedValue = 1;
-            edit.comboBoxEventType.SelectedValue = 1;
-            edit.textBoxFrequency.Text = "0";
-            edit.textBoxTag.Text = "NewTag";
-
-
-            SaveStateForUndo();
-
-            if (DialogResult.OK == edit.ShowDialog())
-            {
-                Guid A = EngineLogic.AddNewEvent(Parent.GuidCode, "", 0, 0, 0);
-                var newEvent = EngineLogic.GetItem(A);
-
-                ReadInfoFromEditForm(edit, newEvent);
-
-                UIEngine.FillTreeView(treeView1);
-            }
-
-            EngineLogic.AssignLevelsToAllEvents();
-            pictureBox1.Invalidate();
-        }
-
-
-        private void toolStripMenuItem_EDIT_Click(object sender, EventArgs e)
-        {
-            int selectedCount = EngineLogic.SelectedEvents.Count;
-            if (selectedCount == 0)
-            {
-                MessageBox.Show("No event selected!", "Error");
-                return;
-            }
-            else if (selectedCount > 1)
-            {
-                MessageBox.Show("You can only edit one event at a time!", "Error");
-                return;
-            }
-
-            var selectedEvent = EngineLogic.SelectedEvents[0];
-
-            FormEditEvent edit = new FormEditEvent(EngineLogic);
-            edit.EngineLogic = EngineLogic;
-
-            edit.textBoxName.Text = selectedEvent.Name;
-            edit.comboBoxGates.SelectedValue = selectedEvent.GateType;
-            edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
-           // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
-            edit.textBoxTag.Text = selectedEvent.Tag;
-
-            edit.textBoxFrequency.Text = selectedEvent.UserMetricValue.ToString();
-            edit.comboBoxMetricType.SelectedIndex = selectedEvent.UserMetricType;
-            edit.comboBoxUnits.SelectedIndex = selectedEvent.UserMetricUnit;
-
-            SaveStateForUndo();
-
-            if (DialogResult.OK == edit.ShowDialog())
-            {
-
-                ReadInfoFromEditForm(edit, selectedEvent);
-                UIEngine.FillTreeView(treeView1);
-                EngineLogic.AssignLevelsToAllEvents();
-                pictureBox1.Invalidate();
-            }
-
-        
-        }
-
+             
         private void ReadInfoFromEditForm(FormEditEvent edit,FTAitem item)
         {
             item.Name = edit.textBoxName.Text;
@@ -507,19 +505,7 @@ namespace OpenFTA
                     return freq;
             }
         }
-
-        private void toolStripMenuItem_HIDEUNHIDE_Click(object sender, EventArgs e)
-        {
-            if (EngineLogic.SelectedEvents.Count == 1)
-            {
-                var selectedEvent = EngineLogic.SelectedEvents.First();
-                selectedEvent.IsHidden = !selectedEvent.IsHidden;
-                HideSubtree(selectedEvent, selectedEvent.IsHidden);
-                ((ToolStripMenuItem)sender).Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
-
-                pictureBox1.Invalidate();
-            }
-        }
+                
         private void HideSubtree(FTAitem node, bool hide)
         {
             foreach (var childGuid in node.Children)
@@ -531,7 +517,6 @@ namespace OpenFTA
                 }
             }
         }
-
         private void Centertree()
         {
             if (EngineLogic.FTAStructure.Count == 0)
@@ -573,9 +558,6 @@ namespace OpenFTA
             pictureBox1.Invalidate();
         }
 
-        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
+       
     }
 }

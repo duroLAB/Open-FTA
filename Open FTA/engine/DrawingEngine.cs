@@ -501,23 +501,32 @@ class DrawingEngine(FTAlogic f)
             int deltaX = mouseCoordinates.X - _lastDragPosition.X;
             int deltaY = mouseCoordinates.Y - _lastDragPosition.Y;
 
+            if (deltaX * deltaX + deltaY * deltaY < 50 * GlobalZoom)
+                return;
+
             foreach (var evt in EngineLogic.SelectedEvents)
             {
                 if (IsTopHiddenParent(evt))
                 {
                     List<FTAitem> subtreeItems = GetSubtreeItems(evt);
 
+                    double temp1 = deltaX * 1000 / GlobalZoom;
+                    double temp2 = deltaY * 1000 / GlobalZoom;
+
                     foreach (var item in subtreeItems)
                     {
-                        item.X += deltaX;
-                        item.Y += deltaY;
+                        item.X += (int)Math.Round(temp1 / 1000);
+                        item.Y += (int)Math.Round(temp2 / 1000);
                     }
                 }
                 else
-                {
+                { 
+                    double temp1 = deltaX * 1000 / GlobalZoom;
+                    double temp2 = deltaY * 1000 / GlobalZoom;
 
-                    evt.X += deltaX;
-                    evt.Y += deltaY;
+                    evt.X += (int) Math.Round(temp1/1000);
+                    evt.Y += (int) Math.Round(temp2/1000); 
+         
                 }
             }
 
