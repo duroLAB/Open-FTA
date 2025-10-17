@@ -266,7 +266,9 @@ namespace OpenFTA
 
         private void toolStripButtonSort_Click(object sender, EventArgs e)
         {
+            ArrangeMainTreeHierarchically();
 
+            pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
         {

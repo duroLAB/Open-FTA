@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
@@ -174,7 +175,9 @@ class DrawingEngine(FTAlogic f)
                         g.DrawString(tagText, tagFont, Brushes.Black, tagPos);
 
                         // Vykreslenie názvu udalosti v strednej časti
-                        string nameText = evt.Name;
+                        //   string nameText = evt.Name;
+                        string nameText = SplitStringToLines(evt.Name);
+
                         Font nameFont = FindFittingFont(g, nameText, middleRect);
                         SizeF nameSize = g.MeasureString(nameText, nameFont);
 
@@ -185,7 +188,15 @@ class DrawingEngine(FTAlogic f)
                                 middleRect.X + (middleRect.Width - nameSize.Width) / 2,
                                 middleRect.Y + (middleRect.Height - nameSize.Height) / 2
                             );
-                            g.DrawString(nameText, nameFont, Brushes.Black, namePos);
+
+                            // Nastavenie zarovnania
+                            StringFormat format = new StringFormat();
+                            format.Alignment = StringAlignment.Center;       
+                            format.LineAlignment = StringAlignment.Center;  
+
+                            //g.DrawString(nameText, nameFont, Brushes.Black, namePos);
+                            g.DrawString(nameText, nameFont, Brushes.Black, middleRect, format);
+
                         }
 
                         // Vykreslenie frekvencie v spodnej časti
@@ -227,6 +238,63 @@ class DrawingEngine(FTAlogic f)
             }
         }
     }
+
+    static string SplitStringToLines(string text)
+    {
+        if (text.Contains('|'))
+        {
+            var parts = text.Split('|', StringSplitOptions.RemoveEmptyEntries);
+            return string.Join("\n", parts.Select(p => p.Trim()));
+        }
+
+        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        int totalLength = text.Length;
+
+       
+        int lineCount;
+        if (totalLength < 15)
+            lineCount = 1;
+        else if (totalLength < 30)
+            lineCount = 2;
+        else
+            lineCount = 3;
+
+        if (lineCount == 1)
+            return text;  
+
+        
+        double[] thresholds;
+        if (lineCount == 2)
+            thresholds = new double[] { 0.6 };  
+        else
+            thresholds = new double[] { 0.5, 0.8 }; // 50% + 30% + 20%
+
+        var sb = new StringBuilder();
+        int currentLength = 0;
+        int newlineCount = 0;
+
+        foreach (var word in words)
+        {
+            if (newlineCount < thresholds.Length &&
+                currentLength + word.Length + 1 > totalLength * thresholds[newlineCount])
+            {
+                sb.Append('\n');
+                newlineCount++;
+            }
+            else if (sb.Length > 0 && sb[^1] != '\n')
+            {
+                sb.Append(' ');
+            }
+
+            sb.Append(word);
+            currentLength += word.Length + 1;
+        }
+
+        return sb.ToString();
+    }
+
+   
+
 
     private Font FindFittingFont(Graphics g, string text, Rectangle rect)// Methode for fitting text into to event visual borders
     {
