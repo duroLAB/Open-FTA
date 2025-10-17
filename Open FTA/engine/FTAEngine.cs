@@ -188,9 +188,9 @@ public class FTAlogic
         EventsList.Add(-1, "Not set");
         EventsList.Add(1, "Intermediate");
         EventsList.Add(2, "Basic");
-        /*EventsList.Add(3, "House");
+        EventsList.Add(3, "House");
         EventsList.Add(4, "Undeveloped");
-        EventsList.Add(5, "Conditioning");*/
+        //EventsList.Add(5, "Conditioning");
     }
     private void GenerateMetrics()
     {
