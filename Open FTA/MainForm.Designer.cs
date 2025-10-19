@@ -57,6 +57,7 @@
             toolStripButtonExportImage = new ToolStripButton();
             toolStripSeparator8 = new ToolStripSeparator();
             toolStripButtonSettings = new ToolStripButton();
+            toolStripButtonrReport = new ToolStripButton();
             panelBottom = new Panel();
             statusStrip1 = new StatusStrip();
             toolStripStatusLabelCoordinates = new ToolStripStatusLabel();
@@ -70,16 +71,19 @@
             toolStripMenuItem_DELETE = new ToolStripMenuItem();
             toolStripMenuItem_COPY = new ToolStripMenuItem();
             toolStripMenuItem_PASTE = new ToolStripMenuItem();
+            toolStripSeparator9 = new ToolStripSeparator();
+            toolStripMenuItemSELECTCHILDREN = new ToolStripMenuItem();
+            toolStripMenuItem_SELECTALLCHILDREN = new ToolStripMenuItem();
+            toolStripSeparator10 = new ToolStripSeparator();
             toolStripMenuItem_HIDEUNHIDE = new ToolStripMenuItem();
             toolStripMenuItem_CENTERTREE = new ToolStripMenuItem();
             toolStripMenuItem_ALIGN = new ToolStripComboBox();
+            toolStrip2 = new ToolStrip();
+            toolStripButton3 = new ToolStripButton();
             splitter2 = new Splitter();
             panelLeft = new Panel();
             treeView1 = new TreeView();
-            toolStripSeparator9 = new ToolStripSeparator();
-            toolStripSeparator10 = new ToolStripSeparator();
-            toolStripMenuItemSELECTCHILDREN = new ToolStripMenuItem();
-            toolStripMenuItem_SELECTALLCHILDREN = new ToolStripMenuItem();
+            toolStripButton4 = new ToolStripButton();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -87,6 +91,7 @@
             panelRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip_Treeview.SuspendLayout();
+            toolStrip2.SuspendLayout();
             panelLeft.SuspendLayout();
             SuspendLayout();
             // 
@@ -98,7 +103,7 @@
             toolStrip1.GripMargin = new Padding(0);
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
             toolStrip1.ImageScalingSize = new Size(20, 20);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripSeparator7, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator4, toolStripButtonCopy, toolStripButtonPaste, toolStripButtonDelete, toolStripSeparator1, toolStripSeparator6, toolStripButton1, toolStripButton2, toolStripSeparator2, toolStripButtonCenter, toolStripButtonSort, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripSeparator8, toolStripButtonSettings });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripSeparator7, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator4,  toolStripSeparator1, toolStripSeparator6, toolStripButton1, toolStripButton2, toolStripSeparator2, toolStripButtonCenter, toolStripButtonSort, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripSeparator8, toolStripButtonSettings, toolStripButtonrReport });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
@@ -256,6 +261,7 @@
             explicitToolStripMenuItem.Name = "explicitToolStripMenuItem";
             explicitToolStripMenuItem.Size = new Size(115, 22);
             explicitToolStripMenuItem.Text = "Explicit";
+            explicitToolStripMenuItem.Click += explicitToolStripMenuItem_Click;
             // 
             // graphicToolStripMenuItem
             // 
@@ -311,6 +317,16 @@
             toolStripButtonSettings.Size = new Size(24, 74);
             toolStripButtonSettings.ToolTipText = "Settings";
             // 
+            // toolStripButtonrReport
+            // 
+            toolStripButtonrReport.Image = (Image)resources.GetObject("toolStripButtonrReport.Image");
+            toolStripButtonrReport.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonrReport.ImageTransparentColor = Color.Magenta;
+            toolStripButtonrReport.Name = "toolStripButtonrReport";
+            toolStripButtonrReport.Size = new Size(62, 74);
+            toolStripButtonrReport.Text = "Report";
+            toolStripButtonrReport.Click += toolStripButtonrReport_Click;
+            // 
             // panelBottom
             // 
             panelBottom.Controls.Add(statusStrip1);
@@ -361,6 +377,7 @@
             // panelRight
             // 
             panelRight.Controls.Add(pictureBox1);
+            panelRight.Controls.Add(toolStrip2);
             panelRight.Dock = DockStyle.Fill;
             panelRight.Location = new Point(237, 0);
             panelRight.Margin = new Padding(4, 3, 4, 3);
@@ -372,10 +389,10 @@
             // 
             pictureBox1.ContextMenuStrip = contextMenuStrip_Treeview;
             pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.Location = new Point(0, 25);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(831, 514);
+            pictureBox1.Size = new Size(831, 489);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
@@ -389,14 +406,14 @@
             contextMenuStrip_Treeview.ImageScalingSize = new Size(20, 20);
             contextMenuStrip_Treeview.Items.AddRange(new ToolStripItem[] { toolStripMenuItem_NEW, toolStripMenuItem_EDIT, toolStripMenuItem_DELETE, toolStripMenuItem_COPY, toolStripMenuItem_PASTE, toolStripSeparator9, toolStripMenuItemSELECTCHILDREN, toolStripMenuItem_SELECTALLCHILDREN, toolStripSeparator10, toolStripMenuItem_HIDEUNHIDE, toolStripMenuItem_CENTERTREE, toolStripMenuItem_ALIGN });
             contextMenuStrip_Treeview.Name = "contextMenuStrip_Treeview";
-            contextMenuStrip_Treeview.Size = new Size(181, 263);
+            contextMenuStrip_Treeview.Size = new Size(167, 241);
             // 
             // toolStripMenuItem_NEW
             // 
             toolStripMenuItem_NEW.Image = (Image)resources.GetObject("toolStripMenuItem_NEW.Image");
             toolStripMenuItem_NEW.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_NEW.Name = "toolStripMenuItem_NEW";
-            toolStripMenuItem_NEW.Size = new Size(180, 22);
+            toolStripMenuItem_NEW.Size = new Size(166, 22);
             toolStripMenuItem_NEW.Text = "New event";
             toolStripMenuItem_NEW.Click += toolStripMenuItem_NEW_Click;
             // 
@@ -405,7 +422,7 @@
             toolStripMenuItem_EDIT.Image = (Image)resources.GetObject("toolStripMenuItem_EDIT.Image");
             toolStripMenuItem_EDIT.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_EDIT.Name = "toolStripMenuItem_EDIT";
-            toolStripMenuItem_EDIT.Size = new Size(180, 22);
+            toolStripMenuItem_EDIT.Size = new Size(166, 22);
             toolStripMenuItem_EDIT.Text = "Edit";
             toolStripMenuItem_EDIT.Click += toolStripMenuItem_EDIT_Click;
             // 
@@ -414,7 +431,7 @@
             toolStripMenuItem_DELETE.Image = (Image)resources.GetObject("toolStripMenuItem_DELETE.Image");
             toolStripMenuItem_DELETE.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_DELETE.Name = "toolStripMenuItem_DELETE";
-            toolStripMenuItem_DELETE.Size = new Size(180, 22);
+            toolStripMenuItem_DELETE.Size = new Size(166, 22);
             toolStripMenuItem_DELETE.Text = "Delete";
             toolStripMenuItem_DELETE.Click += toolStripButtonDelete_Click;
             // 
@@ -423,7 +440,7 @@
             toolStripMenuItem_COPY.Image = (Image)resources.GetObject("toolStripMenuItem_COPY.Image");
             toolStripMenuItem_COPY.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_COPY.Name = "toolStripMenuItem_COPY";
-            toolStripMenuItem_COPY.Size = new Size(180, 22);
+            toolStripMenuItem_COPY.Size = new Size(166, 22);
             toolStripMenuItem_COPY.Text = "Copy";
             toolStripMenuItem_COPY.Click += toolStripButtonCopy_Click;
             // 
@@ -432,16 +449,38 @@
             toolStripMenuItem_PASTE.Image = (Image)resources.GetObject("toolStripMenuItem_PASTE.Image");
             toolStripMenuItem_PASTE.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_PASTE.Name = "toolStripMenuItem_PASTE";
-            toolStripMenuItem_PASTE.Size = new Size(180, 22);
+            toolStripMenuItem_PASTE.Size = new Size(166, 22);
             toolStripMenuItem_PASTE.Text = "Paste";
             toolStripMenuItem_PASTE.Click += toolStripButtonPaste_Click;
+            // 
+            // toolStripSeparator9
+            // 
+            toolStripSeparator9.Name = "toolStripSeparator9";
+            toolStripSeparator9.Size = new Size(163, 6);
+            // 
+            // toolStripMenuItemSELECTCHILDREN
+            // 
+            toolStripMenuItemSELECTCHILDREN.Name = "toolStripMenuItemSELECTCHILDREN";
+            toolStripMenuItemSELECTCHILDREN.Size = new Size(166, 22);
+            toolStripMenuItemSELECTCHILDREN.Text = "Select children";
+            // 
+            // toolStripMenuItem_SELECTALLCHILDREN
+            // 
+            toolStripMenuItem_SELECTALLCHILDREN.Name = "toolStripMenuItem_SELECTALLCHILDREN";
+            toolStripMenuItem_SELECTALLCHILDREN.Size = new Size(166, 22);
+            toolStripMenuItem_SELECTALLCHILDREN.Text = "Select all children";
+            // 
+            // toolStripSeparator10
+            // 
+            toolStripSeparator10.Name = "toolStripSeparator10";
+            toolStripSeparator10.Size = new Size(163, 6);
             // 
             // toolStripMenuItem_HIDEUNHIDE
             // 
             toolStripMenuItem_HIDEUNHIDE.Image = (Image)resources.GetObject("toolStripMenuItem_HIDEUNHIDE.Image");
             toolStripMenuItem_HIDEUNHIDE.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_HIDEUNHIDE.Name = "toolStripMenuItem_HIDEUNHIDE";
-            toolStripMenuItem_HIDEUNHIDE.Size = new Size(180, 22);
+            toolStripMenuItem_HIDEUNHIDE.Size = new Size(166, 22);
             toolStripMenuItem_HIDEUNHIDE.Text = "Hide";
             // 
             // toolStripMenuItem_CENTERTREE
@@ -449,7 +488,7 @@
             toolStripMenuItem_CENTERTREE.Image = (Image)resources.GetObject("toolStripMenuItem_CENTERTREE.Image");
             toolStripMenuItem_CENTERTREE.ImageScaling = ToolStripItemImageScaling.None;
             toolStripMenuItem_CENTERTREE.Name = "toolStripMenuItem_CENTERTREE";
-            toolStripMenuItem_CENTERTREE.Size = new Size(180, 22);
+            toolStripMenuItem_CENTERTREE.Size = new Size(166, 22);
             toolStripMenuItem_CENTERTREE.Text = "Center tree";
             // 
             // toolStripMenuItem_ALIGN
@@ -457,6 +496,24 @@
             toolStripMenuItem_ALIGN.Name = "toolStripMenuItem_ALIGN";
             toolStripMenuItem_ALIGN.Size = new Size(100, 23);
             toolStripMenuItem_ALIGN.Text = "Align";
+            // 
+            // toolStrip2
+            // 
+            toolStrip2.Items.AddRange(new ToolStripItem[] { toolStripButton3, toolStripButton4 , toolStripButtonCopy, toolStripButtonPaste, toolStripButtonDelete });
+            toolStrip2.Location = new Point(0, 0);
+            toolStrip2.Name = "toolStrip2";
+            toolStrip2.Size = new Size(831, 25);
+            toolStrip2.TabIndex = 1;
+            toolStrip2.Text = "toolStrip2";
+            // 
+            // toolStripButton3
+            // 
+            toolStripButton3.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton3.Image = (Image)resources.GetObject("toolStripButton3.Image");
+            toolStripButton3.ImageTransparentColor = Color.Magenta;
+            toolStripButton3.Name = "toolStripButton3";
+            toolStripButton3.Size = new Size(23, 22);
+            toolStripButton3.Text = "toolStripButton3";
             // 
             // splitter2
             // 
@@ -487,27 +544,14 @@
             treeView1.Size = new Size(233, 514);
             treeView1.TabIndex = 0;
             // 
-            // toolStripSeparator9
+            // toolStripButton4
             // 
-            toolStripSeparator9.Name = "toolStripSeparator9";
-            toolStripSeparator9.Size = new Size(177, 6);
-            // 
-            // toolStripSeparator10
-            // 
-            toolStripSeparator10.Name = "toolStripSeparator10";
-            toolStripSeparator10.Size = new Size(177, 6);
-            // 
-            // toolStripMenuItemSELECTCHILDREN
-            // 
-            toolStripMenuItemSELECTCHILDREN.Name = "toolStripMenuItemSELECTCHILDREN";
-            toolStripMenuItemSELECTCHILDREN.Size = new Size(180, 22);
-            toolStripMenuItemSELECTCHILDREN.Text = "Select children";
-            // 
-            // toolStripMenuItem_SELECTALLCHILDREN
-            // 
-            toolStripMenuItem_SELECTALLCHILDREN.Name = "toolStripMenuItem_SELECTALLCHILDREN";
-            toolStripMenuItem_SELECTALLCHILDREN.Size = new Size(180, 22);
-            toolStripMenuItem_SELECTALLCHILDREN.Text = "Select all children";
+            toolStripButton4.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton4.Image = (Image)resources.GetObject("toolStripButton4.Image");
+            toolStripButton4.ImageTransparentColor = Color.Magenta;
+            toolStripButton4.Name = "toolStripButton4";
+            toolStripButton4.Size = new Size(23, 22);
+            toolStripButton4.Text = "toolStripButton4";
             // 
             // MainForm
             // 
@@ -531,8 +575,11 @@
             statusStrip1.PerformLayout();
             panelMain.ResumeLayout(false);
             panelRight.ResumeLayout(false);
+            panelRight.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             contextMenuStrip_Treeview.ResumeLayout(false);
+            toolStrip2.ResumeLayout(false);
+            toolStrip2.PerformLayout();
             panelLeft.ResumeLayout(false);
             ResumeLayout(false);
 
@@ -590,6 +637,10 @@
         private ToolStripMenuItem toolStripMenuItemSELECTCHILDREN;
         private ToolStripMenuItem toolStripMenuItem_SELECTALLCHILDREN;
         private ToolStripSeparator toolStripSeparator10;
+        private ToolStripButton toolStripButtonrReport;
+        private ToolStrip toolStrip2;
+        private ToolStripButton toolStripButton3;
+        private ToolStripButton toolStripButton4;
     }
 }
 

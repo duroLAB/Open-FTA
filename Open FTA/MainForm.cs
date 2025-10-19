@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Open_FTA.forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,23 +29,23 @@ namespace OpenFTA
             EngineLogic = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
             TreeEngine = new DrawingEngine(EngineLogic);
-           /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
-            pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.BackColor = Color.White;
-            SQLiteConnection sqlite_conn;
-            sqlite_conn = CreateConnection();*/
+            /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
+             pictureBox1.Dock = DockStyle.Fill;
+             pictureBox1.BackColor = Color.White;
+             SQLiteConnection sqlite_conn;
+             sqlite_conn = CreateConnection();*/
             Width = 1280;
             Height = 800;
             this.Text = "Open FTA";
 
-/*
-            ToolStripControlHost host = new ToolStripControlHost(tableLayoutPanel2);
-            host.AutoSize = false;
-            host.Size = new Size(50, 50);
-            toolStrip1.Items.Insert(8, host);*/
+            /*
+                        ToolStripControlHost host = new ToolStripControlHost(tableLayoutPanel2);
+                        host.AutoSize = false;
+                        host.Size = new Size(50, 50);
+                        toolStrip1.Items.Insert(8, host);*/
         }
 
-       
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             UIEngine.FillTreeView(treeView1);
@@ -123,7 +124,7 @@ namespace OpenFTA
             int X = 0;
             int Y = 0;
             TreeEngine.PixelToRealPosition(e.Location, ref X, ref Y);
-            String str = "X:"+X+", Y:"+Y+")";
+            String str = "X:" + X + ", Y:" + Y + ")";
             toolStripStatusLabelCoordinates.Text = str;
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
@@ -134,8 +135,8 @@ namespace OpenFTA
         }
         private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
         {
-            TreeEngine.offsetX += (int)(TreeEngine.GlobalZoom*0.05 *(0.5*pictureBox1.Width - e.X));
-            TreeEngine.offsetY += (int)(TreeEngine.GlobalZoom*0.05 *(0.5*pictureBox1.Height - e.Y));
+            TreeEngine.offsetX += (int)(TreeEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Width - e.X));
+            TreeEngine.offsetY += (int)(TreeEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Height - e.Y));
             TreeEngine.GlobalZoom = TreeEngine.GlobalZoom * (1 + e.Delta * 0.0005);
             pictureBox1.Invalidate();
         }
@@ -233,7 +234,7 @@ namespace OpenFTA
             EngineLogic.PasteCopiedEvents();
             if (MainAppSettings.Current.AutoSortTree)
             {
-               ArrangeMainTreeHierarchically();
+                ArrangeMainTreeHierarchically();
             }
             treeView1.ExpandAll();
             pictureBox1.Invalidate();
@@ -258,7 +259,7 @@ namespace OpenFTA
             redoStack.Clear();
         }
 
-         private void toolStripButtonCenter_Click(object sender, EventArgs e)
+        private void toolStripButtonCenter_Click(object sender, EventArgs e)
         {
             Centertree();
 
@@ -352,7 +353,7 @@ namespace OpenFTA
             edit.textBoxName.Text = selectedEvent.Name;
             edit.comboBoxGates.SelectedValue = selectedEvent.GateType;
             edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
-           // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
+            // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
             edit.textBoxTag.Text = selectedEvent.Tag;
 
             edit.textBoxFrequency.Text = selectedEvent.UserMetricValue.ToString();
@@ -370,7 +371,7 @@ namespace OpenFTA
                 pictureBox1.Invalidate();
             }
 
-        
+
         }
         #endregion
 
@@ -470,8 +471,8 @@ namespace OpenFTA
                 pictureBox1.Invalidate();
             }
         }
-             
-        private void ReadInfoFromEditForm(FormEditEvent edit,FTAitem item)
+
+        private void ReadInfoFromEditForm(FormEditEvent edit, FTAitem item)
         {
             item.Name = edit.textBoxName.Text;
             item.Tag = edit.textBoxTag.Text;
@@ -507,7 +508,7 @@ namespace OpenFTA
                     return freq;
             }
         }
-                
+
         private void HideSubtree(FTAitem node, bool hide)
         {
             foreach (var childGuid in node.Children)
@@ -560,6 +561,30 @@ namespace OpenFTA
             pictureBox1.Invalidate();
         }
 
-       
+        private void explicitToolStripMenuItem_Click(object sender, EventArgs e)
+        {/*
+            var A = new MCSEngine(EngineLogic);
+            A.PerformMCS();
+
+            A.FillTreeNode(UIEngine.TreeNodeMinimalCutSet);
+            */
+
+            
+
+        }
+
+        private void toolStripButtonrReport_Click(object sender, EventArgs e)
+        {
+            
+            EngineLogic.GenerateHTMLreport();
+ 
+ 
+             
+
+            ReportForm r = new ReportForm();
+            r.html = EngineLogic.html.ToString();
+            r.Show();
+           
+        }
     }
 }

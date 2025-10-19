@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -24,11 +25,14 @@ public class FTAlogic
     public List<FTAitem> CopiedEvents { get; set; } = new List<FTAitem>();
     public bool IsHidden { get; set; } = false;
 
+    public StringBuilder html { get; set; }  = new StringBuilder();
+
     public List<FTAitem> ConvertStructureToList()
     {
         return FTAStructure.Values.ToList();
     }
 
+    
 
     public FTAlogic()
     {
@@ -769,6 +773,242 @@ public class FTAlogic
                 Debug.WriteLine($"    Child GUID: {child}");
             }
         }
+    }
+
+    public void GenerateHTMLreport()
+    {
+
+        html.Clear();
+        // HTML dokument
+        html.AppendLine("<!DOCTYPE html>");
+        html.AppendLine("<html lang=\"sk\">");
+        html.AppendLine("<head>");
+        html.AppendLine("    <meta charset=\"UTF-8\">");
+        html.AppendLine("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+        html.AppendLine("    <title>OpenFTA export</title>");
+        html.AppendLine("    <style>");
+        html.AppendLine("        body {");
+        html.AppendLine("            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;");
+        html.AppendLine("            background-color: #f4f6f8;");
+        html.AppendLine("            margin: 40px;");
+        html.AppendLine("            color: #333;");
+        html.AppendLine("        }");
+        html.AppendLine("");
+        html.AppendLine("        h1 {");
+        html.AppendLine("            text-align: center;");
+        html.AppendLine("            color: #2c3e50;");
+        html.AppendLine("        }");
+        html.AppendLine("");
+        html.AppendLine("        table {");
+        html.AppendLine("            width: 100%;");
+        html.AppendLine("            border-collapse: collapse;");
+        html.AppendLine("            background-color: #fff;");
+        html.AppendLine("            border-radius: 8px;");
+        html.AppendLine("            overflow: hidden;");
+        html.AppendLine("            box-shadow: 0 4px 8px rgba(0,0,0,0.05);");
+        html.AppendLine("        }");
+        html.AppendLine("");
+        html.AppendLine("        th, td {");
+        //html.AppendLine("            padding: 16px;");
+        html.AppendLine("            padding: 6px;");
+        html.AppendLine("            text-align: left;");
+        html.AppendLine("        }");
+        html.AppendLine("");
+        html.AppendLine("        thead {");
+        html.AppendLine("            background-color: #2c3e50;");
+        html.AppendLine("            color: white;");
+        html.AppendLine("        }");
+        html.AppendLine("");
+        html.AppendLine("        tbody tr:hover {");
+        html.AppendLine("            background-color: #f1f1f1;");
+        html.AppendLine("        }");
+        html.AppendLine("");
+        html.AppendLine("        tbody tr:nth-child(even) {");
+        html.AppendLine("            background-color: #f9f9f9;");
+        html.AppendLine("        }");
+        html.AppendLine("    </style>");
+        html.AppendLine("</head>");
+        html.AppendLine("<body>");
+
+        GenerateReport_ListOfBE(html);
+
+        GenerateReport_MCS(html);
+
+        GenerateReport_ImportanceMeasure(html);
+
+        html.AppendLine("  <script>");
+        html.AppendLine("    document.addEventListener('DOMContentLoaded', function () {");
+        html.AppendLine("      const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;");
+        html.AppendLine("      const comparer = (idx, asc) => (a, b) => {");
+        html.AppendLine("        const v1 = getCellValue(asc ? a : b, idx);");
+        html.AppendLine("        const v2 = getCellValue(asc ? b : a, idx);");
+        html.AppendLine("        const f1 = parseFloat(v1), f2 = parseFloat(v2);");
+        html.AppendLine("        return (!isNaN(f1) && !isNaN(f2)) ? f1 - f2 : v1.localeCompare(v2);");
+        html.AppendLine("      };");
+        html.AppendLine("      document.querySelectorAll('table.sortable th').forEach(th => {");
+        html.AppendLine("        th.addEventListener('click', () => {");
+        html.AppendLine("          const table = th.closest('table');");
+        html.AppendLine("          const tbody = table.tBodies[0];");
+        html.AppendLine("          const rows = Array.from(tbody.rows);");
+        html.AppendLine("          const idx = Array.from(th.parentNode.children).indexOf(th);");
+        html.AppendLine("          rows.sort(comparer(idx, th.asc = !th.asc));");
+        html.AppendLine("          rows.forEach(row => tbody.appendChild(row));");
+        html.AppendLine("        });");
+        html.AppendLine("      });");
+        html.AppendLine("    });");
+        html.AppendLine("  </script>");
+
+        html.AppendLine("</body>");
+        html.AppendLine("</html>");
+
+        
+       /* string path = " .html";
+        File.WriteAllText(path, html.ToString(), Encoding.UTF8);*/
+    }
+
+    public void GenerateReport_ListOfBE(StringBuilder html)
+    {
+        String temp;
+        html.AppendLine("    <h1>List of Basic Events</h1>");
+        //   html.AppendLine("    <table>");
+        html.AppendLine("<table class='sortable'>");
+        html.AppendLine("        <thead>");
+        html.AppendLine("            <tr>");
+        html.AppendLine("                <th>Tag</th>");
+        html.AppendLine("                <th>Name</th>");
+        html.AppendLine("                <th>Notes</th>");
+        html.AppendLine("                <th>Metric</th>");
+        html.AppendLine("            </tr>");
+        html.AppendLine("        </thead>");
+        html.AppendLine("        <tbody>");
+
+        foreach (var Event in FTAStructure)
+        {
+         
+            if (Event.Value.ItemType>1)
+            {
+                temp = "<tr><td>";
+                temp += Event.Value.Tag;
+                temp += "</td><td>" + Event.Value.Name + "</td ><td>" + Event.Value.Description + "</td ><td>";
+
+                string freqText = Event.Value.UserMetricType switch
+                {
+                    0 => "f=",
+                    1 => "P=",
+                    2 => "R=",
+                    3 => "λ=",
+                    _ => ""
+                };
+                freqText += (Event.Value.UserMetricValue < 0.001) ? Event.Value.UserMetricValue.ToString("0.0000E+0") : Event.Value.UserMetricValue.ToString("F6");
+                if (Event.Value.UserMetricType == 0 || Event.Value.UserMetricType == 3)
+                {
+                    freqText += " " + MetricUnitsList[Event.Value.UserMetricUnit];
+                     
+                }
+                temp += freqText;
+                temp += "</td></tr>";
+
+                html.AppendLine(temp);
+
+
+            }
+
+        }
+
+
+        html.AppendLine("        </tbody>");
+        html.AppendLine("    </table>");
+    }
+
+    public void GenerateReport_MCS(StringBuilder html)
+    {
+        MCSEngine mcs = new MCSEngine(this);
+        mcs.PerformMCS();
+
+        String temp;
+        html.AppendLine("<br>    <h1>Minimal cut sets</h1>");
+        // html.AppendLine("    <table>");
+        html.AppendLine("<table class='sortable'>");
+        html.AppendLine("        <thead>");
+        html.AppendLine("            <tr>");
+        html.AppendLine("                <th>Name</th>");
+         html.AppendLine("               <th>Events</th>");
+        html.AppendLine("                <th>Metric</th>");
+     /*   html.AppendLine("                <th>Metric</th>");*/
+        html.AppendLine("            </tr>");
+        html.AppendLine("        </thead>");
+        html.AppendLine("        <tbody>");
+
+        int MSCcount = 1;
+        for(int i=0;i<mcs.CutSets.Count;i++)
+        {
+            if(mcs.CutSets[i].IsMinimal)
+            {
+                temp = "<tr><td>";
+                temp += "MSC - "+ MSCcount.ToString();
+                MSCcount = MSCcount + 1;
+                temp += "</td><td>";
+                for (int j = 0; j < mcs.CutSets[i].items.Count; j++)
+                    temp += "{" + mcs.CutSets[i].items[j].Tag + "} - ";
+                temp = temp.Remove(temp.Length - 2);
+                temp += "</td><td>";
+                temp += mcs.CutSets[i].Freq.ToString();
+                temp += "</td></tr>";
+                html.AppendLine(temp);
+            }
+        }
+        
+
+        html.AppendLine("        </tbody>");
+        html.AppendLine("    </table>");
+    }
+
+    public void GenerateReport_ImportanceMeasure(StringBuilder html)
+    {
+        String temp;
+        html.AppendLine("<br>    <h1>Importance Measures</h1>");       
+        html.AppendLine("<table class='sortable'>");
+        html.AppendLine("        <thead>");
+        html.AppendLine("            <tr>");
+        html.AppendLine("                <th>Name</th>");
+        html.AppendLine("                <th>Tag</th>");
+        html.AppendLine("                <th>BIM</th>");
+        html.AppendLine("                <th>CIM</th>");
+        html.AppendLine("                <th>RAW</th>");
+        html.AppendLine("                <th>RRW</th>");
+        html.AppendLine("                <th>FV</th>");
+
+        html.AppendLine("            </tr>");
+        html.AppendLine("        </thead>");
+        html.AppendLine("        <tbody>");
+
+
+        foreach (FTAitem evt in FTAStructure.Values)
+        {
+            if (evt.ItemType >= 2)
+            {
+                html.AppendLine("            <tr>");
+                double bimValue = Math.Round(ComputeBIM(evt), 8);
+                double cimValue = Math.Round(ComputeCIM(evt), 8);
+                double rawValue = Math.Round(ComputeRAW(evt), 8);
+                double rrwValue = Math.Round(ComputeRRW(evt), 8);
+                double fvValue = Math.Round(ComputeFV(evt), 8);
+
+                temp = "<td>" + evt.Name + "</td><td>" + evt.Tag + "</td>";
+                temp += "<td>" + bimValue.ToString() + "</td>";
+                temp += "<td>" + cimValue.ToString() + "</td>";
+                temp += "<td>" + rawValue.ToString() + "</td>";
+                temp += "<td>" + rrwValue.ToString() + "</td>";
+                temp += "<td>" + fvValue.ToString() + "</td></tr>";
+
+                html.AppendLine(temp);
+
+               
+
+            }
+        }
+        html.AppendLine("        </tbody>");
+        html.AppendLine("    </table>");
     }
 }
 

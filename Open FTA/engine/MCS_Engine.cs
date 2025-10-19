@@ -66,7 +66,7 @@ class MCSEngine
         GenerateCombinationMatrix();
         TestAllCombinations();
         EliminateSubSets();
-        PrintResults();
+        //PrintResults();
     }
 
     public void TestAllCombinations()
