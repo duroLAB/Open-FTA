@@ -18,7 +18,26 @@ public class FTAlogic
     public Dictionary<int, String> GatesList {  get; private set; } = new Dictionary<int, String>();
     public Dictionary<int, String> EventsList { get; private set; } = new Dictionary<int, String>();
     public Dictionary<int, String> MetricList { get; private set; } = new Dictionary<int, String>();
-    public Dictionary<int, String> MetricUnitsList { get; private set; } = new Dictionary<int, String>();
+  //  public Dictionary<int, String> MetricUnitsList { get; private set; } = new Dictionary<int, String>();
+
+   
+
+    public Dictionary<int, string> MetricUnitsList = new()
+    {
+        { 0, "y⁻¹" },  // roky
+        { 1, "d⁻¹" },  // dni
+        { 2, "h⁻¹" },  // hodiny
+        { 3, "s⁻¹" }   // sekundy
+    };
+
+    // Prevodné faktory z jednotky na 1/rok
+    private static readonly Dictionary<int, double> TimeUnitFactors = new()
+    {
+        { 0, 1.0 },           // 1 rok = 1
+        { 1, 365.0 },         // 1 deň = 1/365 roku
+        { 2, 8760.0 },        // 1 hod = 1/8760 roku
+        { 3, 31_536_000.0 }   // 1 sek = 1/31 536 000 roku
+    };
 
     public Dictionary<Guid, FTAitem> MCSStructure { get; private set; } = new Dictionary<Guid, FTAitem>();
     public List<FTAitem> SelectedEvents { get; set; } = new List<FTAitem>();
@@ -207,10 +226,10 @@ public class FTAlogic
 
     private void GenereteMetricUnitsList()
     {
-        MetricUnitsList.Add(0,"y⁻¹");
+       /* MetricUnitsList.Add(0,"y⁻¹");
         MetricUnitsList.Add(1,"d⁻¹");
         MetricUnitsList.Add(2,"h⁻¹");
-        MetricUnitsList.Add(3,"s⁻¹");
+        MetricUnitsList.Add(3,"s⁻¹");*/
 
     }
 
@@ -347,8 +366,88 @@ public class FTAlogic
         }
     }
 
-    //Methode for computing freqvencies 
     public void ComputeTree()
+    {
+         
+        foreach (FTAitem item in FTAStructure.Values)
+       {
+           if (item.ItemType > 1)
+                 UserUnitsToFreq(item);
+       }   
+          
+
+
+        //ComputeTreeSimple();
+         SumChildren(GetItem(TopEventGuid));
+
+        
+    }
+
+    public void SumChildren(FTAitem parent)
+    {
+        bool AllProbabilities = true;
+
+        for (int i = 0; i < parent.Children.Count; i++)
+        {
+            SumChildren(GetItem(parent.Children[i]));
+
+            FTAitem item = GetItem(parent.Children[i]);
+            double f = item.Frequency;
+
+            if(item.UserMetricType!=1&&(AllProbabilities))
+            {
+                AllProbabilities = false;
+            }
+
+            double P = ProbabilityFromFrequency(f);
+
+            int gate = parent.GateType;
+            if (i == 0)
+            {
+                if (gate == 2)
+                    parent.Frequency = P;
+                if (gate == 1)
+                    // parent.Frequency = f;
+                    parent.Frequency = 1 - P;
+            }
+
+            else
+            {
+                ///AND
+                if (gate == 2)
+                    parent.Frequency = parent.Frequency * P;
+                //OR
+                if (gate == 1)
+                    //parent.Frequency = parent.Frequency * f;
+                    parent.Frequency = parent.Frequency * (1 - P);
+
+            }
+            if (gate == 1 && i == parent.Children.Count-1)
+                parent.Frequency = 1 - parent.Frequency;
+
+            if (i == parent.Children.Count - 1)
+            {
+                parent.Frequency = FrequencyFromProbability(parent.Frequency);
+               
+                parent.UserMetricType = 0;
+                parent.UserMetricValue = parent.Frequency;
+                if (AllProbabilities)
+                {
+                    parent.UserMetricType = 1;
+                    parent.UserMetricValue = ProbabilityFromFrequency(parent.Frequency);
+
+                } 
+
+                
+               
+             }
+
+        }      
+
+    }
+
+
+    public void ComputeTreeSimple()
     {
         foreach (var item in FTAStructure.Values)
         {
@@ -388,30 +487,60 @@ public class FTAlogic
                 {
                     double newFreq = 0;
                     int gate = evt.GateType;
+                    bool AllProbabilities = true;
+                    ///to test if all children are probabilities
+                    for (int i = 0; i < evt.Children.Count; i++)
+                    {
+                        if (GetItem(evt.Children[i]).UserMetricType != 1)
+                        { 
+                            AllProbabilities = false;
+                            break;
+                        }
+                    }
+
                     for (int i = 0; i < evt.Children.Count; i++)
                     {
                         double childFreq = GetItem(evt.Children[i]).Frequency;
                         if (i == 0)
-                            newFreq = childFreq;
+                            newFreq = (childFreq);
                         else
                         {
                             // GateType == 1: OR gate 
                             // GateType == 2: AND gate
                             if (gate == 1)
-                                newFreq += childFreq;
+                                newFreq += (childFreq);
                             else if (gate == 2)
-                                newFreq *= childFreq;
+                                newFreq *= (childFreq);
                         }
                     }
+                    if(AllProbabilities)
+                    {
+                        evt.UserMetricType = 1;
+                    }
+
                     if (evt.Frequency != newFreq)
                     {
-                        evt.Frequency = newFreq;
+                        evt.Frequency = (newFreq);
                         updated = true;
                     }
                 }
             }
         }
         while (topEvent.Frequency < 0 && updated && iteration < maxIterations);
+    }
+
+    public void UserUnitsToFreq(FTAitem evt)
+    {
+        if (evt.UserMetricType == 0)
+        {
+            evt.Frequency = evt.UserMetricValue * TimeUnitFactors[evt.UserMetricUnit];
+        }
+
+
+        if (evt.UserMetricType==1)
+        {
+            evt.Frequency = FrequencyFromProbability(evt.UserMetricValue);
+        }
     }
 
     public void ComputeBasicEventFrequencyBounds(double deviationPercent)
@@ -553,32 +682,7 @@ public class FTAlogic
         return fv;
     }
 
-
-    public void SumChildren(FTAitem parent)
-
-    {
-
-        for (int i = 0; i < parent.Children.Count; i++)
-        {
-            SumChildren(GetItem(parent.Children[i]));
-
-            int gate = parent.GateType;
-            double f = GetItem(parent.Children[i]).Frequency;
-
-            if (i == 0)
-                parent.Frequency = f;
-            else
-            {
-                ///AND
-                if (gate == 1)
-                    parent.Frequency = parent.Frequency + f;
-                //OR
-                if (gate == 2)
-                    parent.Frequency = parent.Frequency * f;
-            }
-        }
-    }
-
+        
     //Generate equation for MCS
     public string GenerateEquation()
     {
@@ -905,6 +1009,7 @@ public class FTAlogic
                     freqText += " " + MetricUnitsList[Event.Value.UserMetricUnit];
                      
                 }
+                freqText = Event.Value.Frequency.ToString();
                 temp += freqText;
                 temp += "</td></tr>";
 
@@ -1009,6 +1114,51 @@ public class FTAlogic
         }
         html.AppendLine("        </tbody>");
         html.AppendLine("    </table>");
+    }
+
+    // --- From P, R, λ to  f (v 1/y) ---
+
+    public static double FrequencyFromProbability(double P)
+    {
+        if (P >= 1.0) throw new ArgumentException("Probability P must be < 1");
+        if (P <= 0.0) return 0.0;
+        return -Math.Log(1.0 - P);
+    }
+
+    public static double FrequencyFromReliability(double R)
+    {
+        if (R <= 0.0 || R > 1.0) throw new ArgumentException("R must be in (0,1]");
+        return -Math.Log(R);
+    }
+
+    public static double FrequencyFromLambda(double lambda, int lambdaUnitIndex)
+    {
+        if (!TimeUnitFactors.ContainsKey(lambdaUnitIndex))
+            throw new ArgumentException($"Unknown index: {lambdaUnitIndex}");
+
+        double factor = TimeUnitFactors[lambdaUnitIndex];
+        return lambda * factor; // to/year
+    }
+
+    // --- From f ( 1/rok) back ---
+
+    public static double ProbabilityFromFrequency(double f)
+    {
+        return 1.0 - Math.Exp(-f);
+    }
+
+    public static double ReliabilityFromFrequency(double f)
+    {
+        return Math.Exp(-f);
+    }
+
+    public static double LambdaFromFrequency(double f, int targetUnitIndex)
+    {
+        if (!TimeUnitFactors.ContainsKey(targetUnitIndex))
+            throw new ArgumentException($"Unknown index: {targetUnitIndex}");
+
+        double factor = TimeUnitFactors[targetUnitIndex];
+        return f / factor;
     }
 }
 

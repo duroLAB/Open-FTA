@@ -35,9 +35,6 @@
             toolStripButtonSave = new ToolStripButton();
             toolStripButtonLoad = new ToolStripButton();
             toolStripSeparator4 = new ToolStripSeparator();
-            toolStripButtonCopy = new ToolStripButton();
-            toolStripButtonPaste = new ToolStripButton();
-            toolStripButtonDelete = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
             toolStripSeparator6 = new ToolStripSeparator();
             toolStripButton1 = new ToolStripButton();
@@ -58,6 +55,9 @@
             toolStripSeparator8 = new ToolStripSeparator();
             toolStripButtonSettings = new ToolStripButton();
             toolStripButtonrReport = new ToolStripButton();
+            toolStripButtonCopy = new ToolStripButton();
+            toolStripButtonPaste = new ToolStripButton();
+            toolStripButtonDelete = new ToolStripButton();
             panelBottom = new Panel();
             statusStrip1 = new StatusStrip();
             toolStripStatusLabelCoordinates = new ToolStripStatusLabel();
@@ -80,10 +80,10 @@
             toolStripMenuItem_ALIGN = new ToolStripComboBox();
             toolStrip2 = new ToolStrip();
             toolStripButton3 = new ToolStripButton();
+            toolStripButton4 = new ToolStripButton();
             splitter2 = new Splitter();
             panelLeft = new Panel();
             treeView1 = new TreeView();
-            toolStripButton4 = new ToolStripButton();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -103,7 +103,7 @@
             toolStrip1.GripMargin = new Padding(0);
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
             toolStrip1.ImageScalingSize = new Size(20, 20);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripSeparator7, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator4,  toolStripSeparator1, toolStripSeparator6, toolStripButton1, toolStripButton2, toolStripSeparator2, toolStripButtonCenter, toolStripButtonSort, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripSeparator8, toolStripButtonSettings, toolStripButtonrReport });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripSeparator7, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator4, toolStripSeparator1, toolStripSeparator6, toolStripButton1, toolStripButton2, toolStripSeparator2, toolStripButtonCenter, toolStripButtonSort, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripSeparator8, toolStripButtonSettings, toolStripButtonrReport });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
@@ -142,39 +142,6 @@
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
             toolStripSeparator4.Size = new Size(6, 77);
-            // 
-            // toolStripButtonCopy
-            // 
-            toolStripButtonCopy.Image = (Image)resources.GetObject("toolStripButtonCopy.Image");
-            toolStripButtonCopy.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButtonCopy.ImageTransparentColor = Color.Magenta;
-            toolStripButtonCopy.Name = "toolStripButtonCopy";
-            toolStripButtonCopy.Size = new Size(55, 74);
-            toolStripButtonCopy.Text = "Copy";
-            toolStripButtonCopy.ToolTipText = "Copy selected events";
-            toolStripButtonCopy.Click += toolStripButtonCopy_Click;
-            // 
-            // toolStripButtonPaste
-            // 
-            toolStripButtonPaste.Image = (Image)resources.GetObject("toolStripButtonPaste.Image");
-            toolStripButtonPaste.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButtonPaste.ImageTransparentColor = Color.Magenta;
-            toolStripButtonPaste.Name = "toolStripButtonPaste";
-            toolStripButtonPaste.Size = new Size(55, 74);
-            toolStripButtonPaste.Text = "Paste";
-            toolStripButtonPaste.ToolTipText = "Paste copied events";
-            toolStripButtonPaste.Click += toolStripButtonPaste_Click;
-            // 
-            // toolStripButtonDelete
-            // 
-            toolStripButtonDelete.Image = (Image)resources.GetObject("toolStripButtonDelete.Image");
-            toolStripButtonDelete.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButtonDelete.ImageTransparentColor = Color.Magenta;
-            toolStripButtonDelete.Name = "toolStripButtonDelete";
-            toolStripButtonDelete.Size = new Size(58, 74);
-            toolStripButtonDelete.Text = "Delete";
-            toolStripButtonDelete.ToolTipText = "Delete event with subtree";
-            toolStripButtonDelete.Click += toolStripButtonDelete_Click;
             // 
             // toolStripSeparator1
             // 
@@ -274,6 +241,7 @@
             freqvencyToolStripMenuItem.Name = "freqvencyToolStripMenuItem";
             freqvencyToolStripMenuItem.Size = new Size(199, 22);
             freqvencyToolStripMenuItem.Text = "Frequency";
+            freqvencyToolStripMenuItem.Click += freqvencyToolStripMenuItem_Click;
             // 
             // importanceMeasureToolStripMenuItem
             // 
@@ -326,6 +294,39 @@
             toolStripButtonrReport.Size = new Size(62, 74);
             toolStripButtonrReport.Text = "Report";
             toolStripButtonrReport.Click += toolStripButtonrReport_Click;
+            // 
+            // toolStripButtonCopy
+            // 
+            toolStripButtonCopy.Image = (Image)resources.GetObject("toolStripButtonCopy.Image");
+            toolStripButtonCopy.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonCopy.ImageTransparentColor = Color.Magenta;
+            toolStripButtonCopy.Name = "toolStripButtonCopy";
+            toolStripButtonCopy.Size = new Size(55, 22);
+            toolStripButtonCopy.Text = "Copy";
+            toolStripButtonCopy.ToolTipText = "Copy selected events";
+            toolStripButtonCopy.Click += toolStripButtonCopy_Click;
+            // 
+            // toolStripButtonPaste
+            // 
+            toolStripButtonPaste.Image = (Image)resources.GetObject("toolStripButtonPaste.Image");
+            toolStripButtonPaste.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonPaste.ImageTransparentColor = Color.Magenta;
+            toolStripButtonPaste.Name = "toolStripButtonPaste";
+            toolStripButtonPaste.Size = new Size(55, 22);
+            toolStripButtonPaste.Text = "Paste";
+            toolStripButtonPaste.ToolTipText = "Paste copied events";
+            toolStripButtonPaste.Click += toolStripButtonPaste_Click;
+            // 
+            // toolStripButtonDelete
+            // 
+            toolStripButtonDelete.Image = (Image)resources.GetObject("toolStripButtonDelete.Image");
+            toolStripButtonDelete.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonDelete.ImageTransparentColor = Color.Magenta;
+            toolStripButtonDelete.Name = "toolStripButtonDelete";
+            toolStripButtonDelete.Size = new Size(58, 22);
+            toolStripButtonDelete.Text = "Delete";
+            toolStripButtonDelete.ToolTipText = "Delete event with subtree";
+            toolStripButtonDelete.Click += toolStripButtonDelete_Click;
             // 
             // panelBottom
             // 
@@ -499,7 +500,7 @@
             // 
             // toolStrip2
             // 
-            toolStrip2.Items.AddRange(new ToolStripItem[] { toolStripButton3, toolStripButton4 , toolStripButtonCopy, toolStripButtonPaste, toolStripButtonDelete });
+            toolStrip2.Items.AddRange(new ToolStripItem[] { toolStripButton3, toolStripButton4, toolStripButtonCopy, toolStripButtonPaste, toolStripButtonDelete });
             toolStrip2.Location = new Point(0, 0);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new Size(831, 25);
@@ -514,6 +515,15 @@
             toolStripButton3.Name = "toolStripButton3";
             toolStripButton3.Size = new Size(23, 22);
             toolStripButton3.Text = "toolStripButton3";
+            // 
+            // toolStripButton4
+            // 
+            toolStripButton4.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton4.Image = (Image)resources.GetObject("toolStripButton4.Image");
+            toolStripButton4.ImageTransparentColor = Color.Magenta;
+            toolStripButton4.Name = "toolStripButton4";
+            toolStripButton4.Size = new Size(23, 22);
+            toolStripButton4.Text = "toolStripButton4";
             // 
             // splitter2
             // 
@@ -543,15 +553,6 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(233, 514);
             treeView1.TabIndex = 0;
-            // 
-            // toolStripButton4
-            // 
-            toolStripButton4.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton4.Image = (Image)resources.GetObject("toolStripButton4.Image");
-            toolStripButton4.ImageTransparentColor = Color.Magenta;
-            toolStripButton4.Name = "toolStripButton4";
-            toolStripButton4.Size = new Size(23, 22);
-            toolStripButton4.Text = "toolStripButton4";
             // 
             // MainForm
             // 

@@ -569,22 +569,34 @@ namespace OpenFTA
             A.FillTreeNode(UIEngine.TreeNodeMinimalCutSet);
             */
 
-            
+
 
         }
 
         private void toolStripButtonrReport_Click(object sender, EventArgs e)
         {
-            
+
             EngineLogic.GenerateHTMLreport();
- 
- 
-             
+
+
+
 
             ReportForm r = new ReportForm();
             r.html = EngineLogic.html.ToString();
             r.Show();
-           
+
+        }
+
+        private void freqvencyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            String vysledok;
+            var TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
+            EngineLogic.ComputeTree();
+            pictureBox1.Invalidate();
+            vysledok = "Top Event Failure Probability is= " + TopEvent.Frequency.ToString("0.000E0") + "\n" + " [1/h]";
+            MessageBox.Show(vysledok, "The calculation completed succesfully");
+
+            pictureBox1.Invalidate();
         }
     }
 }
