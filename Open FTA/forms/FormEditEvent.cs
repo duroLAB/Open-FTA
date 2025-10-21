@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace OpenFTA
 {
@@ -71,7 +72,8 @@ namespace OpenFTA
                 textBoxName.Text = "";
                 textBoxFrequency.Text = "0";
             }
-        
+            button1.CausesValidation = false;
+            errorProvider1.BlinkStyle = ErrorBlinkStyle.NeverBlink;
         }
 
         private void comboBoxGates_SelectedIndexChanged(object sender, EventArgs e)
@@ -137,14 +139,26 @@ namespace OpenFTA
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (textBoxTag.Text.Contains(" "))
+            /* if (textBoxTag.Text.Contains(" "))
+             {
+                 MessageBox.Show("TAG must be a single word; no spaces allowed.", "Invalid TAG", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                 // Nastavíme DialogResult ako Cancel, aby sa vrátilo späť do hlavného (editovacieho) okna
+                 this.DialogResult = DialogResult.Cancel;
+                 this.Close();
+                 return;
+             }*/
+
+            bool res = ValidateAll();
+            if (res)
             {
-                MessageBox.Show("TAG must be a single word; no spaces allowed.", "Invalid TAG", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Nastavíme DialogResult ako Cancel, aby sa vrátilo späť do hlavného (editovacieho) okna
-                this.DialogResult = DialogResult.Cancel;
-                this.Close();
-                return;
+                this.DialogResult = DialogResult.OK;
             }
+            else
+            {
+                this.DialogResult = DialogResult.None;
+            }
+
+
         }
 
         private void textBoxTag_TextChanged(object sender, EventArgs e)
@@ -279,7 +293,84 @@ namespace OpenFTA
 
         }
 
-      
+        private void FormEditEvent_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+        }
+
+        private void textBoxFrequency_Validating(object sender, CancelEventArgs e)
+        {
+            /*  if(!string.IsNullOrWhiteSpace(textBoxFrequency.Text))
+              {
+                  if (!double.TryParse(textBoxFrequency.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double value))
+                  {
+                      errorProvider1.SetError(textBoxFrequency, "Invalid frequency format.");
+                  }
+              }*/
+            // Pokúsime sa previesť text na číslo (double = umožní aj desatinné)
+            /* if (!double.TryParse(textBoxFrequency.Text, out _))
+             {
+               //  e.Cancel = true; // zastaví presun fokusu
+                 errorProvider1.SetError(textBoxFrequency, "Zadaj platné číslo.");
+             }
+             else
+             {
+                 errorProvider1.SetError(textBoxFrequency, "");
+             }*/
+        }
+
+        public bool ValidateAll()
+        {
+            bool res = true;
+
+            if (Convert.ToInt32(comboBoxEventType.SelectedValue) == 1)
+            {
+                errorProvider1.SetError(textBoxFrequency, "");
+            }
+
+
+            if (Convert.ToInt32(comboBoxEventType.SelectedValue) > 1)
+            {
+                bool temp = Validatefrequency();
+                if (temp == false) res = false;
+
+
+            }
+            return (res);
+        }
+
+        public bool Validatefrequency()
+        {
+            string text = textBoxFrequency.Text.Trim();
+
+            bool valid = double.TryParse(text,
+                                         System.Globalization.NumberStyles.Float,
+                                         System.Globalization.CultureInfo.CurrentCulture,
+                                         out double value);
+
+            if (!valid)
+            {
+                valid = double.TryParse(text,
+                                        System.Globalization.NumberStyles.Float,
+                                        System.Globalization.CultureInfo.InvariantCulture,
+                                        out value);
+            }
+
+            if (!valid)
+            {
+                errorProvider1.SetError(textBoxFrequency, "The TextBox contains a value that cannot be interpreted.");
+                textBoxFrequency.BackColor = Color.MistyRose; // vizuálna spätná väzba
+
+            }
+            else
+            {
+                textBoxFrequency.BackColor = Color.White; // vizuálna spätná väzba
+                errorProvider1.SetError(textBoxFrequency, "");
+            }
+
+            return (valid);
+
+        }
     }
 
-}
+    }

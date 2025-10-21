@@ -43,6 +43,9 @@ namespace OpenFTA
                         host.AutoSize = false;
                         host.Size = new Size(50, 50);
                         toolStrip1.Items.Insert(8, host);*/
+
+
+            MainAppSettings.Instance.Load();
         }
 
 
@@ -232,7 +235,7 @@ namespace OpenFTA
         private void toolStripButtonPaste_Click(object sender, EventArgs e)
         {
             EngineLogic.PasteCopiedEvents();
-            if (MainAppSettings.Current.AutoSortTree)
+            if (MainAppSettings.Instance.AutoSortTree)
             {
                 ArrangeMainTreeHierarchically();
             }
@@ -474,6 +477,7 @@ namespace OpenFTA
 
         private void ReadInfoFromEditForm(FormEditEvent edit, FTAitem item)
         {
+
             item.Name = edit.textBoxName.Text;
             item.Tag = edit.textBoxTag.Text;
             item.GateType = Convert.ToInt32(edit.comboBoxGates.SelectedValue);
@@ -597,6 +601,12 @@ namespace OpenFTA
             MessageBox.Show(vysledok, "The calculation completed succesfully");
 
             pictureBox1.Invalidate();
+        }
+
+        private void toolStripButtonSettings_Click(object sender, EventArgs e)
+        {
+            FormSettings settingsForm = new FormSettings(); 
+            settingsForm.ShowDialog();
         }
     }
 }

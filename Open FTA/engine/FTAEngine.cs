@@ -10,7 +10,8 @@ using System.Xml.Serialization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
-
+public enum ValueType { F, P, R, Lambda }
+public enum GateType { OR, AND }
 public class FTAlogic
 {
     public Dictionary<Guid, FTAitem> FTAStructure { get; set; }  = new Dictionary<Guid, FTAitem>();
@@ -445,7 +446,6 @@ public class FTAlogic
         }      
 
     }
-
 
     public void ComputeTreeSimple()
     {
@@ -1189,6 +1189,8 @@ public class FTAitem
     public double LowerBoundFrequency { get; set; }
     public double UpperBoundFrequency { get; set; }
 
+    public ValueType Type { get; set; }
+
     public FTAitem()
     {
         // Set uniqe guid 
@@ -1198,6 +1200,7 @@ public class FTAitem
             LowerBoundFrequency = double.NaN;
             UpperBoundFrequency = double.NaN;
         }
+        Type = ValueType.P;
     }
 
    

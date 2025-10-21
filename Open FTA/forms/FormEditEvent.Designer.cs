@@ -141,6 +141,7 @@
             textBoxFrequency.Size = new Size(116, 23);
             textBoxFrequency.TabIndex = 1;
             textBoxFrequency.TextChanged += textBoxFrequency_TextChanged;
+            textBoxFrequency.Validating += textBoxFrequency_Validating;
             // 
             // label3
             // 
@@ -451,6 +452,7 @@
             Margin = new Padding(4, 3, 4, 3);
             Name = "FormEditEvent";
             Text = "FormEditEvent";
+            FormClosing += FormEditEvent_FormClosing;
             Load += FormEditEvent_Load;
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
             tabControlfailure_metrics.ResumeLayout(false);

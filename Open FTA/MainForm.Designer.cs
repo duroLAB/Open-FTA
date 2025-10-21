@@ -284,6 +284,7 @@
             toolStripButtonSettings.Name = "toolStripButtonSettings";
             toolStripButtonSettings.Size = new Size(24, 74);
             toolStripButtonSettings.ToolTipText = "Settings";
+            toolStripButtonSettings.Click += toolStripButtonSettings_Click;
             // 
             // toolStripButtonrReport
             // 

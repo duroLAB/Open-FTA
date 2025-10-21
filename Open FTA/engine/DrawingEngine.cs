@@ -27,7 +27,7 @@ class DrawingEngine(FTAlogic f)
     readonly string picPath = AppContext.BaseDirectory;
 
 
-    public static bool UseTechnicalGates { get; set; } = MainAppSettings.Current.Technicalgates;
+   // public static bool UseTechnicalGates { get; set; } = MainAppSettingsOld.Current.Technicalgates;
 
     public void SetDimensions(int fTAWidth, int fTAHeight)
     {
@@ -58,7 +58,8 @@ class DrawingEngine(FTAlogic f)
 
     private void DrawEvents(Graphics g)
     {
-        using (Pen selPen = new Pen(Color.Blue))
+        // using (Pen selPen = new Pen(Color.Blue))
+        using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
         {
             // Prejdeme všetky udalosti v hlavnej štruktúre
             foreach (var evtPair in EngineLogic.FTAStructure)
@@ -81,7 +82,7 @@ class DrawingEngine(FTAlogic f)
                     if (evt.IsSelected)
                         selPen.Color = Color.Red;
                     else
-                        selPen.Color = Color.Blue;
+                        selPen.Color = MainAppSettings.Instance.ItemPen.Color;
 
                     // Ak je aktívny režim ťahania a udalosť je vybraná, použijeme čierne perá so šrafovaním.
                     if (SelectedEventDrag && evt.IsSelected)
@@ -191,8 +192,8 @@ class DrawingEngine(FTAlogic f)
 
                             // Nastavenie zarovnania
                             StringFormat format = new StringFormat();
-                            format.Alignment = StringAlignment.Center;       
-                            format.LineAlignment = StringAlignment.Center;  
+                            format.Alignment = StringAlignment.Center;
+                            format.LineAlignment = StringAlignment.Center;
 
                             //g.DrawString(nameText, nameFont, Brushes.Black, namePos);
                             g.DrawString(nameText, nameFont, Brushes.Black, middleRect, format);
@@ -204,7 +205,7 @@ class DrawingEngine(FTAlogic f)
                                   (evt.Frequency < 0.001) ? evt.Frequency.ToString("0.0000E+0") :
                                   evt.Frequency.ToString("F6");
 
-                        if(evt.ItemType>1)
+                        if (evt.ItemType > 1)
                         {
 
                             freqText = evt.UserMetricType switch
@@ -215,7 +216,7 @@ class DrawingEngine(FTAlogic f)
                                 3 => "λ=",
                                 _ => ""
                             };
-                            freqText += (evt.UserMetricValue < 0.001) ? evt.UserMetricValue.ToString("0.0000E+0") :  evt.UserMetricValue.ToString("F6");
+                            freqText += (evt.UserMetricValue < 0.001) ? evt.UserMetricValue.ToString("0.0000E+0") : evt.UserMetricValue.ToString("F6");
                             if (evt.UserMetricType == 0 || evt.UserMetricType == 3) { freqText += " " + EngineLogic.MetricUnitsList[evt.UserMetricUnit]; }
 
                         }
@@ -379,7 +380,7 @@ class DrawingEngine(FTAlogic f)
                         g.DrawLine(linePen, horizontalMidpoint, childTop);
                     }
 
-                    if (MainAppSettings.Current.Technicalgates)
+                    if (MainAppSettings.Instance.Technicalgates)
                     {
                         if (parent.GateType == 1)
                         {
