@@ -90,7 +90,8 @@ class MCSEngine
             {
                 r[UniqueTags.Count + 1] = "Cut Set";
 
-
+                var template = CombinationMatrix[i];
+                CombinationMatrix = CombinationMatrix.Where(combination =>!combination.Where((bit, index) => bit && !template[index]).Any()).ToList();
 
                 CutSetsStruct CS = new CutSetsStruct();
                 CS.IsMinimal = true;

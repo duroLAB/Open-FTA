@@ -1027,7 +1027,8 @@ public class FTAlogic
 
     public void GenerateReport_MCS(StringBuilder html)
     {
-        MCSEngine mcs = new MCSEngine(this);
+        // MCSEngine mcs = new MCSEngine(this);
+        MSC_Engine_v2 mcs = new MSC_Engine_v2(this);
         mcs.PerformMCS();
 
         String temp;
