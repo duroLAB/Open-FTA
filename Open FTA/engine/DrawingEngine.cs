@@ -205,19 +205,19 @@ class DrawingEngine(FTAlogic f)
                                   (evt.Frequency < 0.001) ? evt.Frequency.ToString("0.0000E+0") :
                                   evt.Frequency.ToString("F6");
 
-                        if (evt.ItemType > 1)
+                        if (evt.ItemType > -1)
                         {
 
-                            freqText = evt.UserMetricType switch
+                            freqText = evt.ValueType switch
                             {
-                                0 => "f=",
-                                1 => "P=",
-                                2 => "R=",
-                                3 => "λ=",
+                                ValueTypes.F => "f=",
+                                ValueTypes.P => "P=",
+                                ValueTypes.R => "R=",
+                                ValueTypes.Lambda => "λ=",
                                 _ => ""
                             };
-                            freqText += (evt.UserMetricValue < 0.001) ? evt.UserMetricValue.ToString("0.0000E+0") : evt.UserMetricValue.ToString("F6");
-                            if (evt.UserMetricType == 0 || evt.UserMetricType == 3) { freqText += " " + EngineLogic.MetricUnitsList[evt.UserMetricUnit]; }
+                            freqText += (evt.Value < 0.001) ? evt.Value.ToString("0.0000E+0") : evt.Value.ToString("F6");
+                            if (evt.ValueType == ValueTypes.F || evt.ValueType == ValueTypes.Lambda) { freqText += " " + EngineLogic.MetricUnitsList[evt.ValueUnit]; }
 
                         }
 
@@ -382,13 +382,14 @@ class DrawingEngine(FTAlogic f)
 
                     if (MainAppSettings.Instance.Technicalgates)
                     {
-                        if (parent.GateType == 1)
+                        
+                        if (parent.Gate == Gates.OR)
                         {
                             // OR Gate 
                             g.DrawArc(linePen, parentCenter.X - 20, gateY - 10, 40, 60, 0, -180);
                             g.DrawArc(linePen, parentCenter.X - 20, gateY + 10, 40, 20, 0, -180);
                         }
-                        else if (parent.GateType == 2)
+                        else if (parent.Gate == Gates.AND)
                         {
                             // AND Gate 
                             Point orLeft = new Point(parentCenter.X - 20, gateY + 20);
@@ -402,15 +403,15 @@ class DrawingEngine(FTAlogic f)
 
                     else
                     {
-                        switch (parent.GateType)
+                        switch (parent.Gate)
                         {
-                            case 1: // OR Gate
+                            case Gates.OR: // OR Gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gateOr.png", verticalOffset: 10);
                                 break;
-                            case 2: // AND Gate
+                            case Gates.AND: // AND Gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gateAnd.png", verticalOffset: 10);
                                 break;
-                            case 3: // Not Gate
+                          /*  case 3: // Not Gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gateNot.png", verticalOffset: 10);
                                 break;
                             case 4: // Nand Gate
@@ -427,7 +428,7 @@ class DrawingEngine(FTAlogic f)
                                 break;
                             case 8: // Priority and gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gatePriorityand.png", verticalOffset: 10);
-                                break;
+                                break;*/
                             default:
                                 break;
 

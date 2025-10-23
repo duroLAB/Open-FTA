@@ -10,8 +10,8 @@ using System.Xml.Serialization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
-public enum ValueType { F, P, R, Lambda }
-public enum GateType { OR, AND }
+public enum ValueTypes { F, P, R, Lambda }
+public enum Gates {NotSet, OR, AND }
 public class FTAlogic
 {
     public Dictionary<Guid, FTAitem> FTAStructure { get; set; }  = new Dictionary<Guid, FTAitem>();
@@ -51,8 +51,7 @@ public class FTAlogic
     {
         return FTAStructure.Values.ToList();
     }
-
-    
+       
 
     public FTAlogic()
     {
@@ -61,7 +60,7 @@ public class FTAlogic
         FTAitem FI = new FTAitem();
         FI.Name = "Top Event";
         FI.ItemType = 0;
-        FI.GateType = 1;
+        FI.Gate = Gates.OR;
         FI.X = 200;
         FI.Y = 100;
         TopEventGuid = FI.GuidCode;
@@ -122,7 +121,7 @@ public class FTAlogic
         foreach (FTAitem original in CopiedEvents)
         {
             Guid newParent = copiedIDs.Contains(original.Parent) ? original.Parent : targetEvent.GuidCode;
-            Guid newGuid = AddNewEvent(newParent, original.Name, original.ItemType, original.GateType, original.Frequency, original.X, original.Y, original.Tag, original.level);
+            Guid newGuid = AddNewEvent(newParent, original.Name, original.ItemType, original.Gate, original.Frequency, original.X, original.Y, original.Tag, original.level);
             cloneMapping[original.GuidCode] = newGuid;
             clonedEvents.Add(GetItem(newGuid));
             if (newParent == targetEvent.GuidCode)
@@ -150,9 +149,7 @@ public class FTAlogic
 
         MessageBox.Show("Paste operation completed.", "Paste", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-        FindAllChilren();
-   
-        
+        FindAllChilren(); 
         AssignLevelsToAllEvents();
 
         
@@ -270,12 +267,12 @@ public class FTAlogic
     }
 
     //Methode for adding new event to structure
-    public Guid AddNewEvent(Guid Parent, string Name, int ItemType, int GateType, double Freq, int x = -1, int y = -1, string Tag = "", int level = 0)
+    public Guid AddNewEvent(Guid Parent, string Name, int ItemType, Gates Gate, double Freq, int x = -1, int y = -1, string Tag = "", int level = 0)
     {
         FTAitem FI = new FTAitem();
         FI.Name = Name;
         FI.ItemType = ItemType;
-        FI.GateType = GateType;
+        FI.Gate = Gate;
         FI.Parent = Parent;
         FI.Frequency = Freq;
         FI.Tag = Tag;
@@ -369,14 +366,22 @@ public class FTAlogic
 
     public void ComputeTree()
     {
-         
+         /*
         foreach (FTAitem item in FTAStructure.Values)
        {
            if (item.ItemType > 1)
                  UserUnitsToFreq(item);
-       }   
-          
 
+            if (item.ItemType < 2)
+            {
+                item.Frequency = -1;
+                item.Value = -1;
+                item.UserMetricType = -1;
+                item.ValueUnit = -1;
+            }
+       }*/
+
+     
 
         //ComputeTreeSimple();
          SumChildren(GetItem(TopEventGuid));
@@ -384,7 +389,119 @@ public class FTAlogic
         
     }
 
+
+    public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
+    public static bool SimplificationStrategy = false; // P=f
+    public static bool SimplificationStrategyLinearOR = false; // P(A OR B) = Pa+Pb
+
     public void SumChildren(FTAitem parent)
+    {
+        bool AllProbabilities = true;
+        var events = new List<FTAitem>();
+
+        for (int i = 0; i < parent.Children.Count; i++)
+        {
+            FTAitem item = GetItem(parent.Children[i]);
+
+            SumChildren(item);
+            
+            
+            if(i==0)
+            {
+                events.Clear();
+            }
+
+            if (item.ValueType != ValueTypes.P && (AllProbabilities))
+            {
+                AllProbabilities = false;
+            }
+
+            events.Add(GetItem(parent.Children[i]));
+
+            if (i == parent.Children.Count - 1)
+            {
+                double SumResult = 0.0;
+                
+                SumResult = CalculateGate(events, parent.Gate);
+
+                if (AllProbabilities)
+                {
+                    parent.Frequency = SumResult;
+                    parent.ValueType = ValueTypes.P;
+                    parent.Value = SumResult;
+                    parent.ValueUnit = BaseTimeUnit;
+                   }
+                else
+                {
+                    parent.Frequency = ProbabilityToFrequency(SumResult);
+                    parent.ValueType = ValueTypes.F;
+                    parent.Value = ProbabilityToFrequency(SumResult);
+                    parent.ValueUnit = BaseTimeUnit;
+                }
+            }
+        }
+
+      
+     
+    }
+
+    public static double CalculateGate(List<FTAitem> events, Gates gate)
+    {
+        var probs = events.Select(ConvertToProbability).ToList();
+
+        if (gate == Gates.OR && SimplificationStrategyLinearOR)
+        {
+            // lineárna aproximácia OR brány
+            return probs.Sum();
+        }
+
+        return gate switch
+        {
+            Gates.OR => probs.Aggregate((a, b) => a + b - a * b),
+            Gates.AND => probs.Aggregate((a, b) => a * b),
+            _ => throw new ArgumentException("Neznámy typ brány")
+        };
+    }
+
+    private static double ConvertToProbability(FTAitem e)
+    {
+        double Tsource = 1.0 / TimeUnitFactors[e.ValueUnit];
+        double Tbase = 1.0 / TimeUnitFactors[BaseTimeUnit];
+
+        double P;
+
+        if (SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
+            P = e.Value;
+        else
+                P = e.ValueType switch
+               {
+                   // ValueTypes.F => 1 - Math.Exp(-e.Value * Tsource),
+                   ValueTypes.F => 1 - Math.Exp(-e.Value*Tbase),
+                   ValueTypes.P => e.Value,
+                   ValueTypes.R => 1 - e.Value,
+                   ValueTypes.Lambda => 1 - Math.Exp(-e.Value * Tsource),
+                   _ => throw new ArgumentException("Neznámy typ hodnoty")
+               }; 
+         /*   P = e.UserMetricType switch
+            {
+                0 => 1 - Math.Exp(-e.Value * Tsource),
+                1 => e.Value,
+                2 => 1 - e.Value,
+                3 => 1 - Math.Exp(-e.Value * Tsource),
+                _ => throw new ArgumentException("Neznámy typ hodnoty")
+            };*/
+
+        return 1 - Math.Pow(1 - P, Tbase / Tsource);
+    }
+
+    public static double ProbabilityToFrequency(double P)
+    {
+        double Tbase = 1.0 / TimeUnitFactors[BaseTimeUnit];
+        return -Math.Log(1 - P) / Tbase;
+    }
+
+    /*
+    public void SumChildrenOld(FTAitem parent)
     {
         bool AllProbabilities = true;
 
@@ -402,7 +519,7 @@ public class FTAlogic
 
             double P = ProbabilityFromFrequency(f);
 
-            int gate = parent.GateType;
+            int gate = parent.Gate;
             if (i == 0)
             {
                 if (gate == 2)
@@ -431,11 +548,11 @@ public class FTAlogic
                 parent.Frequency = FrequencyFromProbability(parent.Frequency);
                
                 parent.UserMetricType = 0;
-                parent.UserMetricValue = parent.Frequency;
+                parent.Value = parent.Frequency;
                 if (AllProbabilities)
                 {
                     parent.UserMetricType = 1;
-                    parent.UserMetricValue = ProbabilityFromFrequency(parent.Frequency);
+                    parent.Value = ProbabilityFromFrequency(parent.Frequency);
 
                 } 
 
@@ -446,7 +563,8 @@ public class FTAlogic
         }      
 
     }
-
+    */
+    /*
     public void ComputeTreeSimple()
     {
         foreach (var item in FTAStructure.Values)
@@ -486,7 +604,7 @@ public class FTAlogic
                 if (allChildrenComputed)
                 {
                     double newFreq = 0;
-                    int gate = evt.GateType;
+                    int gate = evt.Gate;
                     bool AllProbabilities = true;
                     ///to test if all children are probabilities
                     for (int i = 0; i < evt.Children.Count; i++)
@@ -505,8 +623,8 @@ public class FTAlogic
                             newFreq = (childFreq);
                         else
                         {
-                            // GateType == 1: OR gate 
-                            // GateType == 2: AND gate
+                            // Gates == 1: OR gate 
+                            // Gates == 2: AND gate
                             if (gate == 1)
                                 newFreq += (childFreq);
                             else if (gate == 2)
@@ -528,18 +646,18 @@ public class FTAlogic
         }
         while (topEvent.Frequency < 0 && updated && iteration < maxIterations);
     }
-
+    */
     public void UserUnitsToFreq(FTAitem evt)
     {
-        if (evt.UserMetricType == 0)
+        if (evt.ValueType == ValueTypes.F)
         {
-            evt.Frequency = evt.UserMetricValue * TimeUnitFactors[evt.UserMetricUnit];
+            evt.Frequency = evt.Value * TimeUnitFactors[evt.ValueUnit];
         }
 
 
-        if (evt.UserMetricType==1)
+        if (evt.ValueType==ValueTypes.P)
         {
-            evt.Frequency = FrequencyFromProbability(evt.UserMetricValue);
+            evt.Frequency = FrequencyFromProbability(evt.Value);
         }
     }
 
@@ -711,11 +829,11 @@ public class FTAlogic
             childEquations.Add(GenerateEquationForEvent(childEvent));
         }
         // We check the gate type for the current event to decide how to combine child equations.
-        if (currentEvent.GateType == 1) // OR gate
+        if (currentEvent.Gate == Gates.OR) // OR gate
         {
             return "(" + string.Join(" + ", childEquations) + ")";
         }
-        else if (currentEvent.GateType == 2) // AND gate
+        else if (currentEvent.Gate == Gates.AND) // AND gate
         {
             return "(" + string.Join(" * ", childEquations) + ")";
         }
@@ -754,7 +872,7 @@ public class FTAlogic
         {
             Name = topEvent.Name,
             ItemType = topEvent.ItemType,
-            GateType = 1, // OR gate for the top event.
+            Gate = Gates.OR, // OR gate for the top event.
             X = 200,
             Y = 100,
             Frequency = topEvent.Frequency
@@ -775,12 +893,12 @@ public class FTAlogic
         {
             string trimmedTerm = term.Trim();
             // Determine gate type for intermediate event:
-            // If term contains '*', it is a multi-component term => use AND gate (GateType = 2)
-            // Otherwise, for a single component, set GateType to -1 (Not set)
-            int gateTypeForIntermediate = trimmedTerm.Contains("*") ? 2 : -1;
+            // If term contains '*', it is a multi-component term => use AND gate (Gates = 2)
+            // Otherwise, for a single component, set Gates to -1 (Not set)
+            Gates GateForIntermediate = trimmedTerm.Contains("*") ? Gates.AND : Gates.NotSet;
 
             // Create a new intermediate event with name "MCS" followed by termNumber.
-            Guid intermediateGuid = AddIntermediateEvent("MCS" + termNumber, gateTypeForIntermediate, parentGuid);
+            Guid intermediateGuid = AddIntermediateEvent("MCS" + termNumber, GateForIntermediate, parentGuid);
             termNumber++;
 
             if (trimmedTerm.Contains("*"))
@@ -800,7 +918,7 @@ public class FTAlogic
                             Name = originalEvent.Name,
                             Tag = originalEvent.Tag,
                             ItemType = originalEvent.ItemType,
-                            GateType = originalEvent.GateType,
+                            Gate = originalEvent.Gate,
                             Frequency = originalEvent.Frequency,
                             Parent = intermediateGuid,
                             X = originalEvent.X,
@@ -824,7 +942,7 @@ public class FTAlogic
                         Name = originalEvent.Name,
                         Tag = originalEvent.Tag,
                         ItemType = originalEvent.ItemType,
-                        GateType = originalEvent.GateType,
+                        Gate = originalEvent.Gate,
                         Frequency = originalEvent.Frequency,
                         Parent = intermediateGuid,
                         X = originalEvent.X,
@@ -842,13 +960,13 @@ public class FTAlogic
         }
     }
 
-    private Guid AddIntermediateEvent(string name, int gateType, Guid parentGuid)
+    private Guid AddIntermediateEvent(string name, Gates Gate, Guid parentGuid)
     {
         var intermediateEvent = new FTAitem
         {
             Name = name,
             ItemType = 1, // Intermediate event
-            GateType = gateType, // AND or OR gate
+            Gate = Gate, // AND or OR gate
             Parent = parentGuid,
             X = 0,
             Y = 0
@@ -868,7 +986,7 @@ public class FTAlogic
             Debug.WriteLine($"  TAG: {item.Tag}");
             Debug.WriteLine($"  Parent: {item.Parent}");
             Debug.WriteLine($"  ItemType: {item.ItemType}");
-            Debug.WriteLine($"  GateType: {item.GateType}");
+            Debug.WriteLine($"  Gates: {item.Gate}");
             Debug.WriteLine($"  Frequency: {item.Frequency}");
             Debug.WriteLine($"  X: {item.X}, Y: {item.Y}");
             Debug.WriteLine("  Children:");
@@ -995,18 +1113,18 @@ public class FTAlogic
                 temp += Event.Value.Tag;
                 temp += "</td><td>" + Event.Value.Name + "</td ><td>" + Event.Value.Description + "</td ><td>";
 
-                string freqText = Event.Value.UserMetricType switch
+                string freqText = Event.Value.ValueType switch
                 {
-                    0 => "f=",
-                    1 => "P=",
-                    2 => "R=",
-                    3 => "λ=",
+                    ValueTypes.F => "f=",
+                    ValueTypes.P => "P=",
+                    ValueTypes.R => "R=",
+                    ValueTypes.Lambda => "λ=",
                     _ => ""
                 };
-                freqText += (Event.Value.UserMetricValue < 0.001) ? Event.Value.UserMetricValue.ToString("0.0000E+0") : Event.Value.UserMetricValue.ToString("F6");
-                if (Event.Value.UserMetricType == 0 || Event.Value.UserMetricType == 3)
+                freqText += (Event.Value.Value < 0.001) ? Event.Value.Value.ToString("0.0000E+0") : Event.Value.Value.ToString("F6");
+                if (Event.Value.ValueType == ValueTypes.F || Event.Value.ValueType == ValueTypes.Lambda)
                 {
-                    freqText += " " + MetricUnitsList[Event.Value.UserMetricUnit];
+                    freqText += " " + MetricUnitsList[Event.Value.ValueUnit];
                      
                 }
                 freqText = Event.Value.Frequency.ToString();
@@ -1171,12 +1289,18 @@ public class FTAitem
     public Guid GuidCode;
     public Guid Parent;
     public int ItemType; // ItemType - 1- basic Event, 2- intermediate Event
-    public int GateType; // GateType - 1-AND 2-OR
+   // public int Gate; // Gates - 1-AND 2-OR
     public string Tag;
     public double Frequency;
-    public double UserMetricValue;
-    public int UserMetricType;        // 0-Frequency 1-Probability 2-Reliability 3-Failure rate
-    public int UserMetricUnit;
+    public double Value;
+   // public int UserMetricType;        // 0-Frequency 1-Probability 2-Reliability 3-Failure rate
+    public int ValueUnit;
+    public ValueTypes ValueType { get; set; }
+    public Gates Gate { get; set; }
+
+    
+    
+
     public List<Guid> Children;
     public int level { get; set; }
     public double X1;
@@ -1189,7 +1313,7 @@ public class FTAitem
     public double LowerBoundFrequency { get; set; }
     public double UpperBoundFrequency { get; set; }
 
-    public ValueType Type { get; set; }
+ 
 
     public FTAitem()
     {
@@ -1200,7 +1324,7 @@ public class FTAitem
             LowerBoundFrequency = double.NaN;
             UpperBoundFrequency = double.NaN;
         }
-        Type = ValueType.P;
+        
     }
 
    

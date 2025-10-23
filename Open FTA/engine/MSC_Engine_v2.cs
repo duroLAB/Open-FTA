@@ -208,7 +208,7 @@ public class MSC_Engine_v2
         {
             GetChildrenLogic(EngineLogic.GetItem(parent.Children[i]));
 
-            int gate = parent.GateType;
+            Gates gate = parent.Gate;
             bool f = EngineLogic.GetItem(parent.Children[i]).ItemState;
 
             if (i == 0)
@@ -216,10 +216,10 @@ public class MSC_Engine_v2
             else
             {
                 //AND
-                if (gate == 1)
+                if (gate == Gates.OR)
                     parent.ItemState = parent.ItemState | f;
                 //OR
-                if (gate == 2)
+                if (gate == Gates.AND)
                     parent.ItemState = parent.ItemState & f;
             }
         }

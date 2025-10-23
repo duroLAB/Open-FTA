@@ -26,9 +26,11 @@ namespace OpenFTA
             string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             strPICPath = System.IO.Path.GetDirectoryName(strExeFilePath);
 
-            comboBoxGates.DataSource = new BindingSource(EngineLogic.GatesList, null);
+            /*comboBoxGates.DataSource = new BindingSource(EngineLogic.GatesList, null);
             comboBoxGates.DisplayMember = "Value";
-            comboBoxGates.ValueMember = "Key";
+            comboBoxGates.ValueMember = "Key";*/
+
+            comboBoxGates.DataSource = Enum.GetValues(typeof(Gates));
 
             comboBoxEventType.DataSource = new BindingSource(EngineLogic.EventsList, null);
             comboBoxEventType.DisplayMember = "Value";
@@ -43,7 +45,7 @@ namespace OpenFTA
             comboBoxUnits.ValueMember = "Key";
 
             comboBoxEventType.SelectedValue = 2;
-            comboBoxGates.SelectedValue = 2;
+            comboBoxGates.SelectedIndex = 1;
             comboBoxMetricType.SelectedIndex = 0;
             comboBoxUnits.SelectedIndex = 0;
 
@@ -61,7 +63,9 @@ namespace OpenFTA
                 var singleEvent = EngineLogic.SelectedEvents[0];
                 textBoxTag.Text = singleEvent.Tag;
                 textBoxName.Text = singleEvent.Name;
-                comboBoxGates.SelectedValue = singleEvent.GateType;
+                //comboBoxGates.SelectedValue = singleEvent.Gate;
+
+                comboBoxGates.SelectedItem = singleEvent.Gate;
                 comboBoxEventType.SelectedValue = singleEvent.ItemType;
                 textBoxFrequency.Text = singleEvent.Frequency.ToString();
                 textBoxDescription.Text = singleEvent.Description;
@@ -74,6 +78,9 @@ namespace OpenFTA
             }
             button1.CausesValidation = false;
             errorProvider1.BlinkStyle = ErrorBlinkStyle.NeverBlink;
+
+            pictureBox1.BackColor = Color.Transparent;
+            pictureBox2.BackColor = Color.Transparent;
         }
 
         private void comboBoxGates_SelectedIndexChanged(object sender, EventArgs e)

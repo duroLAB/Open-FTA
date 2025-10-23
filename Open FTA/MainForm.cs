@@ -312,7 +312,7 @@ namespace OpenFTA
             edit.EngineLogic = EngineLogic;
 
             edit.textBoxName.Text = "New Item";
-            edit.comboBoxGates.SelectedValue = 1;
+            edit.comboBoxGates.SelectedItem = Gates.OR;
             edit.comboBoxEventType.SelectedValue = 1;
             edit.textBoxFrequency.Text = "0";
             edit.textBoxTag.Text = "NewTag";
@@ -354,14 +354,14 @@ namespace OpenFTA
             edit.EngineLogic = EngineLogic;
 
             edit.textBoxName.Text = selectedEvent.Name;
-            edit.comboBoxGates.SelectedValue = selectedEvent.GateType;
+            edit.comboBoxGates.SelectedItem = selectedEvent.Gate;
             edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
             // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
             edit.textBoxTag.Text = selectedEvent.Tag;
 
-            edit.textBoxFrequency.Text = selectedEvent.UserMetricValue.ToString();
-            edit.comboBoxMetricType.SelectedIndex = selectedEvent.UserMetricType;
-            edit.comboBoxUnits.SelectedIndex = selectedEvent.UserMetricUnit;
+            edit.textBoxFrequency.Text = selectedEvent.Value.ToString();
+            //edit.comboBoxMetricType.SelectedIndex = selectedEvent.UserMetricType;
+            edit.comboBoxUnits.SelectedIndex = selectedEvent.ValueUnit;
 
             SaveStateForUndo();
 
@@ -480,7 +480,9 @@ namespace OpenFTA
 
             item.Name = edit.textBoxName.Text;
             item.Tag = edit.textBoxTag.Text;
-            item.GateType = Convert.ToInt32(edit.comboBoxGates.SelectedValue);
+            //     item.Gate = Convert.ToInt32(edit.comboBoxGates.SelectedValue);
+
+            item.Gate = (Gates)edit.comboBoxGates.SelectedItem;
             item.ItemType = Convert.ToInt32(edit.comboBoxEventType.SelectedValue);
 
             /* double inputFreq = Convert.ToDouble(edit.textBoxFrequency.Text);
@@ -493,9 +495,9 @@ namespace OpenFTA
 
             if (item.ItemType > 1)
             {
-                item.UserMetricValue = Convert.ToDouble(edit.textBoxFrequency.Text.ToString());
-                item.UserMetricType = edit.comboBoxMetricType.SelectedIndex;
-                item.UserMetricUnit = edit.comboBoxUnits.SelectedIndex;
+                item.Value = Convert.ToDouble(edit.textBoxFrequency.Text.ToString());
+                //   item.UserMetricType = edit.comboBoxMetricType.SelectedIndex;
+                item.ValueUnit = edit.comboBoxUnits.SelectedIndex;
             }
         }
 
@@ -605,8 +607,29 @@ namespace OpenFTA
 
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
-            FormSettings settingsForm = new FormSettings(); 
+            FormSettings settingsForm = new FormSettings();
             settingsForm.ShowDialog();
+        }
+
+        private void toolStripButtonExportImage_Click(object sender, EventArgs e)
+        {
+            EngineLogic.ComputeTree();
+        }
+
+        private void toolStripButton5_Click(object sender, EventArgs e)
+        {
+            EngineLogic = new FTAlogic();
+            UIEngine = new UIlogic(EngineLogic);
+            TreeEngine = new DrawingEngine(EngineLogic);
+
+
+            UIEngine.FillTreeView(treeView1);
+            TreeEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
+           
+            EngineLogic.AssignLevelsToAllEvents();
+
+            Invalidate();
+
         }
     }
 }
