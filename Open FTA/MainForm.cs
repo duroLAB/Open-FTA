@@ -16,6 +16,7 @@ namespace OpenFTA
     public partial class MainForm : Form
     {
         FTAlogic EngineLogic;
+        FTAlogic EngineLogicMCS;
         UIlogic UIEngine;
         DrawingEngine TreeEngine;
         // Settingsform APPSet;
@@ -27,8 +28,9 @@ namespace OpenFTA
         {
             InitializeComponent();
             EngineLogic = new FTAlogic();
+            EngineLogicMCS = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
-            TreeEngine = new DrawingEngine(EngineLogic);
+            TreeEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
             /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
              pictureBox1.Dock = DockStyle.Fill;
              pictureBox1.BackColor = Color.White;
@@ -46,8 +48,51 @@ namespace OpenFTA
 
 
             MainAppSettings.Instance.Load();
+
+            tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tabControl1.Padding = new Point(20, 5);
+            tabControl1.Alignment = TabAlignment.Bottom;   // ⇦ záložky budú dole
+            tabControl1.DrawItem += TabControl1_DrawItem;
         }
 
+        private void TabControl1_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            var tab = (TabControl)sender;
+            var g = e.Graphics;
+            var rect = e.Bounds;
+            bool selected = (e.Index == tab.SelectedIndex);
+
+            // zisti, či sú tabs dole
+            bool bottomTabs = (tab.Alignment == TabAlignment.Bottom);
+
+            // farby
+            Color backColor = selected ? Color.FromArgb(45, 120, 230) : Color.FromArgb(240, 240, 240);
+            Color textColor = selected ? Color.White : Color.Black;
+
+            // vyplnenie pozadia tab-u
+            using (var brush = new SolidBrush(backColor))
+                g.FillRectangle(brush, rect);
+
+            // text v strede
+            string text = tab.TabPages[e.Index].Text;
+            using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+            using (var brush = new SolidBrush(textColor))
+                g.DrawString(text, tab.Font, brush, rect, sf);
+
+            // oddelovacia / zvýrazňovacia linka
+            if (bottomTabs)
+            {
+                // ak je dole, zvýrazni hornú hranu
+                using (var pen = new Pen(selected ? Color.FromArgb(45, 120, 230) : Color.LightGray, selected ? 3 : 1))
+                    g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+            }
+            else
+            {
+                // ak je hore, zvýrazni spodnú hranu
+                using (var pen = new Pen(selected ? Color.FromArgb(45, 120, 230) : Color.LightGray, selected ? 3 : 1))
+                    g.DrawLine(pen, rect.Left, rect.Bottom - 1, rect.Right, rect.Bottom - 1);
+            }
+        }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -239,7 +284,7 @@ namespace OpenFTA
             EngineLogic.PasteCopiedEvents();
             if (MainAppSettings.Instance.AutoSortTree)
             {
-                ArrangeMainTreeHierarchically();
+                TreeEngine.ArrangeMainTreeHierarchically();
             }
             treeView1.ExpandAll();
             pictureBox1.Invalidate();
@@ -270,7 +315,7 @@ namespace OpenFTA
 
         private void toolStripButtonSort_Click(object sender, EventArgs e)
         {
-            ArrangeMainTreeHierarchically();
+            TreeEngine.ArrangeMainTreeHierarchically();
 
             pictureBox1.Invalidate();
         }
@@ -333,12 +378,13 @@ namespace OpenFTA
                 edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
                 edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
                 edit.textBoxDescription.Text = selectedEvent.Description;
-                edit.textBoxName.Text = selectedEvent.Name;
-                edit.comboBoxGates.SelectedItem = selectedEvent.Gate;
+                edit.textBoxName.Text = selectedEvent.Name;            
                 edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
                 edit.textBoxTag.Text = selectedEvent.Tag;
                 edit.textBoxFrequency.Text = selectedEvent.Value.ToString();
                 edit.comboBoxUnits.SelectedIndex = selectedEvent.ValueUnit;
+
+                edit.comboBoxMetricType.SelectedIndex = (int)selectedEvent.ValueType;
             }
 
 
@@ -412,7 +458,7 @@ namespace OpenFTA
 
         #endregion
 
-        public void ArrangeMainTreeHierarchically()
+   /*     public void ArrangeMainTreeHierarchically()
         {
             FTAitem topEvent = EngineLogic.FTAStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
             if (topEvent == null)
@@ -466,7 +512,7 @@ namespace OpenFTA
             }
             totalWidth -= gap;
             return Math.Max(totalWidth, Constants.EventWidth);
-        }
+        }*/
 
         private void Undo()
         {
@@ -528,9 +574,13 @@ namespace OpenFTA
             item.Description = edit.textBoxDescription.Text;
 
             if (item.ItemType > 1)
-            {
+            { 
                 item.Value = Convert.ToDouble(edit.textBoxFrequency.Text.ToString());
                 //   item.UserMetricType = edit.comboBoxMetricType.SelectedIndex;
+                item.ValueType = (ValueTypes)edit.comboBoxMetricType.SelectedIndex;
+
+                
+
                 item.ValueUnit = edit.comboBoxUnits.SelectedIndex;
             }
         }
@@ -641,8 +691,30 @@ namespace OpenFTA
 
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
-            FormSettings settingsForm = new FormSettings();
-            settingsForm.ShowDialog();
+            /*FormSettings settingsForm = new FormSettings();
+            settingsForm.ShowDialog();*/
+            EngineLogic.MCSStructure.Clear();
+            EngineLogic.GenerateMCS();
+            if (EngineLogic.MCSStructure != null && EngineLogic.MCSStructure.Count > 0)
+            {
+                 
+                EngineLogicMCS.FTAStructure = EngineLogic.MCSStructure;
+                TreeEngine.EngineLogic = EngineLogicMCS;
+                TreeEngine.SetStructure(EngineLogicMCS.FTAStructure);
+
+                TreeEngine.ArrangeMainTreeHierarchically();
+
+                pictureBox1.Invalidate();
+
+                
+
+              
+
+            }
+            else
+            {
+                MessageBox.Show("MCS structure is empty. Generate MCS first.", "Error");
+            }
         }
 
         private void toolStripButtonExportImage_Click(object sender, EventArgs e)
@@ -654,7 +726,7 @@ namespace OpenFTA
         {
             EngineLogic = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
-            TreeEngine = new DrawingEngine(EngineLogic);
+            TreeEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
 
 
             UIEngine.FillTreeView(treeView1);

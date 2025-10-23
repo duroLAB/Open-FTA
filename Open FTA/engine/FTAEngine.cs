@@ -10,6 +10,13 @@ using System.Xml.Serialization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
+public enum MainCompTimeUnit
+{
+    Year,
+    Day,
+    Hour,
+    Second
+}
 public enum ValueTypes { F, P, R, Lambda }
 public enum Gates {NotSet, OR, AND }
 public class FTAlogic
@@ -392,8 +399,8 @@ public class FTAlogic
     }
 
 
-    public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
-    public static bool SimplificationStrategy = true; // P=f
+   // public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
+   // public static bool SimplificationStrategy = true; // P=f
     public static bool SimplificationStrategyLinearOR = true; // P(A OR B) = Pa+Pb
 
     public void SumChildren(FTAitem parent)
@@ -431,14 +438,14 @@ public class FTAlogic
                     parent.Frequency = SumResult;
                     parent.ValueType = ValueTypes.P;
                     parent.Value = SumResult;
-                    parent.ValueUnit = BaseTimeUnit;
+                    parent.ValueUnit = (int)MainAppSettings.Instance.BaseTimeUnit;
                    }
                 else
                 {
                     parent.Frequency = ProbabilityToFrequency(SumResult);
                     parent.ValueType = ValueTypes.F;
                     parent.Value = ProbabilityToFrequency(SumResult);
-                    parent.ValueUnit = BaseTimeUnit;
+                    parent.ValueUnit = (int)MainAppSettings.Instance.BaseTimeUnit;
                 }
             }
         }
@@ -467,12 +474,13 @@ public class FTAlogic
 
     private static double ConvertToProbability(FTAitem e)
     {
-        double Tsource = 1.0 / TimeUnitFactors[e.ValueUnit];
-        double Tbase = 1.0 / TimeUnitFactors[BaseTimeUnit];
+        double Tsource = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
+        double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
 
         double P;
 
-        if (SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
+        
+        if (!MainAppSettings.Instance.SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
             P = e.Value;
         else
                 P = e.ValueType switch
@@ -498,8 +506,18 @@ public class FTAlogic
 
     public static double ProbabilityToFrequency(double P)
     {
-        double Tbase = 1.0 / TimeUnitFactors[BaseTimeUnit];
-        return -Math.Log(1 - P) / Tbase;
+        double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
+        double res = 0;
+        if (MainAppSettings.Instance.SimplificationStrategy)
+        {
+            res = -Math.Log(1 - P) / Tbase;
+        }
+        else
+        {
+            res = P / Tbase;
+        }
+        //return -Math.Log(1 - P) / Tbase;
+        return (res);
     }
 
     /*
@@ -682,10 +700,12 @@ public class FTAlogic
     public double ComputeBIM(FTAitem ftaEvent)
     {
 
-        double originalFrequency = ftaEvent.Frequency;
+        //double originalFrequency = ftaEvent.Value;
+        double originalFrequency = ftaEvent.Value;
 
         // Event failed  
-        ftaEvent.Frequency = 1;
+        // ftaEvent.Value = 1;
+        ftaEvent.Value = 1;
         ComputeTree();
         double topFreqWhenFailed = GetItem(TopEventGuid).Frequency;
         if (topFreqWhenFailed > 1)
@@ -694,41 +714,44 @@ public class FTAlogic
         }
 
         // Event didnt failed
-        ftaEvent.Frequency = 0;
+        //ftaEvent.Value = 0;
+        ftaEvent.Value = 0;
         ComputeTree();
         double topFreqWhenWorks = GetItem(TopEventGuid).Frequency;
 
 
-        ftaEvent.Frequency = originalFrequency;
+        //ftaEvent.Value = originalFrequency;
+        ftaEvent.Value = originalFrequency;
 
         // Calculate BIM
         double bim = topFreqWhenFailed - topFreqWhenWorks;
+        ftaEvent.BIM = bim;
         return bim;
     }
     // Computes the Critical Importance Measure (CIM)
     public double ComputeCIM(FTAitem ftaEvent)
     {
-        double pEventNormal = ftaEvent.Frequency;
+        double pEventNormal = ftaEvent.Value;
 
         // Event failed 
-        ftaEvent.Frequency = 0;
+        ftaEvent.Value = 0;
         ComputeTree();
         double pTopWhenWorks = GetItem(TopEventGuid).Frequency;
 
         // Event didnt failed
-        ftaEvent.Frequency = 1;
+        ftaEvent.Value = 1;
         ComputeTree();
         double pTopWhenFails = GetItem(TopEventGuid).Frequency;
 
         // Event works normaly
-        ftaEvent.Frequency = pEventNormal;
+        ftaEvent.Value = pEventNormal;
         ComputeTree();
         double pTopNormal = GetItem(TopEventGuid).Frequency;
 
         // CIM = P(top event when event works) - P(top event when event fails) * (pEventNormal / pTopNormal)
         double cim = (pTopWhenFails - pTopWhenWorks) * (pEventNormal / pTopNormal);
 
-        ftaEvent.Frequency = pEventNormal;
+        ftaEvent.Value = pEventNormal;
 
         return cim;
     }
@@ -736,15 +759,15 @@ public class FTAlogic
 
     public double ComputeRAW(FTAitem ftaEvent)
     {
-        double originalFrequency = ftaEvent.Frequency;
+        double originalFrequency = ftaEvent.Value;
 
         // Event failed
-        ftaEvent.Frequency = 1;
+        ftaEvent.Value = 1;
         ComputeTree();
         double topProbWhenFails = GetItem(TopEventGuid).Frequency;
 
         // Event works normaly
-        ftaEvent.Frequency = originalFrequency;
+        ftaEvent.Value = originalFrequency;
         ComputeTree();
         double topProbNormal = GetItem(TopEventGuid).Frequency;
 
@@ -758,19 +781,19 @@ public class FTAlogic
 
     public double ComputeRRW(FTAitem ftaEvent)
     {
-        double originalFrequency = ftaEvent.Frequency;
+        double originalFrequency = ftaEvent.Value;
 
         // Event failed
-        ftaEvent.Frequency = originalFrequency;
+        ftaEvent.Value = originalFrequency;
         ComputeTree();
         double topProbNormal = GetItem(TopEventGuid).Frequency;
 
         // Event didnt failed
-        ftaEvent.Frequency = 0;
+        ftaEvent.Value = 0;
         ComputeTree();
         double topProbWhenWorks = GetItem(TopEventGuid).Frequency;
 
-        ftaEvent.Frequency = originalFrequency;
+        ftaEvent.Value = originalFrequency;
 
         if (topProbWhenWorks == 0)
             return double.PositiveInfinity;
@@ -781,19 +804,19 @@ public class FTAlogic
 
     public double ComputeFV(FTAitem ftaEvent)
     {
-        double originalFrequency = ftaEvent.Frequency;
+        double originalFrequency = ftaEvent.Value;
 
         // Event works normaly
-        ftaEvent.Frequency = originalFrequency;
+        ftaEvent.Value = originalFrequency;
         ComputeTree();
         double topProbNormal = GetItem(TopEventGuid).Frequency;
 
         // Event didnt failed
-        ftaEvent.Frequency = 0;
+        ftaEvent.Value = 0;
         ComputeTree();
         double topProbWhenWorks = GetItem(TopEventGuid).Frequency;
 
-        ftaEvent.Frequency = originalFrequency;
+        ftaEvent.Value = originalFrequency;
 
         if (topProbNormal == 0)
             return double.PositiveInfinity;
@@ -1397,7 +1420,7 @@ public class FTAitem
     public double LowerBoundFrequency { get; set; }
     public double UpperBoundFrequency { get; set; }
 
- 
+    public double BIM;
 
     public FTAitem()
     {
@@ -1408,7 +1431,9 @@ public class FTAitem
             LowerBoundFrequency = double.NaN;
             UpperBoundFrequency = double.NaN;
         }
-        
+        BIM = 0.1;
+
+
     }
 
    

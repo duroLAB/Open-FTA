@@ -11,9 +11,9 @@ using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
-class DrawingEngine(FTAlogic f)
+class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 {
-    readonly FTAlogic EngineLogic = f;
+    public FTAlogic EngineLogic = f;
     public int offsetX = 0;
     public int offsetY = 0;
     public double GlobalZoom = 1;
@@ -23,11 +23,9 @@ class DrawingEngine(FTAlogic f)
     public bool IsDraggingTree = false;
     private Point LastMousePosition;
     private Point _lastDragPosition;
+    Dictionary<Guid, FTAitem> DrawingStructure = structure;
 
-    readonly string picPath = AppContext.BaseDirectory;
-
-
-   // public static bool UseTechnicalGates { get; set; } = MainAppSettingsOld.Current.Technicalgates;
+    readonly string picPath = AppContext.BaseDirectory;    
 
     public void SetDimensions(int fTAWidth, int fTAHeight)
     {
@@ -40,12 +38,12 @@ class DrawingEngine(FTAlogic f)
         DrawBackGround(e);
         DrawEvents(e);
         DrawLinesAndGates(e);
-        
+        DrawProgressBars(e);
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
     {
-        EngineLogic.FTAStructure = structure;
+        DrawingStructure = structure;
     }
 
     private void DrawBackGround(Graphics g)
@@ -62,7 +60,7 @@ class DrawingEngine(FTAlogic f)
         using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
         {
             // Prejdeme všetky udalosti v hlavnej štruktúre
-            foreach (var evtPair in EngineLogic.FTAStructure)
+            foreach (var evtPair in DrawingStructure)
             {
 
                 FTAitem evt = evtPair.Value;
@@ -94,7 +92,7 @@ class DrawingEngine(FTAlogic f)
                     if (evt.IsHidden)
                     {
                         // Zobrazíme trojuholník len pre najvyššiu skrytú udalosť
-                        if (evt.Parent == Guid.Empty || !EngineLogic.FTAStructure[evt.Parent].IsHidden)
+                        if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
                         {
                             // Vykreslíme obrázok trojuholníka pomocou bitmapy
                             DrawEventBitmap(g, r, "pic\\events\\Transferin.png", verticalOffset: -r.Height);
@@ -151,6 +149,8 @@ class DrawingEngine(FTAlogic f)
                             default: // Not Set 
                                 break;
                         }
+
+                         
 
                         // Definujeme rozloženie textu v udalosti: horná časť pre TAG, stred pre názov, spodná pre frekvenciu.
                         int topRowHeight = r.Height / 6;
@@ -234,10 +234,57 @@ class DrawingEngine(FTAlogic f)
                         {
                             g.DrawPath(selPen, roundedRect);
                         }
+
+                        
                     }
                 }
             }
         }
+    }
+
+    private void DrawProgressBars(Graphics g)
+    {
+        double minBIM = 0;
+        double maxBIM = 0;
+
+        if (DrawingStructure.Values.Any(i => i.BIM != 0))
+        {
+            minBIM = DrawingStructure.Values.Where(i => i.BIM != 0).Min(i => i.BIM);
+            maxBIM = DrawingStructure.Values.Where(i => i.BIM != 0).Max(i => i.BIM);
+
+        }
+        else
+        {
+            return;
+        }
+
+        if (maxBIM == 0||minBIM==maxBIM)
+            return;
+
+        foreach (var evtPair in DrawingStructure)
+        {
+         
+            FTAitem evt = evtPair.Value;
+            if (evt.ItemType >= 2) // Len pre Basic Event
+            {
+
+                // Určíme polohu a rozmery udalosti
+                Rectangle r = new Rectangle
+                {
+                    X = evt.X,
+                    Y = evt.Y + (int)(Constants.EventHeight + 0.45 * Constants.EventHeight),
+                    Width = Constants.EventWidth,
+                    Height = (int)(Constants.EventHeight / 6)
+                };
+                r = RealPositionToPixel(r);
+
+                double bimPercent = 100*(evt.BIM - minBIM) / (maxBIM- minBIM);
+                String txt = $"BIM: {bimPercent:F4}";
+                DrawTurboProgressBar(g, r, (float)bimPercent, txt);
+            }
+        }
+
+         
     }
 
     static string SplitStringToLines(string text)
@@ -294,9 +341,6 @@ class DrawingEngine(FTAlogic f)
         return sb.ToString();
     }
 
-   
-
-
     private Font FindFittingFont(Graphics g, string text, Rectangle rect)// Methode for fitting text into to event visual borders
     {
         float maxFontSize = 10f;
@@ -318,17 +362,18 @@ class DrawingEngine(FTAlogic f)
         }
         return new Font("Arial", minFontSize);
     }
+  
     private void DrawLinesAndGates(Graphics g)
     {
 
         using (Pen linePen = new Pen(Color.Black, 2))
         using (Brush gateBrush = new SolidBrush(Color.Black))
         {
-            foreach (var parentEvent in EngineLogic.FTAStructure)
+            foreach (var parentEvent in DrawingStructure)
             {
                 var parent = parentEvent.Value;
 
-                if (parent.IsHidden || (EngineLogic.FTAStructure.ContainsKey(parent.Parent) && EngineLogic.FTAStructure[parent.Parent].IsHidden))
+                if (parent.IsHidden || (DrawingStructure.ContainsKey(parent.Parent) && DrawingStructure[parent.Parent].IsHidden))
                     continue;
 
                 if (parent.Children.Count > 0)
@@ -435,116 +480,29 @@ class DrawingEngine(FTAlogic f)
                         }
                     }
 
-
-
                 }
+
+                
             }
         }
     }
    
-    public bool Mouse_SelectEvent(Point mouseCoordinates)
-    {
-        int X = 0;
-        int Y = 0;
-        PixelToRealPosition(mouseCoordinates, ref X, ref Y);
-
-        // Check if the SHIFT key is pressed.
-        bool shiftDown = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
-
-
-        // Find the event that was clicked.
-        FTAitem? clickedEvent = null;      
-        foreach (var evt in EngineLogic.FTAStructure.Values)
-        {
-
-            if (evt.IsHidden && !IsTopHiddenParent(evt))
-                continue;
-            if ((X > evt.X) && (X < evt.X + Constants.EventWidth) &&
-                (Y > evt.Y) && (Y < evt.Y + Constants.EventHeight))
-            {
-                clickedEvent = evt;
-                break;
-            }
-        }
-
-        if (clickedEvent != null)
-        {
-            // If SHIFT is pressed, toggle the selection mode.
-            if (shiftDown)
-            {
-                if (clickedEvent.IsSelected)
-                {
-                    clickedEvent.IsSelected = false;
-                    EngineLogic.SelectedEvents.Remove(clickedEvent);
-                }
-                else
-                {
-                    clickedEvent.IsSelected = true;
-                    EngineLogic.SelectedEvents.Add(clickedEvent);
-                }
-            }
-            else
-            {
-                // If the clicked event is already selected, then do nothing (keep multi-select).
-                if (!clickedEvent.IsSelected)
-                {
-                    foreach (var evt in EngineLogic.FTAStructure.Values)
-                    {
-                        evt.IsSelected = false;
-                    }
-                    if (EngineLogic.SelectedEvents != null)
-                    {
-                        EngineLogic.SelectedEvents.Clear();
-                    }
-                    clickedEvent.IsSelected = true;
-                    if(EngineLogic.SelectedEvents!=null)
-                    EngineLogic.SelectedEvents.Add(clickedEvent);
-                }
-            }
-
-            SelectedEventDrag = true;
-            IsDraggingTree = false;
-            SetLastDragPosition(mouseCoordinates);
-            return true;
-        }
-        else
-        {
-            // Clicked on empty area: clear selection if SHIFT is not pressed.
-            if (!shiftDown)
-            {
-                foreach (var evt in EngineLogic.FTAStructure.Values)
-                {
-                    evt.IsSelected = false;
-                }
-                if (EngineLogic.SelectedEvents != null)
-                {
-                    EngineLogic.SelectedEvents.Clear();
-                }
-            }
-            // Enable panning.
-            SelectedEventDrag = false;
-            IsDraggingTree = true;
-            LastMousePosition = mouseCoordinates;
-            return false;
-        }
-    }
     private bool IsTopHiddenParent(FTAitem evt)
     {
         if (!evt.IsHidden)
             return false;
 
-        if (evt.Parent != null && EngineLogic.FTAStructure.TryGetValue(evt.Parent, out FTAitem? parent) && parent!=null &&  parent.IsHidden)
+        if (evt.Parent != null && DrawingStructure.TryGetValue(evt.Parent, out FTAitem? parent) && parent!=null &&  parent.IsHidden)
             return false;
 
         foreach (var childGuid in evt.Children)
         {
-            if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem? child) && child !=null && !child.IsHidden)
+            if (DrawingStructure.TryGetValue(childGuid, out FTAitem? child) && child !=null && !child.IsHidden)
                 return false;
         }
 
         return true;
     }
-
 
     private GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)//Methode for rounding corners of events
     {
@@ -564,63 +522,6 @@ class DrawingEngine(FTAlogic f)
         return path;
     }
    
-    public void Mouse_DragEvent(Point mouseCoordinates)
-    {
-        if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)
-        {
-            int deltaX = mouseCoordinates.X - _lastDragPosition.X;
-            int deltaY = mouseCoordinates.Y - _lastDragPosition.Y;
-
-            if (deltaX * deltaX + deltaY * deltaY < 50 * GlobalZoom)
-                return;
-
-            foreach (var evt in EngineLogic.SelectedEvents)
-            {
-                if (IsTopHiddenParent(evt))
-                {
-                    List<FTAitem> subtreeItems = GetSubtreeItems(evt);
-
-                    double temp1 = deltaX * 1000 / GlobalZoom;
-                    double temp2 = deltaY * 1000 / GlobalZoom;
-
-                    foreach (var item in subtreeItems)
-                    {
-                        item.X += (int)Math.Round(temp1 / 1000);
-                        item.Y += (int)Math.Round(temp2 / 1000);
-                    }
-                }
-                else
-                { 
-                    double temp1 = deltaX * 1000 / GlobalZoom;
-                    double temp2 = deltaY * 1000 / GlobalZoom;
-
-                    evt.X += (int) Math.Round(temp1/1000);
-                    evt.Y += (int) Math.Round(temp2/1000); 
-         
-                }
-            }
-
-            _lastDragPosition = mouseCoordinates;
-        }
-        else if (IsDraggingTree)
-        {
-            // Panning 
-            int deltaX = mouseCoordinates.X - LastMousePosition.X;
-            int deltaY = mouseCoordinates.Y - LastMousePosition.Y;
-
-            offsetX += deltaX;
-            offsetY += deltaY;
-
-            LastMousePosition = mouseCoordinates;
-        }
-    }
-
-    public void Mouse_Up()
-    {
-        SelectedEventDrag = false;
-        IsDraggingTree = false;
-    }
-
     public Rectangle RealPositionToPixel(Rectangle r)
     {
         Rectangle outR = new Rectangle();
@@ -669,7 +570,7 @@ class DrawingEngine(FTAlogic f)
                 g.FillEllipse(redBrush, imageRect);
             }
             g.DrawEllipse(fallbackPen ?? Pens.Black, imageRect);
-        }
+        }      
     }
 
     private void DrawGateBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.6f, float scaleFactorHeight = 0.5f, Pen? fallbackPen = null)
@@ -716,7 +617,7 @@ class DrawingEngine(FTAlogic f)
 
         foreach (var childGuid in root.Children)
         {
-            if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem? child) && child is not null)
+            if (DrawingStructure.TryGetValue(childGuid, out FTAitem? child) && child is not null)
             {
                 subtree.AddRange(GetSubtreeItems(child));
             }
@@ -724,4 +625,353 @@ class DrawingEngine(FTAlogic f)
 
         return subtree;
     }
+
+    public static void DrawTurboProgressBar(Graphics g, Rectangle rect, float value, string text = null)
+    {
+        value = Math.Clamp(value, 0, 100);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+        // pozadie
+        using (var backBrush = new SolidBrush(Color.FromArgb(230, 230, 230)))
+            g.FillRectangle(backBrush, rect);
+
+        // výplň
+        int fillWidth = (int)(rect.Width * (value / 100f));
+        if (fillWidth > 0)
+        {
+            Rectangle fillRect = new Rectangle(rect.X, rect.Y, fillWidth, rect.Height);
+
+            // vypočítaj "horný limit" palety (koľko % z nej sa použije)
+            float stopLimit = value / 100f;
+
+            // definícia Turbo colormap
+            ColorBlend blend = new ColorBlend
+            {
+                Colors = new[]
+                {
+                    Color.FromArgb(  48,  18,  59), // dark blue
+                    Color.FromArgb(  50,  72, 174), // blue
+                    Color.FromArgb(  31, 167, 206), // cyan
+                    Color.FromArgb(  87, 216, 122), // greenish
+                    Color.FromArgb( 194, 223,  35), // yellow
+                    Color.FromArgb( 253, 161,  34), // orange
+                    Color.FromArgb( 241,  47,  47)  // red
+                },
+                Positions = new[]
+                {
+                    0.0f, 0.15f, 0.35f, 0.55f, 0.7f, 0.85f, 1.0f
+                }
+            };
+
+            // vytvor nový ColorBlend "orezaný" podľa hodnoty
+            ColorBlend partial = CropColorBlend(blend, stopLimit);
+
+            using (var brush = new LinearGradientBrush(
+                fillRect,
+                Color.Black,
+                Color.Black,
+                LinearGradientMode.Horizontal))
+            {
+                brush.InterpolationColors = partial;
+                g.FillRectangle(brush, fillRect);
+            }
+        }
+
+        // rámik
+        using (var borderPen = new Pen(Color.Gray, 1))
+            g.DrawRectangle(borderPen, rect);
+
+        // text
+        if (!string.IsNullOrEmpty(text))
+        {
+            using (var font = new Font("Segoe UI", 9, FontStyle.Bold))
+            using (var sf = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            })
+            {
+                Color textColor = value < 50 ? Color.Black : Color.White;
+                using (var textBrush = new SolidBrush(textColor))
+                    g.DrawString(text, font, textBrush, rect, sf);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Oreže farebný prechod podľa "percenta" palety (0–1)
+    /// </summary>
+    private static ColorBlend CropColorBlend(ColorBlend original, float limit)
+    {
+        limit = Math.Clamp(limit, 0f, 1f);
+
+        // ak je veľmi nízke percento, zjednodušene použijeme len 1 farbu
+        if (limit <= 0.001f)
+        {
+            var single = new ColorBlend(2)
+            {
+                Colors = new[] { original.Colors[0], original.Colors[0] },
+                Positions = new[] { 0f, 1f }
+            };
+            return single;
+        }
+
+        // interpolácia farby pri danej pozícii limitu
+        Color endColor = InterpolateColor(original, limit);
+
+        // všetky farby a pozície do limitu
+        var colors = new System.Collections.Generic.List<Color>();
+        var positions = new System.Collections.Generic.List<float>();
+
+        for (int i = 0; i < original.Positions.Length; i++)
+        {
+            float pos = original.Positions[i];
+            if (pos <= limit)
+            {
+                colors.Add(original.Colors[i]);
+                positions.Add(pos / limit); // preškáluj do 0–1
+            }
+            else
+                break;
+        }
+
+        // pridaj "koncovú" interpolovanú farbu
+        colors.Add(endColor);
+        positions.Add(1f);
+
+        return new ColorBlend
+        {
+            Colors = colors.ToArray(),
+            Positions = positions.ToArray()
+        };
+    }
+
+    /// <summary>
+    /// Nájde interpolovanú farbu v rámci palety pre dané t (0–1)
+    /// </summary>
+    private static Color InterpolateColor(ColorBlend blend, float t)
+    {
+        for (int i = 1; i < blend.Positions.Length; i++)
+        {
+            float p0 = blend.Positions[i - 1];
+            float p1 = blend.Positions[i];
+            if (t >= p0 && t <= p1)
+            {
+                float localT = (t - p0) / (p1 - p0);
+                return Lerp(blend.Colors[i - 1], blend.Colors[i], localT);
+            }
+        }
+        return blend.Colors[^1];
+    }
+
+    private static Color Lerp(Color a, Color b, float t)
+    {
+        return Color.FromArgb(
+            (int)(a.R + (b.R - a.R) * t),
+            (int)(a.G + (b.G - a.G) * t),
+            (int)(a.B + (b.B - a.B) * t));
+    }
+
+    public void ArrangeMainTreeHierarchically()
+    {
+        FTAitem topEvent = DrawingStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
+        if (topEvent == null)
+            return;
+
+        // Set top event position
+        topEvent.X = FTAWidth;
+        topEvent.Y = 50;
+
+        ArrangeChildren(topEvent);
+
+        
+    }
+    private void ArrangeChildren(FTAitem parent)
+    {
+        int verticalSpacing = 180;
+        int gap = 20;
+
+        if (parent.Children == null || parent.Children.Count == 0)
+            return;
+
+        double allocatedWidth = ComputeSubtreeWidth(parent, gap);
+        double startX = parent.X - allocatedWidth / 2;
+        int childY = parent.Y + verticalSpacing;
+
+        double currentX = startX;
+        foreach (Guid childGuid in parent.Children)
+        {
+            if (DrawingStructure.TryGetValue(childGuid, out FTAitem child))
+            {
+                double childWidth = ComputeSubtreeWidth(child, gap);
+                child.X = (int)(currentX + childWidth / 2);
+                child.Y = childY;
+                currentX += childWidth + gap;
+                ArrangeChildren(child);
+            }
+        }
+    }
+    private double ComputeSubtreeWidth(FTAitem node, int gap)
+    {
+        if (node.Children == null || node.Children.Count == 0)
+            return Constants.EventWidth;
+
+        double totalWidth = 0;
+        foreach (Guid childGuid in node.Children)
+        {
+            if (DrawingStructure.TryGetValue(childGuid, out FTAitem child))
+            {
+                totalWidth += ComputeSubtreeWidth(child, gap) + gap;
+            }
+        }
+        totalWidth -= gap;
+        return Math.Max(totalWidth, Constants.EventWidth);
+    }
+
+
+    public void Mouse_DragEvent(Point mouseCoordinates)
+    {
+        if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)
+        {
+            int deltaX = mouseCoordinates.X - _lastDragPosition.X;
+            int deltaY = mouseCoordinates.Y - _lastDragPosition.Y;
+
+            if (deltaX * deltaX + deltaY * deltaY < 50 * GlobalZoom)
+                return;
+
+            foreach (var evt in EngineLogic.SelectedEvents)
+            {
+                if (IsTopHiddenParent(evt))
+                {
+                    List<FTAitem> subtreeItems = GetSubtreeItems(evt);
+
+                    double temp1 = deltaX * 1000 / GlobalZoom;
+                    double temp2 = deltaY * 1000 / GlobalZoom;
+
+                    foreach (var item in subtreeItems)
+                    {
+                        item.X += (int)Math.Round(temp1 / 1000);
+                        item.Y += (int)Math.Round(temp2 / 1000);
+                    }
+                }
+                else
+                {
+                    double temp1 = deltaX * 1000 / GlobalZoom;
+                    double temp2 = deltaY * 1000 / GlobalZoom;
+
+                    evt.X += (int)Math.Round(temp1 / 1000);
+                    evt.Y += (int)Math.Round(temp2 / 1000);
+
+                }
+            }
+
+            _lastDragPosition = mouseCoordinates;
+        }
+        else if (IsDraggingTree)
+        {
+            // Panning 
+            int deltaX = mouseCoordinates.X - LastMousePosition.X;
+            int deltaY = mouseCoordinates.Y - LastMousePosition.Y;
+
+            offsetX += deltaX;
+            offsetY += deltaY;
+
+            LastMousePosition = mouseCoordinates;
+        }
+    }
+    public void Mouse_Up()
+    {
+        SelectedEventDrag = false;
+        IsDraggingTree = false;
+    }
+    public bool Mouse_SelectEvent(Point mouseCoordinates)
+    {
+        int X = 0;
+        int Y = 0;
+        PixelToRealPosition(mouseCoordinates, ref X, ref Y);
+
+        // Check if the SHIFT key is pressed.
+        bool shiftDown = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+
+
+        // Find the event that was clicked.
+        FTAitem? clickedEvent = null;
+        foreach (var evt in DrawingStructure.Values)
+        {
+
+            if (evt.IsHidden && !IsTopHiddenParent(evt))
+                continue;
+            if ((X > evt.X) && (X < evt.X + Constants.EventWidth) &&
+                (Y > evt.Y) && (Y < evt.Y + Constants.EventHeight))
+            {
+                clickedEvent = evt;
+                break;
+            }
+        }
+
+        if (clickedEvent != null)
+        {
+            // If SHIFT is pressed, toggle the selection mode.
+            if (shiftDown)
+            {
+                if (clickedEvent.IsSelected)
+                {
+                    clickedEvent.IsSelected = false;
+                    EngineLogic.SelectedEvents.Remove(clickedEvent);
+                }
+                else
+                {
+                    clickedEvent.IsSelected = true;
+                    EngineLogic.SelectedEvents.Add(clickedEvent);
+                }
+            }
+            else
+            {
+                // If the clicked event is already selected, then do nothing (keep multi-select).
+                if (!clickedEvent.IsSelected)
+                {
+                    foreach (var evt in DrawingStructure.Values)
+                    {
+                        evt.IsSelected = false;
+                    }
+                    if (EngineLogic.SelectedEvents != null)
+                    {
+                        EngineLogic.SelectedEvents.Clear();
+                    }
+                    clickedEvent.IsSelected = true;
+                    if (EngineLogic.SelectedEvents != null)
+                        EngineLogic.SelectedEvents.Add(clickedEvent);
+                }
+            }
+
+            SelectedEventDrag = true;
+            IsDraggingTree = false;
+            SetLastDragPosition(mouseCoordinates);
+            return true;
+        }
+        else
+        {
+            // Clicked on empty area: clear selection if SHIFT is not pressed.
+            if (!shiftDown)
+            {
+                foreach (var evt in DrawingStructure.Values)
+                {
+                    evt.IsSelected = false;
+                }
+                if (EngineLogic.SelectedEvents != null)
+                {
+                    EngineLogic.SelectedEvents.Clear();
+                }
+            }
+            // Enable panning.
+            SelectedEventDrag = false;
+            IsDraggingTree = true;
+            LastMousePosition = mouseCoordinates;
+            return false;
+        }
+    }
+
 }
+
+

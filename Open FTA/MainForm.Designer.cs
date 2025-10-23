@@ -61,6 +61,9 @@
             splitter1 = new Splitter();
             panelMain = new Panel();
             panelRight = new Panel();
+            tabControl1 = new TabControl();
+            tabPage1 = new TabPage();
+            tabPage2 = new TabPage();
             pictureBox1 = new PictureBox();
             contextMenuStrip_Treeview = new ContextMenuStrip(components);
             toolStripMenuItem_NEWBasic = new ToolStripMenuItem();
@@ -90,6 +93,8 @@
             statusStrip1.SuspendLayout();
             panelMain.SuspendLayout();
             panelRight.SuspendLayout();
+            tabControl1.SuspendLayout();
+            tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip_Treeview.SuspendLayout();
             toolStrip2.SuspendLayout();
@@ -370,7 +375,7 @@
             // 
             // panelRight
             // 
-            panelRight.Controls.Add(pictureBox1);
+            panelRight.Controls.Add(tabControl1);
             panelRight.Controls.Add(toolStrip2);
             panelRight.Dock = DockStyle.Fill;
             panelRight.Location = new Point(237, 0);
@@ -379,14 +384,47 @@
             panelRight.Size = new Size(831, 536);
             panelRight.TabIndex = 2;
             // 
+            // tabControl1
+            // 
+            tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tabPage2);
+            tabControl1.Dock = DockStyle.Fill;
+            tabControl1.ImeMode = ImeMode.Hiragana;
+            tabControl1.Location = new Point(0, 31);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(831, 505);
+            tabControl1.TabIndex = 2;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(pictureBox1);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(823, 477);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(368, 279);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "tabPage2";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
             // pictureBox1
             // 
             pictureBox1.ContextMenuStrip = contextMenuStrip_Treeview;
             pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Location = new Point(0, 31);
+            pictureBox1.Location = new Point(3, 3);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(831, 505);
+            pictureBox1.Size = new Size(817, 471);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
@@ -401,7 +439,7 @@
             contextMenuStrip_Treeview.Items.AddRange(new ToolStripItem[] { toolStripMenuItem_NEWBasic, toolStripMenuItem_NEWIE, toolStripMenuItem_EDIT, toolStripMenuItem_DELETE, toolStripMenuItem_COPY, toolStripMenuItem_PASTE, toolStripSeparator9, toolStripMenuItemSELECTCHILDREN, toolStripMenuItem_SELECTALLCHILDREN, toolStripSeparator10, toolStripMenuItem_HIDEUNHIDE, toolStripMenuItem_CENTERTREE, toolStripMenuItem_ALIGN });
             contextMenuStrip_Treeview.Name = "contextMenuStrip_Treeview";
             contextMenuStrip_Treeview.RenderMode = ToolStripRenderMode.Professional;
-            contextMenuStrip_Treeview.Size = new Size(203, 325);
+            contextMenuStrip_Treeview.Size = new Size(203, 303);
             // 
             // toolStripMenuItem_NEWBasic
             // 
@@ -610,6 +648,8 @@
             panelMain.ResumeLayout(false);
             panelRight.ResumeLayout(false);
             panelRight.PerformLayout();
+            tabControl1.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             contextMenuStrip_Treeview.ResumeLayout(false);
             toolStrip2.ResumeLayout(false);
@@ -676,6 +716,9 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripSeparator toolStripSeparator4;
         private ToolStripMenuItem toolStripMenuItem_NEWIE;
+        private TabControl tabControl1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
     }
 }
 

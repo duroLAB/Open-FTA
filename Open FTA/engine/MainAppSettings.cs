@@ -5,13 +5,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Xml.Serialization;
 
-public enum  TimeUnit
-{
-    Year,
-    Day,
-    Hour,
-    Second
-}
+ 
 
 [Serializable]
 public class MainAppSettings
@@ -42,10 +36,20 @@ public class MainAppSettings
     public PenSettings ItemPen { get; set; } = new PenSettings();
 
     [Category("Computation settings")]
-    public TimeUnit BaseTimeUnit { get; set; } = TimeUnit.Year;
+    [DisplayName("Base time unit")]
+    public MainCompTimeUnit BaseTimeUnit { get; set; } = MainCompTimeUnit.Year;
 
-   
-    [Category("General settings")]
+    [Category("Computation settings")]
+    [DisplayName("Probability Computation settings")]
+    [Description("If Probability Computation settings = true: " +
+             "P(failure) = 1 − e^(−f⋅t)" +
+             " Otherwise:" +
+             "P ≈ f⋅t")]
+    public bool SimplificationStrategy { get; set; } = false;
+     
+     
+
+   [Category("General settings")]
     [DisplayName("Auto sort tree after paste")]
     public bool AutoSortTree { get; set; } = true;
     // Cesta k súboru – vždy vedľa exe
