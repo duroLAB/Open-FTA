@@ -275,7 +275,9 @@ public class FTAlogic
         FI.Gate = Gate;
         FI.Parent = Parent;
         FI.Frequency = Freq;
-        FI.Tag = Tag;
+        //FI.Tag = Tag;
+        if(Tag.Length<2)
+        FI.Tag = GetNextAvailableTag(ItemType);
         FI.level = level;
 
         var ParentEvent = GetItem(Parent);
@@ -391,8 +393,8 @@ public class FTAlogic
 
 
     public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
-    public static bool SimplificationStrategy = false; // P=f
-    public static bool SimplificationStrategyLinearOR = false; // P(A OR B) = Pa+Pb
+    public static bool SimplificationStrategy = true; // P=f
+    public static bool SimplificationStrategyLinearOR = true; // P(A OR B) = Pa+Pb
 
     public void SumChildren(FTAitem parent)
     {
@@ -1278,6 +1280,88 @@ public class FTAlogic
 
         double factor = TimeUnitFactors[targetUnitIndex];
         return f / factor;
+    }
+
+    public void SelectChildren(FTAitem parent,bool all)
+    {
+        foreach (var childGuid in parent.Children)
+        {
+            var child = GetItem(childGuid);
+            if (child != null)
+            {
+                child.IsSelected = true;
+                SelectedEvents.Add(child);
+                if(all)
+                    SelectChildren(child,all);
+            }
+        }
+    }
+
+    private string GetNextAvailableTag(int itemType)
+    {
+        string prefix = GetPrefixForType(itemType);
+
+        // pozbierame všetky obsadené čísla pre daný prefix
+        var usedNumbers = FTAStructure.Values
+            .Where(item => item.Tag != null && item.Tag.StartsWith(prefix))
+            .Select(item =>
+            {
+                if (int.TryParse(item.Tag.Substring(prefix.Length), out int num))
+                    return num;
+                return (int?)null;
+            })
+            .Where(n => n.HasValue)
+            .Select(n => n.Value)
+            .OrderBy(n => n)
+            .ToList();
+
+        int next = 1;
+        foreach (var n in usedNumbers)
+        {
+            if (n == next)
+                next++;
+            else if (n > next)
+                break;
+        }
+
+        return $"{prefix}{next}";
+    }
+
+    private string GetPrefixForType(int itemType)
+    {
+        return itemType switch
+        {
+            1 => "IE",
+            2 => "BE",
+            _ => "XX" // fallback pre neznámy typ
+        };
+    }
+
+    public string GetNextAvailableBETag()
+    {
+        var usedNumbers = FTAStructure.Values
+            .Where(item => item.Tag != null && item.Tag.StartsWith("BE"))
+            .Select(item =>
+            {
+                if (int.TryParse(item.Tag.Substring(2), out int num))
+                    return num;
+                return (int?)null;
+            })
+            .Where(num => num.HasValue)
+            .Select(num => num.Value)
+            .OrderBy(n => n)
+            .ToList();
+
+        int next = 1;
+        foreach (int n in usedNumbers)
+        {
+            if (n == next)
+                next++;
+            else if (n > next)
+                break;
+        }
+
+        return $"BE{next}";
     }
 }
 

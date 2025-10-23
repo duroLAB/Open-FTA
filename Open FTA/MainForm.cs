@@ -115,6 +115,8 @@ namespace OpenFTA
                 pictureBox1.Cursor = Cursors.Cross;
                 pictureBox1.Invalidate();
             }
+
+            UpdateMainFormControls();
         }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
@@ -247,9 +249,7 @@ namespace OpenFTA
         private void toolStripButtonDelete_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-
             EngineLogic.DeleteSelectedEvents();
-
             UIEngine.FillTreeView(treeView1);
             pictureBox1.Invalidate();
         }
@@ -285,57 +285,22 @@ namespace OpenFTA
         }
         private void toolStripMenuItem_NEW_Click(object sender, EventArgs e)
         {
-            int selectedCount = EngineLogic.SelectedEvents.Count;
-
-            if (selectedCount == 0)
-            {
-                MessageBox.Show("No parent selected. Please select one parent.", "Error");
-                return;
-            }
-            else if (selectedCount > 1)
-            {
-                MessageBox.Show("You can choose only one parent!", "Error");
-                return;
-            }
-
-            var parent = EngineLogic.SelectedEvents[0];
-            if (parent.ItemType == 2)
-            {
-                MessageBox.Show("Please select a non-basic event as parent.", "Error");
-                return;
-            }
-
-
-            var Parent = EngineLogic.SelectedEvents[0];
-
-            FormEditEvent edit = new FormEditEvent(EngineLogic);
-            edit.EngineLogic = EngineLogic;
-
-            edit.textBoxName.Text = "New Item";
-            edit.comboBoxGates.SelectedItem = Gates.OR;
-            edit.comboBoxEventType.SelectedValue = 1;
-            edit.textBoxFrequency.Text = "0";
-            edit.textBoxTag.Text = "NewTag";
-
-
-            SaveStateForUndo();
-
-            if (DialogResult.OK == edit.ShowDialog())
-            {
-                Guid A = EngineLogic.AddNewEvent(Parent.GuidCode, "", 0, 0, 0);
-                var newEvent = EngineLogic.GetItem(A);
-
-                ReadInfoFromEditForm(edit, newEvent);
-
-                UIEngine.FillTreeView(treeView1);
-            }
-
-            EngineLogic.AssignLevelsToAllEvents();
-            pictureBox1.Invalidate();
+            OpenEditFormForEvent(true);
         }
 
         private void toolStripMenuItem_EDIT_Click(object sender, EventArgs e)
         {
+            OpenEditFormForEvent(false);
+        }
+
+        private void toolStripButtonAddBasicEvent_Click(object sender, EventArgs e)
+        {
+            CreateNewEvent(EngineLogic.SelectedEvents[0], true);
+        }
+
+        private void OpenEditFormForEvent(bool isNew)
+        {
+
             int selectedCount = EngineLogic.SelectedEvents.Count;
             if (selectedCount == 0)
             {
@@ -347,35 +312,104 @@ namespace OpenFTA
                 MessageBox.Show("You can only edit one event at a time!", "Error");
                 return;
             }
-
             var selectedEvent = EngineLogic.SelectedEvents[0];
-
             FormEditEvent edit = new FormEditEvent(EngineLogic);
             edit.EngineLogic = EngineLogic;
 
-            edit.textBoxName.Text = selectedEvent.Name;
-            edit.comboBoxGates.SelectedItem = selectedEvent.Gate;
-            edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
-            // edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
-            edit.textBoxTag.Text = selectedEvent.Tag;
+            if (isNew)
+            {
 
-            edit.textBoxFrequency.Text = selectedEvent.Value.ToString();
-            //edit.comboBoxMetricType.SelectedIndex = selectedEvent.UserMetricType;
-            edit.comboBoxUnits.SelectedIndex = selectedEvent.ValueUnit;
+                edit.textBoxName.Text = "New Item";
+                edit.comboBoxGates.SelectedItem = Gates.OR;
+                edit.comboBoxEventType.SelectedValue = 1;
+                edit.textBoxFrequency.Text = "0";
+                edit.textBoxTag.Text = "NewTag";
 
-            SaveStateForUndo();
+            }
+            else
+            {
+
+                edit.comboBoxGates.SelectedItem = selectedEvent.Gate;
+                edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
+                edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
+                edit.textBoxDescription.Text = selectedEvent.Description;
+                edit.textBoxName.Text = selectedEvent.Name;
+                edit.comboBoxGates.SelectedItem = selectedEvent.Gate;
+                edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
+                edit.textBoxTag.Text = selectedEvent.Tag;
+                edit.textBoxFrequency.Text = selectedEvent.Value.ToString();
+                edit.comboBoxUnits.SelectedIndex = selectedEvent.ValueUnit;
+            }
+
+
+
 
             if (DialogResult.OK == edit.ShowDialog())
             {
+                if (isNew)
+                {
+                    Guid A = EngineLogic.AddNewEvent(selectedEvent.GuidCode, "", 0, 0, 0);
+                    var newEvent = EngineLogic.GetItem(A);
+                    ReadInfoFromEditForm(edit, newEvent);
+                }
+                else
+                {
+                    ReadInfoFromEditForm(edit, selectedEvent);
+                }
 
-                ReadInfoFromEditForm(edit, selectedEvent);
                 UIEngine.FillTreeView(treeView1);
                 EngineLogic.AssignLevelsToAllEvents();
                 pictureBox1.Invalidate();
             }
-
-
+            UpdateMainFormControls();
+            SaveStateForUndo();
         }
+
+        void CreateNewEvent(FTAitem parent, bool Basis)
+        {
+
+            int selectedCount = EngineLogic.SelectedEvents.Count;
+            if (selectedCount != 1)
+                return;
+
+            if (parent.ItemType > 1)
+            {
+                MessageBox.Show("Cannot add event to a basic event!", "Error");
+                return;
+            }
+
+            SaveStateForUndo();
+
+
+            int temp = Basis ? 2 : 1;
+            Guid A = EngineLogic.AddNewEvent(parent.GuidCode, "", temp, 0, 0);
+            var newEvent = EngineLogic.GetItem(A);
+
+
+            newEvent.Name = "New Item";
+            // newEvent.Tag = "NewTag";
+            newEvent.Gate = Gates.OR;
+            newEvent.Frequency = 0;
+            newEvent.ValueType = ValueTypes.F;
+            newEvent.ValueUnit = 0;
+            newEvent.ValueUnit = 0;
+
+
+            UpdateMainFormControls();
+            UIEngine.FillTreeView(treeView1);
+            EngineLogic.AssignLevelsToAllEvents();
+            pictureBox1.Invalidate();
+        }
+
+        private void toolStripButtonAddIntermediateEvent_Click(object sender, EventArgs e)
+        {
+            CreateNewEvent(EngineLogic.SelectedEvents[0], false);
+        }
+        private void toolStripButtonEdit_Click(object sender, EventArgs e)
+        {
+            OpenEditFormForEvent(false);
+        }
+
         #endregion
 
         public void ArrangeMainTreeHierarchically()
@@ -625,11 +659,122 @@ namespace OpenFTA
 
             UIEngine.FillTreeView(treeView1);
             TreeEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
-           
+
             EngineLogic.AssignLevelsToAllEvents();
 
             Invalidate();
 
+        }
+
+        private void UpdateMainFormControls()
+        {
+            toolStripButtonPaste.Enabled = false;
+            toolStripButtonAddBasicEvent.Enabled = false;
+            toolStripButtonAddIntermediateEvent.Enabled = false;
+            toolStripButtonEdit.Enabled = false;
+            toolStripButtonCopy.Enabled = false;
+            toolStripButtonDelete.Enabled = false;
+
+
+            if (EngineLogic.SelectedEvents.Count > 0)
+                UpdateMainFormControls_EventsAreSelected();
+
+
+            toolStripMenuItem_PASTE.Enabled = toolStripButtonPaste.Enabled;
+            toolStripMenuItem_COPY.Enabled = toolStripButtonCopy.Enabled;
+            toolStripMenuItem_DELETE.Enabled = toolStripButtonDelete.Enabled;
+            toolStripMenuItem_EDIT.Enabled = toolStripButtonEdit.Enabled;
+
+
+        }
+
+        private void UpdateMainFormControls_EventsAreSelected()
+        {
+            bool OneEventIsSelected = EngineLogic.SelectedEvents.Count == 1;
+
+            toolStripButtonCopy.Enabled = true;
+            toolStripButtonDelete.Enabled = true;
+
+
+            if (OneEventIsSelected)
+            {
+                toolStripButtonPaste.Enabled = true;
+                toolStripButtonAddBasicEvent.Enabled = true;
+                toolStripButtonAddIntermediateEvent.Enabled = true;
+                toolStripButtonEdit.Enabled = true;
+            }
+            /*else  ///MultiSelection
+            {
+                toolStripButtonCopy.Enabled = true;
+                toolStripButtonDelete.Enabled = true;                
+            }*/
+        }
+
+        private void toolStripMenuItemSELECTCHILDREN_Click(object sender, EventArgs e)
+        {
+            if (EngineLogic.SelectedEvents.Count == 1)
+            {
+                EngineLogic.SelectChildren(EngineLogic.SelectedEvents[0], false);
+            }
+            pictureBox1.Invalidate();
+        }
+
+        private void toolStripMenuItem_SELECTALLCHILDREN_Click(object sender, EventArgs e)
+        {
+            if (EngineLogic.SelectedEvents.Count == 1)
+            {
+                EngineLogic.SelectChildren(EngineLogic.SelectedEvents[0], true);
+            }
+            pictureBox1.Invalidate();
+        }
+
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            //  ShiftDown for multiselect
+            bool shiftDown = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+
+            // Get Selected Item
+            var selectedItem = EngineLogic.GetItem(treeView1.SelectedNode.Name);
+            if (selectedItem != null)
+            {
+                if (shiftDown)
+                {
+                    if (selectedItem.IsSelected)
+                    {
+                        selectedItem.IsSelected = false;
+                        EngineLogic.SelectedEvents.Remove(selectedItem);
+                    }
+                    else
+                    {
+                        selectedItem.IsSelected = true;
+                        EngineLogic.SelectedEvents.Add(selectedItem);
+                    }
+                }
+                else
+                {
+                    foreach (var evt in EngineLogic.FTAStructure.Values)
+                        evt.IsSelected = false;
+                    EngineLogic.SelectedEvents.Clear();
+
+                    selectedItem.IsSelected = true;
+                    EngineLogic.SelectedEvents.Add(selectedItem);
+                }
+            }
+
+            pictureBox1.Invalidate();
+        }
+
+        private void toolStripMenuItem_HIDEUNHIDE_Click(object sender, EventArgs e)
+        {
+            if (EngineLogic.SelectedEvents.Count == 1)
+            {
+                var selectedEvent = EngineLogic.SelectedEvents.First();
+                selectedEvent.IsHidden = !selectedEvent.IsHidden;
+                HideSubtree(selectedEvent, selectedEvent.IsHidden);
+                ((ToolStripMenuItem)sender).Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
+
+                pictureBox1.Invalidate();
+            }
         }
     }
 }

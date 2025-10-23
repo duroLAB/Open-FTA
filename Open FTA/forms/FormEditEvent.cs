@@ -57,25 +57,7 @@ namespace OpenFTA
             tabControlfailure_metrics.ItemSize = new Size(0, 1);
             tabControlfailure_metrics.SizeMode = TabSizeMode.Fixed;
 
-            int count = EngineLogic.SelectedEvents.Count;
-            if (count == 1)
-            {
-                var singleEvent = EngineLogic.SelectedEvents[0];
-                textBoxTag.Text = singleEvent.Tag;
-                textBoxName.Text = singleEvent.Name;
-                //comboBoxGates.SelectedValue = singleEvent.Gate;
-
-                comboBoxGates.SelectedItem = singleEvent.Gate;
-                comboBoxEventType.SelectedValue = singleEvent.ItemType;
-                textBoxFrequency.Text = singleEvent.Frequency.ToString();
-                textBoxDescription.Text = singleEvent.Description;
-            }
-            else
-            {
-                textBoxTag.Text = "NewTag";
-                textBoxName.Text = "";
-                textBoxFrequency.Text = "0";
-            }
+   
             button1.CausesValidation = false;
             errorProvider1.BlinkStyle = ErrorBlinkStyle.NeverBlink;
 
