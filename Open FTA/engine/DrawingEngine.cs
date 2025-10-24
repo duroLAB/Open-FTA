@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -35,10 +37,39 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
     public void DrawFTA(Graphics e)
     {
+
         DrawBackGround(e);
         DrawEvents(e);
         DrawLinesAndGates(e);
         DrawProgressBars(e);
+
+       /* using (var stream = new FileStream("vystup.emf", FileMode.Create))
+        {
+            // 2️⃣ Získaj HDC
+            IntPtr hdc = e.GetHdc();
+
+            // 3️⃣ Vytvor Metafile s tým istým HDC (aby mal rovnaké rozlíšenie)
+            using (Metafile metafile = new Metafile(stream, hdc))
+            {
+                e.ReleaseHdc(hdc);
+
+                // 4️⃣ Vytvor Graphics z metafilu a kresli
+                using (Graphics gMeta = Graphics.FromImage(metafile))
+                {
+                    // všetko čo tu nakreslíš sa uloží do .emf súboru
+                    gMeta.Clear(Color.White);
+                    gMeta.DrawEllipse(Pens.Blue, 10, 10, 200, 100);
+                    gMeta.DrawString("Ahoj EMF!", new Font("Arial", 16), Brushes.Red, 20, 60);
+
+                    DrawBackGround(gMeta);
+                    DrawEvents(gMeta);
+                    DrawLinesAndGates(gMeta);
+                    DrawProgressBars(gMeta);
+                }
+            }
+        }*/
+
+
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
@@ -972,6 +1003,69 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
+    public void ExportToMeta(string Filename)
+    {
+        var bounds = GetBounds(EngineLogic.FTAStructure);
+        float margin = 10f;
+        float width = bounds.Width +200 + 2 * margin;
+        float height = bounds.Height +200+ 2 * margin;
+
+        using (var stream = new FileStream(Filename, FileMode.Create))
+        using (var refGraphics = Graphics.FromHwnd(IntPtr.Zero))
+        {
+            IntPtr hdc = refGraphics.GetHdc();
+
+            RectangleF rect = new RectangleF(0, 0, width, height);
+            using (var metafile = new Metafile(stream, hdc, rect, MetafileFrameUnit.Pixel))
+            {
+                refGraphics.ReleaseHdc(hdc);
+
+                using (Graphics gMeta = Graphics.FromImage(metafile))
+                {
+                    // Posun, aby sa záporné hodnoty dostali do viditeľnej oblasti
+                    gMeta.TranslateTransform(margin - bounds.Left, margin - bounds.Top);
+
+                    DrawFTA(gMeta);
+
+                    // Kreslenie všetkých položiek
+                    /*  foreach (var fta in items.Values)
+                      {
+                          gMeta.FillEllipse(Brushes.Red, (float)fta.X - 2, (float)fta.Y - 2, 4, 4);
+                      }*/
+
+                    // Ak chceš kresliť polygony:
+                    // var points = items.Values.Select(i => new PointF((float)i.X, (float)i.Y)).ToArray();
+                    // gMeta.DrawPolygon(Pens.Blue, points);
+                }
+            }
+        }
+
+    }
+    RectangleF GetBounds(Dictionary<Guid, FTAitem> items)
+    {
+        if (items == null || items.Count == 0)
+            return RectangleF.Empty;
+
+        double minX = double.MaxValue;
+        double maxX = double.MinValue;
+        double minY = double.MaxValue;
+        double maxY = double.MinValue;
+
+        foreach (var fta in items.Values)
+        {
+            if (fta.X < minX) minX = fta.X;
+            if (fta.X > maxX) maxX = fta.X;
+            if (fta.Y < minY) minY = fta.Y;
+            if (fta.Y > maxY) maxY = fta.Y;
+        }
+
+        return new RectangleF(
+            (float)minX,
+            (float)minY,
+            (float)(maxX - minX),
+            (float)(maxY - minY)
+        );
+    }
 }
 
 

@@ -126,7 +126,7 @@
             toolStripButton5.Name = "toolStripButton5";
             toolStripButton5.Size = new Size(67, 52);
             toolStripButton5.Text = "New";
-            toolStripButton5.Click += toolStripButton5_Click;
+//            toolStripButton5.Click += toolStripButton5_Click;
             // 
             // toolStripButtonSave
             // 

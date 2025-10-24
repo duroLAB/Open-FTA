@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
+using System.Runtime.CompilerServices;
 
 public enum MainCompTimeUnit
 {
@@ -945,6 +947,9 @@ public class FTAlogic
                             ItemType = originalEvent.ItemType,
                             Gate = originalEvent.Gate,
                             Frequency = originalEvent.Frequency,
+                            Value = originalEvent.Value,
+                            ValueType = originalEvent.ValueType,
+                            ValueUnit = originalEvent.ValueUnit,
                             Parent = intermediateGuid,
                             X = originalEvent.X,
                             Y = originalEvent.Y
@@ -969,6 +974,9 @@ public class FTAlogic
                         ItemType = originalEvent.ItemType,
                         Gate = originalEvent.Gate,
                         Frequency = originalEvent.Frequency,
+                        Value = originalEvent.Value,
+                        ValueType = originalEvent.ValueType,
+                        ValueUnit = originalEvent.ValueUnit,
                         Parent = intermediateGuid,
                         X = originalEvent.X,
                         Y = originalEvent.Y
@@ -1428,10 +1436,10 @@ public class FTAitem
         GuidCode = Guid.NewGuid();
         Children = new List<Guid>();
         {
-            LowerBoundFrequency = double.NaN;
-            UpperBoundFrequency = double.NaN;
+            LowerBoundFrequency = 0;
+            UpperBoundFrequency = 0;
         }
-        BIM = 0.1;
+        BIM = 0;
 
 
     }

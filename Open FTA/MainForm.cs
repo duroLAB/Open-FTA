@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -18,8 +20,8 @@ namespace OpenFTA
         FTAlogic EngineLogic;
         FTAlogic EngineLogicMCS;
         UIlogic UIEngine;
-        DrawingEngine TreeEngine;
-        // Settingsform APPSet;
+        DrawingEngine MyDrawingEngine;
+        
 
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
         private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
@@ -30,7 +32,7 @@ namespace OpenFTA
             EngineLogic = new FTAlogic();
             EngineLogicMCS = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
-            TreeEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
+            MyDrawingEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
             /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
              pictureBox1.Dock = DockStyle.Fill;
              pictureBox1.BackColor = Color.White;
@@ -53,6 +55,8 @@ namespace OpenFTA
             tabControl1.Padding = new Point(20, 5);
             tabControl1.Alignment = TabAlignment.Bottom;   // ⇦ záložky budú dole
             tabControl1.DrawItem += TabControl1_DrawItem;
+
+
         }
 
         private void TabControl1_DrawItem(object sender, DrawItemEventArgs e)
@@ -97,7 +101,7 @@ namespace OpenFTA
         private void MainForm_Load(object sender, EventArgs e)
         {
             UIEngine.FillTreeView(treeView1);
-            TreeEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
+            MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             EngineLogic.AssignLevelsToAllEvents();
         }
@@ -109,16 +113,16 @@ namespace OpenFTA
             switch (e.KeyCode)
             {
                 case Keys.Left:
-                    TreeEngine.offsetX = TreeEngine.offsetX + 20;
+                    MyDrawingEngine.offsetX = MyDrawingEngine.offsetX + 20;
                     break;
                 case Keys.Right:
-                    TreeEngine.offsetX = TreeEngine.offsetX - 20;
+                    MyDrawingEngine.offsetX = MyDrawingEngine.offsetX - 20;
                     break;
                 case Keys.Up:
-                    TreeEngine.offsetY = TreeEngine.offsetY + 20;
+                    MyDrawingEngine.offsetY = MyDrawingEngine.offsetY + 20;
                     break;
                 case Keys.Down:
-                    TreeEngine.offsetY = TreeEngine.offsetY - 20;
+                    MyDrawingEngine.offsetY = MyDrawingEngine.offsetY - 20;
                     break;
 
             }
@@ -152,10 +156,10 @@ namespace OpenFTA
                 Point coordinates = me.Location;
                 toolStripMenuItem_ALIGN.Text = "Align";
 
-                bool EventWasSelected = TreeEngine.Mouse_SelectEvent(coordinates);
+                bool EventWasSelected = MyDrawingEngine.Mouse_SelectEvent(coordinates);
                 if (EventWasSelected)
                 {
-                    TreeEngine.SetLastDragPosition(me.Location);
+                    MyDrawingEngine.SetLastDragPosition(me.Location);
                 }
                 pictureBox1.Cursor = Cursors.Cross;
                 pictureBox1.Invalidate();
@@ -165,34 +169,34 @@ namespace OpenFTA
         }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (TreeEngine.SelectedEventDrag || TreeEngine.IsDraggingTree)
+            if (MyDrawingEngine.SelectedEventDrag || MyDrawingEngine.IsDraggingTree)
             {
-                TreeEngine.Mouse_DragEvent(e.Location);
+                MyDrawingEngine.Mouse_DragEvent(e.Location);
                 pictureBox1.Invalidate();
             }
 
             int X = 0;
             int Y = 0;
-            TreeEngine.PixelToRealPosition(e.Location, ref X, ref Y);
+            MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
             String str = "X:" + X + ", Y:" + Y + ")";
             toolStripStatusLabelCoordinates.Text = str;
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            TreeEngine.Mouse_Up();
+            MyDrawingEngine.Mouse_Up();
             pictureBox1.Cursor = Cursors.Default;
             pictureBox1.Invalidate();
         }
         private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
         {
-            TreeEngine.offsetX += (int)(TreeEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Width - e.X));
-            TreeEngine.offsetY += (int)(TreeEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Height - e.Y));
-            TreeEngine.GlobalZoom = TreeEngine.GlobalZoom * (1 + e.Delta * 0.0005);
+            MyDrawingEngine.offsetX += (int)(MyDrawingEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Width - e.X));
+            MyDrawingEngine.offsetY += (int)(MyDrawingEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Height - e.Y));
+            MyDrawingEngine.GlobalZoom = MyDrawingEngine.GlobalZoom * (1 + e.Delta * 0.0005);
             pictureBox1.Invalidate();
         }
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            TreeEngine.DrawFTA(e.Graphics);
+            MyDrawingEngine.DrawFTA(e.Graphics);
         }
 
         #endregion
@@ -284,7 +288,7 @@ namespace OpenFTA
             EngineLogic.PasteCopiedEvents();
             if (MainAppSettings.Instance.AutoSortTree)
             {
-                TreeEngine.ArrangeMainTreeHierarchically();
+                MyDrawingEngine.ArrangeMainTreeHierarchically();
             }
             treeView1.ExpandAll();
             pictureBox1.Invalidate();
@@ -315,7 +319,7 @@ namespace OpenFTA
 
         private void toolStripButtonSort_Click(object sender, EventArgs e)
         {
-            TreeEngine.ArrangeMainTreeHierarchically();
+            MyDrawingEngine.ArrangeMainTreeHierarchically();
 
             pictureBox1.Invalidate();
         }
@@ -645,9 +649,9 @@ namespace OpenFTA
             int offsetX = (int)((pictureBox1.Width - treeWidth * newZoom) / 2 - minX * newZoom);
             int offsetY = (int)((pictureBox1.Height - treeHeight * newZoom) / 2 - minY * newZoom);
 
-            TreeEngine.GlobalZoom = newZoom;
-            TreeEngine.offsetX = offsetX;
-            TreeEngine.offsetY = offsetY;
+            MyDrawingEngine.GlobalZoom = newZoom;
+            MyDrawingEngine.offsetX = offsetX;
+            MyDrawingEngine.offsetY = offsetY;
             pictureBox1.Invalidate();
         }
 
@@ -693,44 +697,114 @@ namespace OpenFTA
         {
             /*FormSettings settingsForm = new FormSettings();
             settingsForm.ShowDialog();*/
-            EngineLogic.MCSStructure.Clear();
-            EngineLogic.GenerateMCS();
-            if (EngineLogic.MCSStructure != null && EngineLogic.MCSStructure.Count > 0)
-            {
-                 
-                EngineLogicMCS.FTAStructure = EngineLogic.MCSStructure;
-                TreeEngine.EngineLogic = EngineLogicMCS;
-                TreeEngine.SetStructure(EngineLogicMCS.FTAStructure);
 
-                TreeEngine.ArrangeMainTreeHierarchically();
+ 
 
-                pictureBox1.Invalidate();
 
-                
 
-              
-
-            }
-            else
-            {
-                MessageBox.Show("MCS structure is empty. Generate MCS first.", "Error");
-            }
         }
 
         private void toolStripButtonExportImage_Click(object sender, EventArgs e)
         {
-            EngineLogic.ComputeTree();
+            try
+            {
+                using (var dlg = new ExportDialogForm())
+                {
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        switch (dlg.SelectedOption)
+                        {
+                            case ExportDialogForm.ExportOption.Bitmap:
+                                SaveToBMP();
+                                break;
+                            case ExportDialogForm.ExportOption.Metafile:
+                                SaveToVector();
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                "An unknown error occurred while creating the image.\n\nDetails: " + ex.Message,
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+            }
         }
+
+        private void SaveToVector()
+        {
+            double BackupGlobalZoom = MyDrawingEngine.GlobalZoom;
+            int BackupoffsetX = MyDrawingEngine.offsetX;
+            int BackupoffsetY = MyDrawingEngine.offsetY;
+
+            MyDrawingEngine.GlobalZoom = 1;
+            MyDrawingEngine.offsetX = 0;
+            MyDrawingEngine.offsetY = 0;
+            
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "wmf Image|*.wmf";
+            sfd.Title = "Save Screenshot";
+            sfd.FileName = "FaultTreeimg.wmf";
+
+
+            pictureBox1.Invalidate();
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {               
+                MyDrawingEngine.ExportToMeta(sfd.FileName);
+            }
+
+            
+          
+
+            MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
+            MyDrawingEngine.offsetX = BackupoffsetX;
+            MyDrawingEngine.offsetY = BackupoffsetY;
+            pictureBox1.Invalidate();
+        }
+        private void SaveToBMP()
+        {
+            Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            pictureBox1.DrawToBitmap(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Bitmap Image|*.bmp";
+            sfd.Title = "Save Screenshot";
+            sfd.FileName = "FaultTreeimg.png";
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                ImageFormat format = ImageFormat.Png;
+                switch (sfd.FilterIndex)
+                {
+                    case 2:
+                        format = ImageFormat.Jpeg;
+                        break;
+                    case 3:
+                        format = ImageFormat.Bmp;
+                        break;
+                    default:
+                        format = ImageFormat.Png;
+                        break;
+                }
+
+                bmp.Save(sfd.FileName, format);
+               // MessageBox.Show("Screenshot saved successfully!", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
 
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
             EngineLogic = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
-            TreeEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
+            MyDrawingEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
 
 
             UIEngine.FillTreeView(treeView1);
-            TreeEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
+            MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
 
             EngineLogic.AssignLevelsToAllEvents();
 
