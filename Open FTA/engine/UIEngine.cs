@@ -63,7 +63,50 @@ class UIlogic
         treeView1.ExpandAll();
     }
 
+    public void SetupModernGrid(DataGridView grid)
+    {
+        // 🟩 Zakázať editovanie a zmenu štruktúry
+        grid.ReadOnly = true;
+        grid.AllowUserToAddRows = false;
+        grid.AllowUserToDeleteRows = false;
+        grid.AllowUserToResizeRows = false;
+        grid.AllowUserToResizeColumns = false;
+        grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        grid.MultiSelect = false;
+        grid.RowHeadersVisible = false;
 
-   
-   
+        // 🟦 Farby a štýly
+        grid.BackgroundColor = Color.White;
+        grid.BorderStyle = BorderStyle.None;
+        grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+        grid.GridColor = Color.LightGray;
+
+        // 🟨 Hlavičky stĺpcov
+        grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(240, 240, 240);
+        grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+        grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+        grid.ColumnHeadersHeight = 32;
+        grid.EnableHeadersVisualStyles = false; // bez tohto by systém prepísal farby
+
+        // 🟪 Riadky
+        grid.DefaultCellStyle.BackColor = Color.White;
+        grid.DefaultCellStyle.ForeColor = Color.Black;
+        grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(230, 240, 255);
+        grid.DefaultCellStyle.SelectionForeColor = Color.Black;
+        grid.DefaultCellStyle.Font = new Font("Segoe UI", 10);
+
+        // 🟧 Alternujúce farby riadkov
+        grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 248, 248);
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
+        grid.GridColor = Color.LightGray; // alebo iná decentná farba
+
+        grid.AllowUserToResizeColumns = true;
+
+        grid.Columns[0].Width = 80;  // prvý stĺpec
+        grid.Columns[1].Width = 120; // druhý stĺpec
+
+    }
+
+
 }

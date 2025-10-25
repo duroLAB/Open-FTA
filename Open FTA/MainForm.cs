@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -12,6 +13,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace OpenFTA
 {
@@ -21,7 +23,7 @@ namespace OpenFTA
         FTAlogic EngineLogicMCS;
         UIlogic UIEngine;
         DrawingEngine MyDrawingEngine;
-        
+
 
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
         private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
@@ -32,7 +34,7 @@ namespace OpenFTA
             EngineLogic = new FTAlogic();
             EngineLogicMCS = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
-            MyDrawingEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
+            MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
             /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
              pictureBox1.Dock = DockStyle.Fill;
              pictureBox1.BackColor = Color.White;
@@ -268,7 +270,7 @@ namespace OpenFTA
                     UIEngine.FillTreeView(treeView1);
                     pictureBox1.Invalidate();
 
-                    MessageBox.Show("FTAStructure loaded successfully.", "Load", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    // MessageBox.Show("FTAStructure loaded successfully.", "Load", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
@@ -382,7 +384,7 @@ namespace OpenFTA
                 edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
                 edit.textBoxFrequency.Text = selectedEvent.Frequency.ToString();
                 edit.textBoxDescription.Text = selectedEvent.Description;
-                edit.textBoxName.Text = selectedEvent.Name;            
+                edit.textBoxName.Text = selectedEvent.Name;
                 edit.comboBoxEventType.SelectedValue = selectedEvent.ItemType;
                 edit.textBoxTag.Text = selectedEvent.Tag;
                 edit.textBoxFrequency.Text = selectedEvent.Value.ToString();
@@ -462,61 +464,61 @@ namespace OpenFTA
 
         #endregion
 
-   /*     public void ArrangeMainTreeHierarchically()
-        {
-            FTAitem topEvent = EngineLogic.FTAStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
-            if (topEvent == null)
-                return;
+        /*     public void ArrangeMainTreeHierarchically()
+             {
+                 FTAitem topEvent = EngineLogic.FTAStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
+                 if (topEvent == null)
+                     return;
 
-            // Set top event position
-            topEvent.X = pictureBox1.Width / 2;
-            topEvent.Y = 50;
+                 // Set top event position
+                 topEvent.X = pictureBox1.Width / 2;
+                 topEvent.Y = 50;
 
-            ArrangeChildren(topEvent);
+                 ArrangeChildren(topEvent);
 
-            pictureBox1.Invalidate();
-        }
-        private void ArrangeChildren(FTAitem parent)
-        {
-            int verticalSpacing = 180;
-            int gap = 20;
+                 pictureBox1.Invalidate();
+             }
+             private void ArrangeChildren(FTAitem parent)
+             {
+                 int verticalSpacing = 180;
+                 int gap = 20;
 
-            if (parent.Children == null || parent.Children.Count == 0)
-                return;
+                 if (parent.Children == null || parent.Children.Count == 0)
+                     return;
 
-            double allocatedWidth = ComputeSubtreeWidth(parent, gap);
-            double startX = parent.X - allocatedWidth / 2;
-            int childY = parent.Y + verticalSpacing;
+                 double allocatedWidth = ComputeSubtreeWidth(parent, gap);
+                 double startX = parent.X - allocatedWidth / 2;
+                 int childY = parent.Y + verticalSpacing;
 
-            double currentX = startX;
-            foreach (Guid childGuid in parent.Children)
-            {
-                if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
-                {
-                    double childWidth = ComputeSubtreeWidth(child, gap);
-                    child.X = (int)(currentX + childWidth / 2);
-                    child.Y = childY;
-                    currentX += childWidth + gap;
-                    ArrangeChildren(child);
-                }
-            }
-        }
-        private double ComputeSubtreeWidth(FTAitem node, int gap)
-        {
-            if (node.Children == null || node.Children.Count == 0)
-                return Constants.EventWidth;
+                 double currentX = startX;
+                 foreach (Guid childGuid in parent.Children)
+                 {
+                     if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
+                     {
+                         double childWidth = ComputeSubtreeWidth(child, gap);
+                         child.X = (int)(currentX + childWidth / 2);
+                         child.Y = childY;
+                         currentX += childWidth + gap;
+                         ArrangeChildren(child);
+                     }
+                 }
+             }
+             private double ComputeSubtreeWidth(FTAitem node, int gap)
+             {
+                 if (node.Children == null || node.Children.Count == 0)
+                     return Constants.EventWidth;
 
-            double totalWidth = 0;
-            foreach (Guid childGuid in node.Children)
-            {
-                if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
-                {
-                    totalWidth += ComputeSubtreeWidth(child, gap) + gap;
-                }
-            }
-            totalWidth -= gap;
-            return Math.Max(totalWidth, Constants.EventWidth);
-        }*/
+                 double totalWidth = 0;
+                 foreach (Guid childGuid in node.Children)
+                 {
+                     if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
+                     {
+                         totalWidth += ComputeSubtreeWidth(child, gap) + gap;
+                     }
+                 }
+                 totalWidth -= gap;
+                 return Math.Max(totalWidth, Constants.EventWidth);
+             }*/
 
         private void Undo()
         {
@@ -578,12 +580,12 @@ namespace OpenFTA
             item.Description = edit.textBoxDescription.Text;
 
             if (item.ItemType > 1)
-            { 
+            {
                 item.Value = Convert.ToDouble(edit.textBoxFrequency.Text.ToString());
                 //   item.UserMetricType = edit.comboBoxMetricType.SelectedIndex;
                 item.ValueType = (ValueTypes)edit.comboBoxMetricType.SelectedIndex;
 
-                
+
 
                 item.ValueUnit = edit.comboBoxUnits.SelectedIndex;
             }
@@ -698,7 +700,7 @@ namespace OpenFTA
             /*FormSettings settingsForm = new FormSettings();
             settingsForm.ShowDialog();*/
 
- 
+
 
 
 
@@ -744,7 +746,7 @@ namespace OpenFTA
             MyDrawingEngine.GlobalZoom = 1;
             MyDrawingEngine.offsetX = 0;
             MyDrawingEngine.offsetY = 0;
-            
+
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "wmf Image|*.wmf";
             sfd.Title = "Save Screenshot";
@@ -753,12 +755,12 @@ namespace OpenFTA
 
             pictureBox1.Invalidate();
             if (sfd.ShowDialog() == DialogResult.OK)
-            {               
+            {
                 MyDrawingEngine.ExportToMeta(sfd.FileName);
             }
 
-            
-          
+
+
 
             MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
             MyDrawingEngine.offsetX = BackupoffsetX;
@@ -791,7 +793,7 @@ namespace OpenFTA
                 }
 
                 bmp.Save(sfd.FileName, format);
-               // MessageBox.Show("Screenshot saved successfully!", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // MessageBox.Show("Screenshot saved successfully!", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -800,7 +802,7 @@ namespace OpenFTA
         {
             EngineLogic = new FTAlogic();
             UIEngine = new UIlogic(EngineLogic);
-            MyDrawingEngine = new DrawingEngine(EngineLogic,EngineLogic.FTAStructure);
+            MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
 
 
             UIEngine.FillTreeView(treeView1);
@@ -921,6 +923,147 @@ namespace OpenFTA
 
                 pictureBox1.Invalidate();
             }
+        }
+
+        private void minimalCutSetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            string equation = "";
+            string simplifiedEquation = "";
+
+            EngineLogic.GenerateMCS(out equation, out simplifiedEquation);
+            if (EngineLogic.MCSStructure != null && EngineLogic.MCSStructure.Count > 0)
+            {
+                string message = "Generated Tree Expression:\n" + equation + Environment.NewLine +
+                        "\nSimplified Expression:\n" + simplifiedEquation;
+
+                textBoxMCSExpr.Text = message;
+            }
+
+            FTAitem TopEvent = null;
+            foreach (var item in EngineLogic.MCSStructure)
+            {
+                if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
+            }
+            EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);
+
+            List<FTAitem> l = EngineLogic.GenerateListOfBasicEvents();
+
+            dataGridView1.Rows.Clear();
+            dataGridView1.Columns.Clear();
+            foreach (FTAitem item in l)
+            {
+                dataGridView1.Columns.Add(item.Tag, item.Tag);
+            }
+            dataGridView1.Columns.Add("Frequency", "Frequency");
+            int rowIndex = 0;
+            int MaxColums = 0;
+
+            foreach (var item in EngineLogic.MCSStructure)
+            {
+
+                if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
+                {
+                    dataGridView1.Rows.Add(item.Value.Name);
+                    dataGridView1.Rows[rowIndex].Cells[1].Value = item.Value.Value;
+
+                    for (int i = 0; i < item.Value.Children.Count; i++)
+                    {
+                        FTAitem fTAitem = EngineLogic.GetItem(item.Value.Children[i], EngineLogic.MCSStructure);
+                        dataGridView1.Rows[rowIndex].Cells[i + 2].Value = fTAitem.Name;
+
+
+                        if (i > MaxColums)
+                        {
+                            MaxColums = i;
+                        }
+                    }
+                    rowIndex += 1;
+                }
+            }
+            MaxColums += 3; // plus frequency and name columns
+            for (int i = dataGridView1.Columns.Count - 1; i >= MaxColums; i--)
+            {
+                dataGridView1.Columns.RemoveAt(i);
+
+            }
+            dataGridView1.ColumnHeadersVisible = false;
+            dataGridView1.RowHeadersVisible = false;
+
+
+
+            UIEngine.SetupModernGrid(dataGridView1);
+
+            var column = dataGridView1.Columns[1];
+            dataGridView1.Sort(column, System.ComponentModel.ListSortDirection.Descending);
+        }
+
+        private void SaveGridToCsv(DataGridView grid)
+        {
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.Title = "Export DataGridView";
+                sfd.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+                sfd.FileName = "export.csv";
+                sfd.OverwritePrompt = true;
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        ExportToCsv(grid, sfd.FileName, ';');
+
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Pri ukladaní došlo k chybe:\n" + ex.Message,
+                            "Chyba exportu",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        public static void ExportToCsv(DataGridView grid, string filePath, char separator = ';')
+        {
+            var sb = new StringBuilder();
+
+            // 🟦 Hlavičky
+            var headers = grid.Columns
+                .Cast<DataGridViewColumn>()
+                .Select(c => Quote(c.HeaderText, separator));
+            sb.AppendLine(string.Join(separator, headers));
+
+            // 🟩 Riadky
+            foreach (DataGridViewRow row in grid.Rows)
+            {
+                if (row.IsNewRow) continue; // preskočí prázdny riadok na konci
+
+                var cells = row.Cells
+                    .Cast<DataGridViewCell>()
+                    .Select(c => Quote(c.Value?.ToString() ?? "", separator));
+
+                sb.AppendLine(string.Join(separator, cells));
+            }
+
+            // 🟨 Uloženie do súboru (UTF-8)
+            File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+        }
+
+        private static string Quote(string value, char separator)
+        {
+            if (value.Contains(separator) || value.Contains('"') || value.Contains('\n'))
+            {
+                value = value.Replace("\"", "\"\""); // zdvojíme úvodzovky
+                return $"\"{value}\"";
+            }
+            return value;
+        }
+
+        private void toolStripButtonExportToCSV_Click(object sender, EventArgs e)
+        {
+            SaveGridToCsv(dataGridView1);
         }
     }
 }

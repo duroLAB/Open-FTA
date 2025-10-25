@@ -329,6 +329,10 @@ public class FTAlogic
         return FTAStructure.TryGetValue(guid, out FTAitem item) ? item : null;
     }
 
+    public FTAitem GetItem(Guid guid, Dictionary<Guid, FTAitem> str)
+    {
+        return str.TryGetValue(guid, out FTAitem item) ? item : null;
+    }
     // Methode for obtaining item from structure based od guid string
     public FTAitem GetItem(String guidString)
     {
@@ -405,19 +409,19 @@ public class FTAlogic
    // public static bool SimplificationStrategy = true; // P=f
     public static bool SimplificationStrategyLinearOR = true; // P(A OR B) = Pa+Pb
 
-    public void SumChildren(FTAitem parent)
+    public void SumChildren(FTAitem parent,Dictionary<Guid,FTAitem> str)
     {
         bool AllProbabilities = true;
         var events = new List<FTAitem>();
 
         for (int i = 0; i < parent.Children.Count; i++)
         {
-            FTAitem item = GetItem(parent.Children[i]);
+            FTAitem item = GetItem(parent.Children[i],str);
 
-            SumChildren(item);
-            
-            
-            if(i==0)
+            SumChildren(item,str);
+
+
+            if (i == 0)
             {
                 events.Clear();
             }
@@ -427,12 +431,12 @@ public class FTAlogic
                 AllProbabilities = false;
             }
 
-            events.Add(GetItem(parent.Children[i]));
+            events.Add(GetItem(parent.Children[i],str));
 
             if (i == parent.Children.Count - 1)
             {
                 double SumResult = 0.0;
-                
+
                 SumResult = CalculateGate(events, parent.Gate);
 
                 if (AllProbabilities)
@@ -441,7 +445,7 @@ public class FTAlogic
                     parent.ValueType = ValueTypes.P;
                     parent.Value = SumResult;
                     parent.ValueUnit = (int)MainAppSettings.Instance.BaseTimeUnit;
-                   }
+                }
                 else
                 {
                     parent.Frequency = ProbabilityToFrequency(SumResult);
@@ -451,9 +455,10 @@ public class FTAlogic
                 }
             }
         }
-
-      
-     
+    }
+    public void SumChildren(FTAitem parent)
+    {
+        SumChildren(parent, FTAStructure);
     }
 
     public static double CalculateGate(List<FTAitem> events, Gates gate)
@@ -503,7 +508,12 @@ public class FTAlogic
                 _ => throw new ArgumentException("Neznámy typ hodnoty")
             };*/
 
-        return 1 - Math.Pow(1 - P, Tbase / Tsource);
+        if(Tbase==Tsource)
+            return P;
+        else
+            return 1 - Math.Pow(1 - P, Tsource / Tbase);        
+
+        
     }
 
     public static double ProbabilityToFrequency(double P)
@@ -868,7 +878,7 @@ public class FTAlogic
         return "";
     }
 
-    public void GenerateMCS()
+    public void GenerateMCS(out string equation,out string simplifiedEquation)
     {
         // Set default frequency for basic events if not set.
         foreach (var item in FTAStructure.Values)
@@ -882,16 +892,16 @@ public class FTAlogic
         MCSStructure.Clear();
 
         // 1) Generate the MCS equation from the fault tree.
-        string equation = GenerateEquation();
+        equation = GenerateEquation();
 
 
 
         // 2) Simplify the equation using BooleanAlgebra.
-        string simplifiedEquation = MCSEngine_Exp.ProcessExpression(equation);
+        simplifiedEquation = MCSEngine_Exp.ProcessExpression(equation);
 
         string message = "Generated Tree Expression:\n" + equation +
                          "\n\nSimplified Expression:\n" + simplifiedEquation;
-        MessageBox.Show(message, "MCS Equation Overview", MessageBoxButtons.OK, MessageBoxIcon.Information);
+       // MessageBox.Show(message, "MCS Equation Overview", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         // 3) Create the top event for MCS with an OR gate.
         FTAitem topEvent = GetItem(TopEventGuid);
@@ -922,7 +932,7 @@ public class FTAlogic
             // Determine gate type for intermediate event:
             // If term contains '*', it is a multi-component term => use AND gate (Gates = 2)
             // Otherwise, for a single component, set Gates to -1 (Not set)
-            Gates GateForIntermediate = trimmedTerm.Contains("*") ? Gates.AND : Gates.NotSet;
+            Gates GateForIntermediate = trimmedTerm.Contains("*") ? Gates.AND : Gates.OR;
 
             // Create a new intermediate event with name "MCS" followed by termNumber.
             Guid intermediateGuid = AddIntermediateEvent("MCS" + termNumber, GateForIntermediate, parentGuid);
@@ -945,7 +955,7 @@ public class FTAlogic
                             Name = originalEvent.Name,
                             Tag = originalEvent.Tag,
                             ItemType = originalEvent.ItemType,
-                            Gate = originalEvent.Gate,
+                            Gate = originalEvent.Gate,                           
                             Frequency = originalEvent.Frequency,
                             Value = originalEvent.Value,
                             ValueType = originalEvent.ValueType,
@@ -1137,16 +1147,17 @@ public class FTAlogic
         html.AppendLine("        </thead>");
         html.AppendLine("        <tbody>");
 
-        foreach (var Event in FTAStructure)
+        List<FTAitem> l = GenerateListOfBasicEvents();
+
+        foreach (var Event in l)
         {
          
-            if (Event.Value.ItemType>1)
-            {
+            
                 temp = "<tr><td>";
-                temp += Event.Value.Tag;
-                temp += "</td><td>" + Event.Value.Name + "</td ><td>" + Event.Value.Description + "</td ><td>";
+                temp += Event.Tag;
+                temp += "</td><td>" + Event.Name + "</td ><td>" + Event.Description + "</td ><td>";
 
-                string freqText = Event.Value.ValueType switch
+                string freqText = Event.ValueType switch
                 {
                     ValueTypes.F => "f=",
                     ValueTypes.P => "P=",
@@ -1154,20 +1165,20 @@ public class FTAlogic
                     ValueTypes.Lambda => "λ=",
                     _ => ""
                 };
-                freqText += (Event.Value.Value < 0.001) ? Event.Value.Value.ToString("0.0000E+0") : Event.Value.Value.ToString("F6");
-                if (Event.Value.ValueType == ValueTypes.F || Event.Value.ValueType == ValueTypes.Lambda)
+                freqText += (Event.Value < 0.001) ? Event.Value.ToString("0.0000E+0") : Event.Value.ToString("F6");
+                if (Event.ValueType == ValueTypes.F || Event.ValueType == ValueTypes.Lambda)
                 {
-                    freqText += " " + MetricUnitsList[Event.Value.ValueUnit];
+                    freqText += " " + MetricUnitsList[Event.ValueUnit];
                      
                 }
-                freqText = Event.Value.Frequency.ToString();
+               // freqText = Event.Frequency.ToString();
                 temp += freqText;
                 temp += "</td></tr>";
 
                 html.AppendLine(temp);
 
 
-            }
+             
 
         }
 
@@ -1268,6 +1279,18 @@ public class FTAlogic
         html.AppendLine("    </table>");
     }
 
+    public List<FTAitem> GenerateListOfBasicEvents()
+    {
+        List<FTAitem> basicEvents = new List<FTAitem>();
+        foreach (var item in FTAStructure.Values)
+        {
+            if (item.ItemType >= 2) // Basic event
+            {
+                basicEvents.Add(item);
+            }
+        }
+        return basicEvents;
+    }
     // --- From P, R, λ to  f (v 1/y) ---
 
     public static double FrequencyFromProbability(double P)

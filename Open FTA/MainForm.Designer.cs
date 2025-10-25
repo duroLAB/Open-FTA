@@ -40,8 +40,6 @@
             toolStripSeparator3 = new ToolStripSeparator();
             toolStripDropDownButtonEvaluate = new ToolStripDropDownButton();
             minimalCutSetToolStripMenuItem = new ToolStripMenuItem();
-            explicitToolStripMenuItem = new ToolStripMenuItem();
-            graphicToolStripMenuItem = new ToolStripMenuItem();
             freqvencyToolStripMenuItem = new ToolStripMenuItem();
             importanceMeasureToolStripMenuItem = new ToolStripMenuItem();
             monteCarloToolStripMenuItem = new ToolStripMenuItem();
@@ -63,7 +61,6 @@
             panelRight = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
-            tabPage2 = new TabPage();
             pictureBox1 = new PictureBox();
             contextMenuStrip_Treeview = new ContextMenuStrip(components);
             toolStripMenuItem_NEWBasic = new ToolStripMenuItem();
@@ -85,6 +82,15 @@
             toolStripButtonEdit = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
             toolStripSeparator4 = new ToolStripSeparator();
+            tabPage2 = new TabPage();
+            panel2 = new Panel();
+            dataGridView1 = new DataGridView();
+            splitter4 = new Splitter();
+            panel1 = new Panel();
+            textBoxMCSExpr = new TextBox();
+            splitter3 = new Splitter();
+            toolStrip3 = new ToolStrip();
+            toolStripButtonExportToCSV = new ToolStripButton();
             splitter2 = new Splitter();
             panelLeft = new Panel();
             treeView1 = new TreeView();
@@ -98,6 +104,11 @@
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip_Treeview.SuspendLayout();
             toolStrip2.SuspendLayout();
+            tabPage2.SuspendLayout();
+            panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            panel1.SuspendLayout();
+            toolStrip3.SuspendLayout();
             panelLeft.SuspendLayout();
             SuspendLayout();
             // 
@@ -114,7 +125,7 @@
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new Padding(0);
             toolStrip1.RenderMode = ToolStripRenderMode.Professional;
-            toolStrip1.Size = new Size(1068, 55);
+            toolStrip1.Size = new Size(1094, 55);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -126,7 +137,6 @@
             toolStripButton5.Name = "toolStripButton5";
             toolStripButton5.Size = new Size(67, 52);
             toolStripButton5.Text = "New";
-//            toolStripButton5.Click += toolStripButton5_Click;
             // 
             // toolStripButtonSave
             // 
@@ -192,23 +202,10 @@
             // 
             // minimalCutSetToolStripMenuItem
             // 
-            minimalCutSetToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { explicitToolStripMenuItem, graphicToolStripMenuItem });
             minimalCutSetToolStripMenuItem.Name = "minimalCutSetToolStripMenuItem";
             minimalCutSetToolStripMenuItem.Size = new Size(199, 22);
             minimalCutSetToolStripMenuItem.Text = "Minimal cut set";
-            // 
-            // explicitToolStripMenuItem
-            // 
-            explicitToolStripMenuItem.Name = "explicitToolStripMenuItem";
-            explicitToolStripMenuItem.Size = new Size(115, 22);
-            explicitToolStripMenuItem.Text = "Explicit";
-            explicitToolStripMenuItem.Click += explicitToolStripMenuItem_Click;
-            // 
-            // graphicToolStripMenuItem
-            // 
-            graphicToolStripMenuItem.Name = "graphicToolStripMenuItem";
-            graphicToolStripMenuItem.Size = new Size(115, 22);
-            graphicToolStripMenuItem.Text = "Graphic";
+            minimalCutSetToolStripMenuItem.Click += minimalCutSetToolStripMenuItem_Click;
             // 
             // freqvencyToolStripMenuItem
             // 
@@ -330,10 +327,10 @@
             // 
             panelBottom.Controls.Add(statusStrip1);
             panelBottom.Dock = DockStyle.Bottom;
-            panelBottom.Location = new Point(0, 594);
+            panelBottom.Location = new Point(0, 635);
             panelBottom.Margin = new Padding(4, 3, 4, 3);
             panelBottom.Name = "panelBottom";
-            panelBottom.Size = new Size(1068, 29);
+            panelBottom.Size = new Size(1094, 29);
             panelBottom.TabIndex = 2;
             // 
             // statusStrip1
@@ -341,7 +338,7 @@
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelCoordinates });
             statusStrip1.Location = new Point(0, 7);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(1068, 22);
+            statusStrip1.Size = new Size(1094, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -354,10 +351,10 @@
             // splitter1
             // 
             splitter1.Dock = DockStyle.Bottom;
-            splitter1.Location = new Point(0, 591);
+            splitter1.Location = new Point(0, 632);
             splitter1.Margin = new Padding(4, 3, 4, 3);
             splitter1.Name = "splitter1";
-            splitter1.Size = new Size(1068, 3);
+            splitter1.Size = new Size(1094, 3);
             splitter1.TabIndex = 3;
             splitter1.TabStop = false;
             // 
@@ -370,18 +367,17 @@
             panelMain.Location = new Point(0, 55);
             panelMain.Margin = new Padding(4, 3, 4, 3);
             panelMain.Name = "panelMain";
-            panelMain.Size = new Size(1068, 536);
+            panelMain.Size = new Size(1094, 577);
             panelMain.TabIndex = 4;
             // 
             // panelRight
             // 
             panelRight.Controls.Add(tabControl1);
-            panelRight.Controls.Add(toolStrip2);
             panelRight.Dock = DockStyle.Fill;
             panelRight.Location = new Point(237, 0);
             panelRight.Margin = new Padding(4, 3, 4, 3);
             panelRight.Name = "panelRight";
-            panelRight.Size = new Size(831, 536);
+            panelRight.Size = new Size(857, 577);
             panelRight.TabIndex = 2;
             // 
             // tabControl1
@@ -390,41 +386,32 @@
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.ImeMode = ImeMode.Hiragana;
-            tabControl1.Location = new Point(0, 31);
+            tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(831, 505);
+            tabControl1.Size = new Size(857, 577);
             tabControl1.TabIndex = 2;
             // 
             // tabPage1
             // 
             tabPage1.Controls.Add(pictureBox1);
+            tabPage1.Controls.Add(toolStrip2);
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(823, 477);
+            tabPage1.Size = new Size(849, 549);
             tabPage1.TabIndex = 0;
-            tabPage1.Text = "tabPage1";
+            tabPage1.Text = "Main Tree Structure";
             tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            tabPage2.Location = new Point(4, 24);
-            tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(368, 279);
-            tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
-            tabPage2.UseVisualStyleBackColor = true;
             // 
             // pictureBox1
             // 
             pictureBox1.ContextMenuStrip = contextMenuStrip_Treeview;
             pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Location = new Point(3, 3);
+            pictureBox1.Location = new Point(3, 34);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(817, 471);
+            pictureBox1.Size = new Size(843, 512);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
@@ -547,9 +534,9 @@
             // toolStrip2
             // 
             toolStrip2.Items.AddRange(new ToolStripItem[] { toolStripButtonAddBasicEvent, toolStripButtonAddIntermediateEvent, toolStripButtonDelete, toolStripButtonEdit, toolStripSeparator1, toolStripButtonCopy, toolStripButtonPaste, toolStripSeparator4, toolStripButtonCenter, toolStripButtonSort });
-            toolStrip2.Location = new Point(0, 0);
+            toolStrip2.Location = new Point(3, 3);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new Size(831, 31);
+            toolStrip2.Size = new Size(843, 31);
             toolStrip2.TabIndex = 1;
             toolStrip2.Text = "toolStrip2";
             // 
@@ -595,12 +582,101 @@
             toolStripSeparator4.Name = "toolStripSeparator4";
             toolStripSeparator4.Size = new Size(6, 31);
             // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(panel2);
+            tabPage2.Controls.Add(splitter4);
+            tabPage2.Controls.Add(panel1);
+            tabPage2.Controls.Add(splitter3);
+            tabPage2.Controls.Add(toolStrip3);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(849, 549);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "Minimal Cut Sets";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // panel2
+            // 
+            panel2.Controls.Add(dataGridView1);
+            panel2.Dock = DockStyle.Fill;
+            panel2.Location = new Point(3, 37);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(843, 430);
+            panel2.TabIndex = 5;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Dock = DockStyle.Fill;
+            dataGridView1.Location = new Point(0, 0);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(843, 430);
+            dataGridView1.TabIndex = 0;
+            // 
+            // splitter4
+            // 
+            splitter4.Dock = DockStyle.Bottom;
+            splitter4.Location = new Point(3, 467);
+            splitter4.Name = "splitter4";
+            splitter4.Size = new Size(843, 3);
+            splitter4.TabIndex = 4;
+            splitter4.TabStop = false;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(textBoxMCSExpr);
+            panel1.Dock = DockStyle.Bottom;
+            panel1.Location = new Point(3, 470);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(843, 76);
+            panel1.TabIndex = 3;
+            // 
+            // textBoxMCSExpr
+            // 
+            textBoxMCSExpr.Dock = DockStyle.Fill;
+            textBoxMCSExpr.Location = new Point(0, 0);
+            textBoxMCSExpr.Multiline = true;
+            textBoxMCSExpr.Name = "textBoxMCSExpr";
+            textBoxMCSExpr.Size = new Size(843, 76);
+            textBoxMCSExpr.TabIndex = 0;
+            textBoxMCSExpr.Text = "textBoxMCSExpr";
+            // 
+            // splitter3
+            // 
+            splitter3.Dock = DockStyle.Top;
+            splitter3.Location = new Point(3, 34);
+            splitter3.Name = "splitter3";
+            splitter3.Size = new Size(843, 3);
+            splitter3.TabIndex = 2;
+            splitter3.TabStop = false;
+            // 
+            // toolStrip3
+            // 
+            toolStrip3.Items.AddRange(new ToolStripItem[] { toolStripButtonExportToCSV });
+            toolStrip3.Location = new Point(3, 3);
+            toolStrip3.Name = "toolStrip3";
+            toolStrip3.Size = new Size(843, 31);
+            toolStrip3.TabIndex = 1;
+            toolStrip3.Text = "toolStrip3";
+            // 
+            // toolStripButtonExportToCSV
+            // 
+            toolStripButtonExportToCSV.Image = Open_FTA.Properties.Resources.ExportToWord;
+            toolStripButtonExportToCSV.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonExportToCSV.ImageTransparentColor = Color.Magenta;
+            toolStripButtonExportToCSV.Name = "toolStripButtonExportToCSV";
+            toolStripButtonExportToCSV.Size = new Size(107, 28);
+            toolStripButtonExportToCSV.Text = "Export to CSV";
+            toolStripButtonExportToCSV.Click += toolStripButtonExportToCSV_Click;
+            // 
             // splitter2
             // 
             splitter2.Location = new Point(233, 0);
             splitter2.Margin = new Padding(4, 3, 4, 3);
             splitter2.Name = "splitter2";
-            splitter2.Size = new Size(4, 536);
+            splitter2.Size = new Size(4, 577);
             splitter2.TabIndex = 1;
             splitter2.TabStop = false;
             // 
@@ -611,7 +687,7 @@
             panelLeft.Location = new Point(0, 0);
             panelLeft.Margin = new Padding(4, 3, 4, 3);
             panelLeft.Name = "panelLeft";
-            panelLeft.Size = new Size(233, 536);
+            panelLeft.Size = new Size(233, 577);
             panelLeft.TabIndex = 0;
             // 
             // treeView1
@@ -621,7 +697,7 @@
             treeView1.Location = new Point(0, 0);
             treeView1.Margin = new Padding(4, 3, 4, 3);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(233, 536);
+            treeView1.Size = new Size(233, 577);
             treeView1.TabIndex = 0;
             treeView1.AfterSelect += treeView1_AfterSelect;
             // 
@@ -629,7 +705,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1068, 623);
+            ClientSize = new Size(1094, 664);
             Controls.Add(panelMain);
             Controls.Add(splitter1);
             Controls.Add(panelBottom);
@@ -647,13 +723,21 @@
             statusStrip1.PerformLayout();
             panelMain.ResumeLayout(false);
             panelRight.ResumeLayout(false);
-            panelRight.PerformLayout();
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             contextMenuStrip_Treeview.ResumeLayout(false);
             toolStrip2.ResumeLayout(false);
             toolStrip2.PerformLayout();
+            tabPage2.ResumeLayout(false);
+            tabPage2.PerformLayout();
+            panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            toolStrip3.ResumeLayout(false);
+            toolStrip3.PerformLayout();
             panelLeft.ResumeLayout(false);
             ResumeLayout(false);
 
@@ -675,8 +759,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButtonEvaluate;
         private System.Windows.Forms.ToolStripMenuItem minimalCutSetToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem explicitToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem graphicToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem freqvencyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importanceMeasureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem monteCarloToolStripMenuItem;
@@ -719,6 +801,14 @@
         private TabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
+        private Panel panel1;
+        private Splitter splitter3;
+        private ToolStrip toolStrip3;
+        private Panel panel2;
+        private Splitter splitter4;
+        private TextBox textBoxMCSExpr;
+        private DataGridView dataGridView1;
+        private ToolStripButton toolStripButtonExportToCSV;
     }
 }
 

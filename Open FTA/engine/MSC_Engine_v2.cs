@@ -116,10 +116,15 @@ public class MSC_Engine_v2
                 {
                     CS.items.Add(UTS.items[0]);
 
-                    if (Frek == 0)
+                   /* if (Frek == 0)
                         Frek = UTS.items[0].Frequency;
                     else
-                        Frek *= UTS.items[0].Frequency;
+                        Frek *= UTS.items[0].Frequency;*/
+
+                    if (Frek == 0)
+                        Frek = UTS.items[0].Value;
+                    else
+                        Frek *= UTS.items[0].Value;
 
                 }
                 j = j + 1;
