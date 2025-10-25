@@ -14,7 +14,7 @@ namespace Open_FTA.forms
     {
         public enum ExportOption { None, Bitmap, Metafile }
         public ExportOption SelectedOption { get; private set; } = ExportOption.None;
- 
+
         public ExportDialogForm()
         {
             this.Text = "Export Options";
@@ -102,6 +102,11 @@ namespace Open_FTA.forms
             panel.Controls.Add(lblDesc);
 
             return panel;
+        }
+
+        private void ExportDialogForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 

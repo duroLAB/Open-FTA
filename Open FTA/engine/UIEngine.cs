@@ -103,8 +103,7 @@ class UIlogic
 
         grid.AllowUserToResizeColumns = true;
 
-        grid.Columns[0].Width = 80;  // prvý stĺpec
-        grid.Columns[1].Width = 120; // druhý stĺpec
+        
 
     }
 

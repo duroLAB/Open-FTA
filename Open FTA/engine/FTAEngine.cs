@@ -1,16 +1,31 @@
-﻿using System;
+﻿using Open_FTA.forms;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
+using static Open_FTA.forms.ErrorDialog;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
-using System.Runtime.CompilerServices;
+
+
+public class MessageItem
+{
+    public MessageType Type { get; set; }
+    public string Text { get; set; }
+
+    public MessageItem(MessageType type, string text)
+    {
+        Type = type;
+        Text = text;
+    }
+}
 
 public enum MainCompTimeUnit
 {
@@ -66,14 +81,7 @@ public class FTAlogic
     {
 
         //Create Top Event
-        FTAitem FI = new FTAitem();
-        FI.Name = "Top Event";
-        FI.ItemType = 0;
-        FI.Gate = Gates.OR;
-        FI.X = 200;
-        FI.Y = 100;
-        TopEventGuid = FI.GuidCode;
-        AddItem(FI);
+        CreateNewTopEvent();
 
         GenerateGatesList();
         GenerateEvetsList();
@@ -81,6 +89,18 @@ public class FTAlogic
         GenereteMetricUnitsList();
     }
 
+   public void CreateNewTopEvent()
+    {
+        FTAitem FI = new FTAitem();
+        FI.Name = "Top Event";
+        FI.Tag = "TE";
+        FI.ItemType = 0;
+        FI.Gate = Gates.OR;
+        FI.X = 200;
+        FI.Y = 100;
+        TopEventGuid = FI.GuidCode;
+        AddItem(FI);
+    }
 
     public void CopySelectedEvents()
     {
@@ -96,6 +116,14 @@ public class FTAlogic
         {
              CopiedEvents.Add(evt);
         }
+
+        string json = JsonSerializer.Serialize(CopiedEvents, new JsonSerializerOptions
+        {
+            WriteIndented = true // pekné odsadenie pre ľudí
+        });
+
+        // uloženie do clipboardu
+        Clipboard.SetText(json);
 
         MessageBox.Show("Selected events have been copied.", "Copy");
         
@@ -287,6 +315,8 @@ public class FTAlogic
         //FI.Tag = Tag;
         if(Tag.Length<2)
         FI.Tag = GetNextAvailableTag(ItemType);
+        if(Name.Length<2)
+            FI.Name ="New - "+FI.Tag;
         FI.level = level;
 
         var ParentEvent = GetItem(Parent);
@@ -1417,57 +1447,123 @@ public class FTAlogic
 
         return $"BE{next}";
     }
+
+     
+
+   List<MessageItem> ErrorMessages = new List<MessageItem>();
+    public bool PerformFullTest()
+    {
+        ErrorMessages.Clear();
+
+      
+        bool res=true;
+
+        if (!PerformTestHasbasicEvents())
+        {
+            res = false;
+        }
+
+        if(!PerformTestAND_2F())
+        {
+            res = false;
+        }
+
+        if (!res)ErrorDialog.ShowMessages(ErrorMessages);
+
+        return (res);
+    }
+    private bool PerformTestHasbasicEvents()
+    {
+        bool res = true;
+        foreach (var item in FTAStructure.Values)
+        {
+            if (item.Children.Count == 0 && (item.ItemType == 1|| item.ItemType == 0))
+            {
+
+                string txt = "Event: " + item.Name + " (" + item.Tag + ") is an intermediate event and has no children.";
+                ErrorMessages.Add(new MessageItem(MessageType.Error,txt));
+                txt = "To fix it change event to basic event or add children events.";
+                ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                res = false;
+            }
+        }
+        return (res);
+    }
+
+    private bool PerformTestAND_2F()
+    {   
+        bool res = true;
+        foreach (var item in FTAStructure.Values)
+        {
+            int NumberOfChildrenWithFrequency = 0;
+            
+            foreach (var childGuid in item.Children)
+            {
+                if (FTAStructure.TryGetValue(childGuid, out FTAitem child))
+                {
+                    if(child.ValueType== ValueTypes.F || child.ValueType == ValueTypes.Lambda)
+                    {
+                        NumberOfChildrenWithFrequency = NumberOfChildrenWithFrequency + 1;
+                    }
+                }
+            }
+            if(item.Gate == Gates.AND && NumberOfChildrenWithFrequency >= 2)
+            {
+                string txt = "Event: " + item.Name + " (" + item.Tag + ") has an AND gate with " + NumberOfChildrenWithFrequency.ToString() + " children having frequency metric (F or λ).";
+                ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
+                txt = "To fix it change metric of some children to Probability (P) or Reliability (R).";
+                ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                res = false;
+            }
+
+
+        }
+        return (res);
+    }
+
+
 }
 
 public class FTAitem
 {
-
-    public string Name;
-    public string Description;
-    public Guid GuidCode;
-    public Guid Parent;
-    public int ItemType; // ItemType - 1- basic Event, 2- intermediate Event
-   // public int Gate; // Gates - 1-AND 2-OR
-    public string Tag;
-    public double Frequency;
-    public double Value;
-   // public int UserMetricType;        // 0-Frequency 1-Probability 2-Reliability 3-Failure rate
-    public int ValueUnit;
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public Guid GuidCode { get; set; }
+    public Guid Parent { get; set; }
+    public int ItemType { get; set; } // 1 - Basic Event, 2 - Intermediate Event
+    // public int Gate; // voliteľné, ak nepotrebné
+    public string Tag { get; set; }
+    public double Frequency { get; set; }
+    public double Value { get; set; }
+    // public int UserMetricType; // voliteľné
+    public int ValueUnit { get; set; }
     public ValueTypes ValueType { get; set; }
     public Gates Gate { get; set; }
 
-    
-    
+    public List<Guid> Children { get; set; }
+    public int Level { get; set; }
+    public double X1 { get; set; }
+    public double Y1 { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
 
-    public List<Guid> Children;
     public int level { get; set; }
-    public double X1;
-    public double Y1;
-    public int X;
-    public int Y;
-    public bool ItemState;
-    public bool IsHidden;
-    public bool IsSelected;
+    public bool ItemState { get; set; }
+    public bool IsHidden { get; set; }
+    public bool IsSelected { get; set; }
     public double LowerBoundFrequency { get; set; }
     public double UpperBoundFrequency { get; set; }
-
-    public double BIM;
+    public double BIM { get; set; }
 
     public FTAitem()
     {
-        // Set uniqe guid 
+        // generovanie unikátneho Guid
         GuidCode = Guid.NewGuid();
         Children = new List<Guid>();
-        {
-            LowerBoundFrequency = 0;
-            UpperBoundFrequency = 0;
-        }
+        LowerBoundFrequency = 0;
+        UpperBoundFrequency = 0;
         BIM = 0;
-
-
     }
-
-   
 }
 
 public static class Constants

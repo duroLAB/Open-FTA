@@ -31,12 +31,12 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             toolStrip1 = new ToolStrip();
-            toolStripButton5 = new ToolStripButton();
+            toolStripButtonNew = new ToolStripButton();
             toolStripButtonSave = new ToolStripButton();
             toolStripButtonLoad = new ToolStripButton();
             toolStripSeparator6 = new ToolStripSeparator();
-            toolStripButton1 = new ToolStripButton();
-            toolStripButton2 = new ToolStripButton();
+            toolStripButtonUndo = new ToolStripButton();
+            toolStripButtonRedo = new ToolStripButton();
             toolStripSeparator3 = new ToolStripSeparator();
             toolStripDropDownButtonEvaluate = new ToolStripDropDownButton();
             minimalCutSetToolStripMenuItem = new ToolStripMenuItem();
@@ -84,13 +84,15 @@
             toolStripSeparator4 = new ToolStripSeparator();
             tabPage2 = new TabPage();
             panel2 = new Panel();
-            dataGridView1 = new DataGridView();
+            dataGridViewMCSResults = new DataGridView();
             splitter4 = new Splitter();
             panel1 = new Panel();
             textBoxMCSExpr = new TextBox();
             splitter3 = new Splitter();
             toolStrip3 = new ToolStrip();
             toolStripButtonExportToCSV = new ToolStripButton();
+            tabPage3 = new TabPage();
+            dataGridViewImportanceMeasureResults = new DataGridView();
             splitter2 = new Splitter();
             panelLeft = new Panel();
             treeView1 = new TreeView();
@@ -106,9 +108,11 @@
             toolStrip2.SuspendLayout();
             tabPage2.SuspendLayout();
             panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewMCSResults).BeginInit();
             panel1.SuspendLayout();
             toolStrip3.SuspendLayout();
+            tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewImportanceMeasureResults).BeginInit();
             panelLeft.SuspendLayout();
             SuspendLayout();
             // 
@@ -119,7 +123,7 @@
             toolStrip1.CanOverflow = false;
             toolStrip1.GripMargin = new Padding(0);
             toolStrip1.ImageScalingSize = new Size(20, 20);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton5, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator6, toolStripButton1, toolStripButton2, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripButtonrReport, toolStripSeparator8, toolStripButtonSettings });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButtonNew, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator6, toolStripButtonUndo, toolStripButtonRedo, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripButtonrReport, toolStripSeparator8, toolStripButtonSettings });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
@@ -129,14 +133,15 @@
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripButton5
+            // toolStripButtonNew
             // 
-            toolStripButton5.Image = Open_FTA.Properties.Resources.NewDocument;
-            toolStripButton5.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButton5.ImageTransparentColor = Color.Magenta;
-            toolStripButton5.Name = "toolStripButton5";
-            toolStripButton5.Size = new Size(67, 52);
-            toolStripButton5.Text = "New";
+            toolStripButtonNew.Image = Open_FTA.Properties.Resources.NewDocument;
+            toolStripButtonNew.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonNew.ImageTransparentColor = Color.Magenta;
+            toolStripButtonNew.Name = "toolStripButtonNew";
+            toolStripButtonNew.Size = new Size(67, 52);
+            toolStripButtonNew.Text = "New";
+            toolStripButtonNew.Click += toolStripButtonNew_Click;
             // 
             // toolStripButtonSave
             // 
@@ -163,27 +168,27 @@
             toolStripSeparator6.Name = "toolStripSeparator6";
             toolStripSeparator6.Size = new Size(6, 55);
             // 
-            // toolStripButton1
+            // toolStripButtonUndo
             // 
-            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton1.Image = Open_FTA.Properties.Resources.StepBackward;
-            toolStripButton1.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButton1.ImageTransparentColor = Color.Magenta;
-            toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(36, 52);
-            toolStripButton1.Text = "Undo";
-            toolStripButton1.Click += toolStripButton1_Click;
+            toolStripButtonUndo.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonUndo.Image = Open_FTA.Properties.Resources.StepBackward;
+            toolStripButtonUndo.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonUndo.ImageTransparentColor = Color.Magenta;
+            toolStripButtonUndo.Name = "toolStripButtonUndo";
+            toolStripButtonUndo.Size = new Size(36, 52);
+            toolStripButtonUndo.Text = "Undo";
+            toolStripButtonUndo.Click += toolStripButton1_Click;
             // 
-            // toolStripButton2
+            // toolStripButtonRedo
             // 
-            toolStripButton2.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton2.Image = Open_FTA.Properties.Resources.StepForward;
-            toolStripButton2.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButton2.ImageTransparentColor = Color.Magenta;
-            toolStripButton2.Name = "toolStripButton2";
-            toolStripButton2.Size = new Size(36, 52);
-            toolStripButton2.Text = "Redo";
-            toolStripButton2.Click += toolStripButton2_Click;
+            toolStripButtonRedo.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonRedo.Image = Open_FTA.Properties.Resources.StepForward;
+            toolStripButtonRedo.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonRedo.ImageTransparentColor = Color.Magenta;
+            toolStripButtonRedo.Name = "toolStripButtonRedo";
+            toolStripButtonRedo.Size = new Size(36, 52);
+            toolStripButtonRedo.Text = "Redo";
+            toolStripButtonRedo.Click += toolStripButton2_Click;
             // 
             // toolStripSeparator3
             // 
@@ -219,6 +224,7 @@
             importanceMeasureToolStripMenuItem.Name = "importanceMeasureToolStripMenuItem";
             importanceMeasureToolStripMenuItem.Size = new Size(199, 22);
             importanceMeasureToolStripMenuItem.Text = "Importance measure";
+            importanceMeasureToolStripMenuItem.Click += importanceMeasureToolStripMenuItem_Click;
             // 
             // monteCarloToolStripMenuItem
             // 
@@ -384,6 +390,7 @@
             // 
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
+            tabControl1.Controls.Add(tabPage3);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.ImeMode = ImeMode.Hiragana;
             tabControl1.Location = new Point(0, 0);
@@ -391,6 +398,7 @@
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(857, 577);
             tabControl1.TabIndex = 2;
+            tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
             // 
             // tabPage1
             // 
@@ -599,21 +607,21 @@
             // 
             // panel2
             // 
-            panel2.Controls.Add(dataGridView1);
+            panel2.Controls.Add(dataGridViewMCSResults);
             panel2.Dock = DockStyle.Fill;
             panel2.Location = new Point(3, 37);
             panel2.Name = "panel2";
             panel2.Size = new Size(843, 430);
             panel2.TabIndex = 5;
             // 
-            // dataGridView1
+            // dataGridViewMCSResults
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Dock = DockStyle.Fill;
-            dataGridView1.Location = new Point(0, 0);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(843, 430);
-            dataGridView1.TabIndex = 0;
+            dataGridViewMCSResults.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewMCSResults.Dock = DockStyle.Fill;
+            dataGridViewMCSResults.Location = new Point(0, 0);
+            dataGridViewMCSResults.Name = "dataGridViewMCSResults";
+            dataGridViewMCSResults.Size = new Size(843, 430);
+            dataGridViewMCSResults.TabIndex = 0;
             // 
             // splitter4
             // 
@@ -670,6 +678,26 @@
             toolStripButtonExportToCSV.Size = new Size(107, 28);
             toolStripButtonExportToCSV.Text = "Export to CSV";
             toolStripButtonExportToCSV.Click += toolStripButtonExportToCSV_Click;
+            // 
+            // tabPage3
+            // 
+            tabPage3.Controls.Add(dataGridViewImportanceMeasureResults);
+            tabPage3.Location = new Point(4, 24);
+            tabPage3.Name = "tabPage3";
+            tabPage3.Padding = new Padding(3);
+            tabPage3.Size = new Size(849, 549);
+            tabPage3.TabIndex = 2;
+            tabPage3.Text = "Importance measure";
+            tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // dataGridViewImportanceMeasureResults
+            // 
+            dataGridViewImportanceMeasureResults.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewImportanceMeasureResults.Dock = DockStyle.Fill;
+            dataGridViewImportanceMeasureResults.Location = new Point(3, 3);
+            dataGridViewImportanceMeasureResults.Name = "dataGridViewImportanceMeasureResults";
+            dataGridViewImportanceMeasureResults.Size = new Size(843, 543);
+            dataGridViewImportanceMeasureResults.TabIndex = 1;
             // 
             // splitter2
             // 
@@ -733,11 +761,13 @@
             tabPage2.ResumeLayout(false);
             tabPage2.PerformLayout();
             panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewMCSResults).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             toolStrip3.ResumeLayout(false);
             toolStrip3.PerformLayout();
+            tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridViewImportanceMeasureResults).EndInit();
             panelLeft.ResumeLayout(false);
             ResumeLayout(false);
 
@@ -752,8 +782,8 @@
         private System.Windows.Forms.ToolStripButton toolStripButtonPaste;
         private System.Windows.Forms.ToolStripButton toolStripButtonDelete;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
-        private System.Windows.Forms.ToolStripButton toolStripButton1;
-        private System.Windows.Forms.ToolStripButton toolStripButton2;
+        private System.Windows.Forms.ToolStripButton toolStripButtonUndo;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRedo;
         private System.Windows.Forms.ToolStripButton toolStripButtonCenter;
         private System.Windows.Forms.ToolStripButton toolStripButtonSort;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
@@ -793,7 +823,7 @@
         private ToolStrip toolStrip2;
         private ToolStripButton toolStripButtonAddBasicEvent;
         private ToolStripButton toolStripButtonAddIntermediateEvent;
-        private ToolStripButton toolStripButton5;
+        private ToolStripButton toolStripButtonNew;
         private ToolStripButton toolStripButtonEdit;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripSeparator toolStripSeparator4;
@@ -807,8 +837,10 @@
         private Panel panel2;
         private Splitter splitter4;
         private TextBox textBoxMCSExpr;
-        private DataGridView dataGridView1;
+        private DataGridView dataGridViewMCSResults;
         private ToolStripButton toolStripButtonExportToCSV;
+        private TabPage tabPage3;
+        private DataGridView dataGridViewImportanceMeasureResults;
     }
 }
 

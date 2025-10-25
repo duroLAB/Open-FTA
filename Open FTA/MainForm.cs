@@ -59,6 +59,10 @@ namespace OpenFTA
             tabControl1.DrawItem += TabControl1_DrawItem;
 
 
+            UpdateMainFormControls();
+
+         
+
         }
 
         private void TabControl1_DrawItem(object sender, DrawItemEventArgs e)
@@ -127,6 +131,15 @@ namespace OpenFTA
                     MyDrawingEngine.offsetY = MyDrawingEngine.offsetY - 20;
                     break;
 
+            }
+
+            if (e.Control && e.KeyCode == Keys.C)
+            {
+                // iba ak je focus na PictureBox
+                 
+                   MessageBox.Show("Ctrl+C detected on PictureBox - Copying selected events.");
+                    
+                 
             }
             pictureBox1.Invalidate();
         }
@@ -252,6 +265,11 @@ namespace OpenFTA
                     EngineLogic.FTAStructure.Clear();
                     foreach (FTAitem item in loadedList)
                     {
+                       
+                            item.LowerBoundFrequency = 0;
+                        
+                            item.UpperBoundFrequency = 0;
+                        
                         EngineLogic.FTAStructure[item.GuidCode] = item;
                     }
 
@@ -438,7 +456,7 @@ namespace OpenFTA
             var newEvent = EngineLogic.GetItem(A);
 
 
-            newEvent.Name = "New Item";
+         //   newEvent.Name = "New Item";
             // newEvent.Tag = "NewTag";
             newEvent.Gate = Gates.OR;
             newEvent.Frequency = 0;
@@ -672,10 +690,9 @@ namespace OpenFTA
         private void toolStripButtonrReport_Click(object sender, EventArgs e)
         {
 
+            EngineLogic.PerformFullTest();
+            return;
             EngineLogic.GenerateHTMLreport();
-
-
-
 
             ReportForm r = new ReportForm();
             r.html = EngineLogic.html.ToString();
@@ -834,6 +851,15 @@ namespace OpenFTA
             toolStripMenuItem_EDIT.Enabled = toolStripButtonEdit.Enabled;
 
 
+            if(undoStack.Count > 0)
+                toolStripButtonUndo.Enabled = true;
+            else
+                toolStripButtonUndo.Enabled = false;
+
+            if (redoStack.Count > 0)
+                toolStripButtonRedo.Enabled = true;
+            else
+                toolStripButtonRedo.Enabled = false;
         }
 
         private void UpdateMainFormControls_EventsAreSelected()
@@ -949,13 +975,14 @@ namespace OpenFTA
 
             List<FTAitem> l = EngineLogic.GenerateListOfBasicEvents();
 
-            dataGridView1.Rows.Clear();
-            dataGridView1.Columns.Clear();
+            dataGridViewMCSResults.Rows.Clear();
+            dataGridViewMCSResults.Columns.Clear();
             foreach (FTAitem item in l)
             {
-                dataGridView1.Columns.Add(item.Tag, item.Tag);
+                dataGridViewMCSResults.Columns.Add(item.Tag, item.Tag);
             }
-            dataGridView1.Columns.Add("Frequency", "Frequency");
+            dataGridViewMCSResults.Columns.Add("Frequency", "Frequency");
+
             int rowIndex = 0;
             int MaxColums = 0;
 
@@ -964,13 +991,17 @@ namespace OpenFTA
 
                 if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
                 {
-                    dataGridView1.Rows.Add(item.Value.Name);
-                    dataGridView1.Rows[rowIndex].Cells[1].Value = item.Value.Value;
+                    dataGridViewMCSResults.Rows.Add(item.Value.Name);
+                    dataGridViewMCSResults.Rows[rowIndex].Cells[1].Value = item.Value.Value;
 
                     for (int i = 0; i < item.Value.Children.Count; i++)
                     {
+                        if (i + 3 > dataGridViewMCSResults.ColumnCount)
+                            dataGridViewMCSResults.Columns.Add("", "");
+
                         FTAitem fTAitem = EngineLogic.GetItem(item.Value.Children[i], EngineLogic.MCSStructure);
-                        dataGridView1.Rows[rowIndex].Cells[i + 2].Value = fTAitem.Name;
+                        dataGridViewMCSResults.Rows[rowIndex].Cells[i + 2].Value = fTAitem.Name;
+
 
 
                         if (i > MaxColums)
@@ -982,20 +1013,24 @@ namespace OpenFTA
                 }
             }
             MaxColums += 3; // plus frequency and name columns
-            for (int i = dataGridView1.Columns.Count - 1; i >= MaxColums; i--)
+            for (int i = dataGridViewMCSResults.Columns.Count - 1; i >= MaxColums; i--)
             {
-                dataGridView1.Columns.RemoveAt(i);
+                dataGridViewMCSResults.Columns.RemoveAt(i);
 
             }
-            dataGridView1.ColumnHeadersVisible = false;
-            dataGridView1.RowHeadersVisible = false;
+            dataGridViewMCSResults.ColumnHeadersVisible = false;
+            dataGridViewMCSResults.RowHeadersVisible = false;
 
 
 
-            UIEngine.SetupModernGrid(dataGridView1);
+            UIEngine.SetupModernGrid(dataGridViewMCSResults);
+            dataGridViewMCSResults.Columns[0].Width = 80;  // prvý stĺpec
+            dataGridViewMCSResults.Columns[1].Width = 120; // druhý stĺpec
 
-            var column = dataGridView1.Columns[1];
-            dataGridView1.Sort(column, System.ComponentModel.ListSortDirection.Descending);
+            var column = dataGridViewMCSResults.Columns[1];
+            dataGridViewMCSResults.Sort(column, System.ComponentModel.ListSortDirection.Descending);
+
+            tabControl1.SelectedTab = tabPage2;
         }
 
         private void SaveGridToCsv(DataGridView grid)
@@ -1063,7 +1098,99 @@ namespace OpenFTA
 
         private void toolStripButtonExportToCSV_Click(object sender, EventArgs e)
         {
-            SaveGridToCsv(dataGridView1);
+            if (tabControl1.SelectedTab == tabPage2)
+            {
+                SaveGridToCsv(dataGridViewMCSResults);
+            }
+            else if (tabControl1.SelectedTab == tabPage3)
+            {
+                SaveGridToCsv(dataGridViewImportanceMeasureResults);
+            }
+
+        }
+
+        private void importanceMeasureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Event Name", typeof(string));
+            dt.Columns.Add("Event GUID", typeof(string));
+            dt.Columns.Add("Birnbaum importance measure (BIM)", typeof(double));
+            dt.Columns.Add("Critical importance measure (CIM)", typeof(double));
+            dt.Columns.Add("Reliability achievement worth (RAW)", typeof(double));
+            dt.Columns.Add("Reliability reduction worth (RRW)", typeof(double));
+            dt.Columns.Add("Fussell-Vessely importance (FV)", typeof(double));
+
+            foreach (FTAitem evt in EngineLogic.FTAStructure.Values)
+            {
+                if (evt.ItemType >= 2)
+                {
+                    double bimValue = Math.Round(EngineLogic.ComputeBIM(evt), 8);
+                    double cimValue = Math.Round(EngineLogic.ComputeCIM(evt), 8);
+                    double rawValue = Math.Round(EngineLogic.ComputeRAW(evt), 8);
+                    double rrwValue = Math.Round(EngineLogic.ComputeRRW(evt), 8);
+                    double fvValue = Math.Round(EngineLogic.ComputeFV(evt), 8);
+
+                    DataRow row = dt.NewRow();
+                    row["Event Name"] = evt.Name;
+                    row["Event GUID"] = evt.GuidCode.ToString();
+                    row["Birnbaum importance measure (BIM)"] = bimValue;
+                    row["Critical importance measure (CIM)"] = cimValue;
+                    row["Reliability achievement worth (RAW)"] = rawValue;
+                    row["Reliability reduction worth (RRW)"] = rrwValue;
+                    row["Fussell-Vessely importance (FV)"] = fvValue;
+                    dt.Rows.Add(row);
+                }
+            }
+
+            DataView dv = dt.DefaultView;
+            dv.Sort = "Birnbaum importance measure (BIM) DESC";
+            DataTable sortedDt = dv.ToTable();
+
+            Form tableForm = new Form();
+            tableForm.Text = "Importance Measures Overview";
+            tableForm.Size = new Size(700, 400);
+
+
+            dataGridViewImportanceMeasureResults.Dock = DockStyle.Fill;
+            dataGridViewImportanceMeasureResults.DataSource = sortedDt;
+
+            UIEngine.SetupModernGrid(dataGridViewImportanceMeasureResults);
+
+            tabControl1.SelectedTab = tabPage3;
+
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab == tabPage2)
+            {
+                toolStrip3.Parent = tabPage2;
+            }
+            else if (tabControl1.SelectedTab == tabPage3)
+            {
+                toolStrip3.Parent = tabPage3;
+            }
+        }
+
+        private void toolStripButtonNew_Click(object sender, EventArgs e)
+        {
+            newFile();
+        }
+
+        private void newFile()
+        {
+            undoStack.Clear();
+            redoStack.Clear();
+            EngineLogic.FTAStructure.Clear();
+            EngineLogic.SelectedEvents.Clear();
+            EngineLogic.CopiedEvents.Clear();
+            EngineLogic.CreateNewTopEvent();
+            MyDrawingEngine.GlobalZoom = 1;
+            MyDrawingEngine.offsetX = 0;
+            MyDrawingEngine.offsetY = 0;
+            pictureBox1.Invalidate();
+            UpdateMainFormControls();
+            
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Open_FTA.forms
 {
-    partial class ExportDialogForm
+    partial class ErrorDialog
     {
         /// <summary>
         /// Required designer variable.
@@ -30,14 +30,14 @@
         {
             SuspendLayout();
             // 
-            // ExportDialogForm
+            // ErrorDialog
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Name = "ExportDialogForm";
-            Text = "ExportDialogForm";
-            Load += ExportDialogForm_Load;
+            Name = "ErrorDialog";
+            Text = "ErrorDialog";
+            Load += ErrorDialog_Load;
             ResumeLayout(false);
         }
 
