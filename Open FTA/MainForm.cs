@@ -219,7 +219,7 @@ namespace OpenFTA
         #region Controls
         private void toolStripButtonSave_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
+            /*SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
             sfd.Title = "Save FTAStructure";
             sfd.FileName = "ftastructure.xml";
@@ -242,15 +242,44 @@ namespace OpenFTA
                 {
                     MessageBox.Show("Error saving structure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }*/
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
+            sfd.Title = "Save FTAStructure";
+            sfd.FileName = "ftastructure.fta";
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    SaveTreeClass saveData = new SaveTreeClass
+                    {
+                        BuildVersion = "1.0.1.0",
+                        Zoom = MyDrawingEngine.GlobalZoom,
+                        OffsetX = MyDrawingEngine.offsetX,
+                        OffsetY = MyDrawingEngine.offsetY,
+                        FtaStructure = EngineLogic.FTAStructure
+                    }; 
+
+                    saveData.SaveToFile(sfd.FileName);
+
+                    MessageBox.Show("Structure saved successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error saving structure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
         private void toolStripButtonLoad_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+            ofd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
             ofd.Title = "Open FTAStructure";
 
+            /*
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -289,6 +318,37 @@ namespace OpenFTA
                     pictureBox1.Invalidate();
 
                     // MessageBox.Show("FTAStructure loaded successfully.", "Load", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading FTAStructure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }*/
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    SaveTreeClass loadedData = SaveTreeClass.LoadFromFile(ofd.FileName);
+
+                    MyDrawingEngine.GlobalZoom = loadedData.Zoom;
+                    MyDrawingEngine.offsetX = (int)loadedData.OffsetX;
+                    MyDrawingEngine.offsetY = (int)loadedData.OffsetY;
+                    EngineLogic.FTAStructure.Clear();
+                    EngineLogic.FTAStructure = loadedData.FtaStructure;
+
+                 
+
+                    FTAitem root = EngineLogic.FTAStructure.Values.FirstOrDefault(item => item.Parent == Guid.Empty);
+
+                    EngineLogic.TopEventGuid = root.GuidCode;
+                    EngineLogic.FindAllChilren();
+                    EngineLogic.AssignLevelsToAllEvents();
+                    // UIEngine.FillTreeView(treeView1);
+                    MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
+                    pictureBox1.Invalidate();
+
+                     
                 }
                 catch (Exception ex)
                 {

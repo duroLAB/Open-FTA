@@ -102,7 +102,7 @@ public class FTAlogic
         AddItem(FI);
     }
 
-    public void CopySelectedEvents()
+    public void CopySelectedEventsOLD()
     {
          CopiedEvents.Clear();
 
@@ -129,7 +129,7 @@ public class FTAlogic
         
     }
 
-    public void PasteCopiedEvents()
+    public void PasteCopiedEventsOLD()
     {
         if (CopiedEvents.Count == 0)
         {
@@ -191,6 +191,104 @@ public class FTAlogic
 
         
     }
+
+    public void CopySelectedEvents()
+    {
+        try
+        {
+
+            foreach (var evt in SelectedEvents.OrderBy(item => item.level))
+            {
+                CopiedEvents.Add(evt);
+            }
+            string json = JsonSerializer.Serialize(CopiedEvents, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            Clipboard.SetText(json);
+            CopiedEvents.Clear();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Error during copy operation: " + ex.Message, "Copy Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    public void PasteCopiedEvents()
+    {
+        try
+        {
+
+            if (SelectedEvents.Count != 1)
+            {
+                MessageBox.Show("Please select exactly one target event to paste into.", "Paste Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            FTAitem targetEvent = SelectedEvents[0];
+
+            if (targetEvent.ItemType >= 2)
+            {
+                MessageBox.Show("Cannot paste into a basic event.", "Paste Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+
+            string jsonFromClipboard = Clipboard.GetText();
+            List<FTAitem> CopiedEvents = JsonSerializer.Deserialize<List<FTAitem>>(jsonFromClipboard);
+
+            List<Guid> copiedIDs = CopiedEvents.Select(evt => evt.GuidCode).ToList();
+            Dictionary<Guid, Guid> cloneMapping = new Dictionary<Guid, Guid>();
+            List<FTAitem> clonedEvents = new List<FTAitem>();
+
+            foreach (FTAitem original in CopiedEvents)
+            {
+                FTAitem newItem = original.DeepCopyFrom(original);
+                if (newItem.ItemType >= 1)
+                    newItem.Tag = GetNextAvailableTag(newItem.ItemType);
+                FTAStructure.Add(newItem.GuidCode, newItem);
+                //   cloneMapping[original.GuidCode] =newItem.GuidCode;
+                cloneMapping.Add(original.GuidCode, newItem.GuidCode);
+                clonedEvents.Add(newItem);
+            }
+
+
+            SelectedEvents.Clear();
+            foreach (FTAitem pasted in clonedEvents)
+            {
+                if (cloneMapping.ContainsKey(pasted.Parent))
+                {
+                    Guid newNguid = cloneMapping[pasted.Parent];
+                    pasted.Parent = newNguid;
+                }
+                else
+                {
+                    pasted.Parent = targetEvent.GuidCode;
+
+                }
+                SelectedEvents.Add(pasted);
+
+            }
+
+
+
+
+
+
+            //MessageBox.Show("Paste operation completed.", "Paste", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            FindAllChilren();
+            AssignLevelsToAllEvents();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Error during paste operation: " + ex.Message, "Paste Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+
+    }
+
+
     public  void DeleteSelectedEvents()
     {
         if (SelectedEvents.Count == 0)
@@ -1522,48 +1620,6 @@ public class FTAlogic
     }
 
 
-}
-
-public class FTAitem
-{
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public Guid GuidCode { get; set; }
-    public Guid Parent { get; set; }
-    public int ItemType { get; set; } // 1 - Basic Event, 2 - Intermediate Event
-    // public int Gate; // voliteľné, ak nepotrebné
-    public string Tag { get; set; }
-    public double Frequency { get; set; }
-    public double Value { get; set; }
-    // public int UserMetricType; // voliteľné
-    public int ValueUnit { get; set; }
-    public ValueTypes ValueType { get; set; }
-    public Gates Gate { get; set; }
-
-    public List<Guid> Children { get; set; }
-    public int Level { get; set; }
-    public double X1 { get; set; }
-    public double Y1 { get; set; }
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public int level { get; set; }
-    public bool ItemState { get; set; }
-    public bool IsHidden { get; set; }
-    public bool IsSelected { get; set; }
-    public double LowerBoundFrequency { get; set; }
-    public double UpperBoundFrequency { get; set; }
-    public double BIM { get; set; }
-
-    public FTAitem()
-    {
-        // generovanie unikátneho Guid
-        GuidCode = Guid.NewGuid();
-        Children = new List<Guid>();
-        LowerBoundFrequency = 0;
-        UpperBoundFrequency = 0;
-        BIM = 0;
-    }
 }
 
 public static class Constants
