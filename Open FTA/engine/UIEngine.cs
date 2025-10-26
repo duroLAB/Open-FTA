@@ -5,10 +5,10 @@ using System.Text;
 using System.Windows.Forms;
 
 
-class UIlogic
+class UIEngine
 {
     FTAlogic EngineLogic;
-    public UIlogic(FTAlogic f)
+    public UIEngine(FTAlogic f)
     {
         EngineLogic = f;
     }
@@ -54,6 +54,8 @@ class UIlogic
                     parentNode.Nodes.Add(childGuid.ToString(), EngineLogic.FTAStructure[childGuid].Name);
                 }
             }
+
+            FillMinimalCutSets(treeView1, TreeNodeMinimalCutSet);
         }
         catch (Exception ex)
         {
@@ -61,6 +63,33 @@ class UIlogic
         }
 
         treeView1.ExpandAll();
+    }
+
+    public void FillMinimalCutSets(TreeView treeView1,TreeNode MCSnode)
+    {
+        foreach (var evt in EngineLogic.MCSStructure.Values)
+        {
+            foreach (var childGuid in EngineLogic.MCSStructure[evt.GuidCode].Children)
+            {
+                TreeNode parentNode = treeView1.Nodes.Find(evt.GuidCode.ToString(), true).FirstOrDefault();
+
+                if (parentNode == null)
+                {
+                    TreeNode newParentNode = new TreeNode(EngineLogic.MCSStructure[evt.GuidCode].Name)
+                    {
+                        Name = evt.GuidCode.ToString()
+                    };
+                    TreeNode grandParentNode = treeView1.Nodes.Find(EngineLogic.MCSStructure[evt.GuidCode].Parent.ToString(), true).FirstOrDefault();
+                    if (grandParentNode != null)
+                        grandParentNode.Nodes.Add(newParentNode);
+                    else
+                        MCSnode.Nodes.Add(newParentNode);
+
+                    parentNode = newParentNode;
+                }
+               parentNode.Nodes.Add(childGuid.ToString(), EngineLogic.MCSStructure[childGuid].Name);
+            }
+        }
     }
 
     public void SetupModernGrid(DataGridView grid)

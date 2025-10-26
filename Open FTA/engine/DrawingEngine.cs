@@ -85,6 +85,43 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
+    private void DrawMCSHeader(Graphics g, Rectangle rect, string text,int Height,int FontSize)
+    {
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+        // Výška hlavičky
+        int headerHeight = Height;
+
+        // Vytvorenie obdĺžnika v hornej časti
+        Rectangle headerRect = new Rectangle(rect.X, rect.Y, rect.Width, headerHeight);
+
+        // Vyplnenie zelenou farbou
+        using (Brush headerBrush = new SolidBrush(Color.LightGreen))
+        {
+            g.FillRectangle(headerBrush, headerRect);
+        }
+
+        // Ohraničenie hlavičky
+        using (Pen borderPen = new Pen(Color.DarkGreen, 2))
+        {
+            g.DrawRectangle(borderPen, headerRect);
+        }
+
+        // Text v strede
+        using (Font font = new Font("Segoe UI", FontSize, FontStyle.Bold))
+        using (Brush textBrush = new SolidBrush(Color.DarkGreen))
+        {
+            StringFormat sf = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+
+            g.DrawString(text, font, textBrush, headerRect, sf);
+        }
+    }
+
     private void DrawEvents(Graphics g)
     {
         // using (Pen selPen = new Pen(Color.Blue))
@@ -109,12 +146,41 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                     // Nastavíme farbu pera podľa toho, či je udalosť vybraná (multiselect)
                     if (evt.IsSelected)
+                    {
                         selPen.Color = Color.Red;
+                        selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+                    }
                     else
+                    {
                         selPen.Color = MainAppSettings.Instance.ItemPen.Color;
+                        selPen.Width = MainAppSettings.Instance.ItemPen.Width ;
+                    }
+                
 
-                    // Ak je aktívny režim ťahania a udalosť je vybraná, použijeme čierne perá so šrafovaním.
-                    if (SelectedEventDrag && evt.IsSelected)
+                    string searchGuid = evt.Tag;
+                    bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
+                    if (exists)
+                    {
+                        selPen.Color = Color.Green;
+
+                        selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+                        Rectangle headerRect = new Rectangle(0, 0, 220, 25);
+                        string t = "Minimal Cut Set:"+EngineLogic.HighlightedMCS;
+                        DrawMCSHeader(g, headerRect, t,25,10);
+
+                        headerRect = r;
+                        headerRect.X = r.X + r.Width/2+2;
+                        headerRect.Y = r.Y-18;
+                        headerRect.Width = r.Width/2-5;
+
+                        DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS,16,8);
+
+
+                    }
+
+
+                        // Ak je aktívny režim ťahania a udalosť je vybraná, použijeme čierne perá so šrafovaním.
+                        if (SelectedEventDrag && evt.IsSelected)
                     {
                         selPen.Color = Color.Black;
                         selPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
@@ -463,7 +529,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                         {
                             // OR Gate 
                             g.DrawArc(linePen, parentCenter.X - 20, gateY - 10, 40, 60, 0, -180);
-                            g.DrawArc(linePen, parentCenter.X - 20, gateY + 10, 40, 20, 0, -180);
+                            g.DrawArc(linePen, parentCenter.X - 20, gateY + 10, 40, 20, 0, -180);                          
                         }
                         else if (parent.Gate == Gates.AND)
                         {
@@ -483,6 +549,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                         {
                             case Gates.OR: // OR Gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gateOr.png", verticalOffset: 10);
+                                //DrawOrGate(g, parentRect);
                                 break;
                             case Gates.AND: // AND Gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gateAnd.png", verticalOffset: 10);
@@ -1066,6 +1133,46 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             (float)(maxY - minY)
         );
     }
+
+    private void DrawOrGate(Graphics g, Rectangle rect)
+    {
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+
+        // Zmeníme rozmery – užšia a posunutá nižšie
+        int newWidth = rect.Width / 3;   // zmenšenie šírky
+        int newHeight = (int)(rect.Height/1.3);     // výška zostáva rovnaká
+        int newX = rect.X + (rect.Width - newWidth) / 2; // vycentrované horizontálne
+        int newY = rect.Y + (int)( rect.Height*1.1);             // posunutie nižšie
+
+        Rectangle adjustedRect = new Rectangle(newX, newY, newWidth, newHeight);
+
+        using (Pen linePen = new Pen(Color.Black, 2))
+        {
+            // Main arcs
+            g.DrawArc(linePen, adjustedRect.X, adjustedRect.Y, adjustedRect.Width, adjustedRect.Height, 0, -180);
+            g.DrawArc(linePen, adjustedRect.X, adjustedRect.Y + adjustedRect.Height / 3,
+                      adjustedRect.Width, adjustedRect.Height / 3, 0, -180);
+        }
+
+        // Optional 3D gradient fill
+        using (LinearGradientBrush brush = new LinearGradientBrush(
+            adjustedRect, Color.LightBlue, Color.DarkBlue, LinearGradientMode.ForwardDiagonal))
+        {
+            GraphicsPath path = new GraphicsPath();
+            path.AddArc(adjustedRect.X, adjustedRect.Y, adjustedRect.Width, adjustedRect.Height, 0, -180);
+            path.AddArc(adjustedRect.X, adjustedRect.Y + adjustedRect.Height / 3,
+                        adjustedRect.Width, adjustedRect.Height / 3, 0, -180);
+            g.FillPath(brush, path);
+        }
+    }
+
+
+
+
+
+
+
+
 }
 
 

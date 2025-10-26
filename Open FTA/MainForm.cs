@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -21,7 +22,7 @@ namespace OpenFTA
     {
         FTAlogic EngineLogic;
         FTAlogic EngineLogicMCS;
-        UIlogic UIEngine;
+        UIEngine MyUIEngine;
         DrawingEngine MyDrawingEngine;
 
 
@@ -33,7 +34,7 @@ namespace OpenFTA
             InitializeComponent();
             EngineLogic = new FTAlogic();
             EngineLogicMCS = new FTAlogic();
-            UIEngine = new UIlogic(EngineLogic);
+            MyUIEngine = new UIEngine(EngineLogic);
             MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
             /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
              pictureBox1.Dock = DockStyle.Fill;
@@ -106,7 +107,7 @@ namespace OpenFTA
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            UIEngine.FillTreeView(treeView1);
+            MyUIEngine.FillTreeView(treeView1);
             MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             EngineLogic.AssignLevelsToAllEvents();
@@ -314,7 +315,7 @@ namespace OpenFTA
 
                     EngineLogic.FindAllChilren();
                     EngineLogic.AssignLevelsToAllEvents();
-                    UIEngine.FillTreeView(treeView1);
+                    MyUIEngine.FillTreeView(treeView1);
                     pictureBox1.Invalidate();
 
                     // MessageBox.Show("FTAStructure loaded successfully.", "Load", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -344,7 +345,7 @@ namespace OpenFTA
                     EngineLogic.TopEventGuid = root.GuidCode;
                     EngineLogic.FindAllChilren();
                     EngineLogic.AssignLevelsToAllEvents();
-                    // UIEngine.FillTreeView(treeView1);
+                    MyUIEngine.FillTreeView(treeView1);
                     MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
                     pictureBox1.Invalidate();
 
@@ -360,7 +361,7 @@ namespace OpenFTA
         private void toolStripButtonCopy_Click(object sender, EventArgs e)
         {
             EngineLogic.CopySelectedEvents();
-            UIEngine.FillTreeView(treeView1);
+            MyUIEngine.FillTreeView(treeView1);
         }
 
         private void toolStripButtonPaste_Click(object sender, EventArgs e)
@@ -372,14 +373,14 @@ namespace OpenFTA
             }
             treeView1.ExpandAll();
             pictureBox1.Invalidate();
-            UIEngine.FillTreeView(treeView1);
+            MyUIEngine.FillTreeView(treeView1);
         }
 
         private void toolStripButtonDelete_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
             EngineLogic.DeleteSelectedEvents();
-            UIEngine.FillTreeView(treeView1);
+            MyUIEngine.FillTreeView(treeView1);
             pictureBox1.Invalidate();
         }
 
@@ -487,7 +488,7 @@ namespace OpenFTA
                     ReadInfoFromEditForm(edit, selectedEvent);
                 }
 
-                UIEngine.FillTreeView(treeView1);
+                MyUIEngine.FillTreeView(treeView1);
                 EngineLogic.AssignLevelsToAllEvents();
                 pictureBox1.Invalidate();
             }
@@ -526,7 +527,7 @@ namespace OpenFTA
 
 
             UpdateMainFormControls();
-            UIEngine.FillTreeView(treeView1);
+            MyUIEngine.FillTreeView(treeView1);
             EngineLogic.AssignLevelsToAllEvents();
             pictureBox1.Invalidate();
         }
@@ -614,7 +615,7 @@ namespace OpenFTA
 
                 EngineLogic.FindAllChilren();
                 EngineLogic.AssignLevelsToAllEvents();
-                UIEngine.FillTreeView(treeView1);
+                MyUIEngine.FillTreeView(treeView1);
                 pictureBox1.Invalidate();
             }
         }
@@ -634,7 +635,7 @@ namespace OpenFTA
 
                 EngineLogic.FindAllChilren();
                 EngineLogic.AssignLevelsToAllEvents();
-                UIEngine.FillTreeView(treeView1);
+                MyUIEngine.FillTreeView(treeView1);
                 pictureBox1.Invalidate();
             }
         }
@@ -740,7 +741,7 @@ namespace OpenFTA
             var A = new MCSEngine(EngineLogic);
             A.PerformMCS();
 
-            A.FillTreeNode(UIEngine.TreeNodeMinimalCutSet);
+            A.FillTreeNode(MyUIEngine.TreeNodeMinimalCutSet);
             */
 
 
@@ -774,8 +775,8 @@ namespace OpenFTA
 
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
-            /*FormSettings settingsForm = new FormSettings();
-            settingsForm.ShowDialog();*/
+            FormSettings settingsForm = new FormSettings();
+            settingsForm.ShowDialog();
 
 
 
@@ -878,11 +879,11 @@ namespace OpenFTA
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
             EngineLogic = new FTAlogic();
-            UIEngine = new UIlogic(EngineLogic);
+            MyUIEngine = new UIEngine(EngineLogic);
             MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
 
 
-            UIEngine.FillTreeView(treeView1);
+            MyUIEngine.FillTreeView(treeView1);
             MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
 
             EngineLogic.AssignLevelsToAllEvents();
@@ -964,6 +965,8 @@ namespace OpenFTA
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            tabControl1.SelectedTab = tabPage1;
+
             //  ShiftDown for multiselect
             bool shiftDown = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
 
@@ -994,6 +997,31 @@ namespace OpenFTA
                     EngineLogic.SelectedEvents.Add(selectedItem);
                 }
             }
+
+            EngineLogic.HighlightedMCS = "";
+            ////Minimal cutset test
+            EngineLogic.HighlightedEvents.Clear();             
+            var selectedMSCItem = EngineLogic.GetItem(treeView1.SelectedNode.Name, EngineLogic.MCSStructure);
+            if (selectedMSCItem != null)
+            {
+                if (selectedMSCItem.ItemType == 1)
+                {
+                    EngineLogic.HighlightedMCS = selectedMSCItem.Name;
+                    for (int i = 0; i < selectedMSCItem.Children.Count; i++)
+                    {
+                        var child = EngineLogic.GetItem(selectedMSCItem.Children[i], EngineLogic.MCSStructure);
+
+                        if (child != null)
+                            EngineLogic.HighlightedEvents.Add(child);
+
+                    }
+                }
+             }
+
+            
+
+
+
 
             pictureBox1.Invalidate();
         }
@@ -1083,14 +1111,18 @@ namespace OpenFTA
 
 
 
-            UIEngine.SetupModernGrid(dataGridViewMCSResults);
+            MyUIEngine.SetupModernGrid(dataGridViewMCSResults);
             dataGridViewMCSResults.Columns[0].Width = 80;  // prvý stĺpec
             dataGridViewMCSResults.Columns[1].Width = 120; // druhý stĺpec
 
             var column = dataGridViewMCSResults.Columns[1];
             dataGridViewMCSResults.Sort(column, System.ComponentModel.ListSortDirection.Descending);
 
+            MyUIEngine.FillTreeView(treeView1);
+
             tabControl1.SelectedTab = tabPage2;
+
+            
         }
 
         private void SaveGridToCsv(DataGridView grid)
@@ -1214,7 +1246,7 @@ namespace OpenFTA
             dataGridViewImportanceMeasureResults.Dock = DockStyle.Fill;
             dataGridViewImportanceMeasureResults.DataSource = sortedDt;
 
-            UIEngine.SetupModernGrid(dataGridViewImportanceMeasureResults);
+            MyUIEngine.SetupModernGrid(dataGridViewImportanceMeasureResults);
 
             tabControl1.SelectedTab = tabPage3;
 

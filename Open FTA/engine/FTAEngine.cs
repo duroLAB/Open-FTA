@@ -66,6 +66,9 @@ public class FTAlogic
 
     public Dictionary<Guid, FTAitem> MCSStructure { get; private set; } = new Dictionary<Guid, FTAitem>();
     public List<FTAitem> SelectedEvents { get; set; } = new List<FTAitem>();
+    public List<FTAitem> HighlightedEvents { get; set; } = new List<FTAitem>();
+
+    public String HighlightedMCS { get; set; }
     public List<FTAitem> CopiedEvents { get; set; } = new List<FTAitem>();
     public bool IsHidden { get; set; } = false;
 
@@ -469,6 +472,17 @@ public class FTAlogic
         bool isValid = Guid.TryParse(guidString, out guid);
         if (isValid)
             return FTAStructure.TryGetValue(guid, out FTAitem item) ? item : null;
+        else
+            return (null);
+    }
+
+    public FTAitem GetItem(String guidString, Dictionary<Guid, FTAitem> str)
+    {
+
+        Guid guid;
+        bool isValid = Guid.TryParse(guidString, out guid);
+        if (isValid)
+            return str.TryGetValue(guid, out FTAitem item) ? item : null;
         else
             return (null);
     }
@@ -1080,6 +1094,7 @@ public class FTAlogic
                         // Create a copy of the original event for the MCS structure.
                         FTAitem newItem = new FTAitem
                         {
+                            GuidCode = originalEvent.GuidCode,
                             Name = originalEvent.Name,
                             Tag = originalEvent.Tag,
                             ItemType = originalEvent.ItemType,
@@ -1107,6 +1122,7 @@ public class FTAlogic
                 {
                     FTAitem newItem = new FTAitem
                     {
+                        GuidCode = originalEvent.GuidCode,
                         Name = originalEvent.Name,
                         Tag = originalEvent.Tag,
                         ItemType = originalEvent.ItemType,
