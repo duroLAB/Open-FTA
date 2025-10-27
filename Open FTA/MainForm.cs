@@ -470,6 +470,7 @@ namespace OpenFTA
                 edit.comboBoxUnits.SelectedIndex = selectedEvent.ValueUnit;
 
                 edit.comboBoxMetricType.SelectedIndex = (int)selectedEvent.ValueType;
+                edit.Text = "Event:" + selectedEvent.Name + " (" + selectedEvent.Tag+")";
             }
 
 
@@ -542,62 +543,6 @@ namespace OpenFTA
         }
 
         #endregion
-
-        /*     public void ArrangeMainTreeHierarchically()
-             {
-                 FTAitem topEvent = EngineLogic.FTAStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
-                 if (topEvent == null)
-                     return;
-
-                 // Set top event position
-                 topEvent.X = pictureBox1.Width / 2;
-                 topEvent.Y = 50;
-
-                 ArrangeChildren(topEvent);
-
-                 pictureBox1.Invalidate();
-             }
-             private void ArrangeChildren(FTAitem parent)
-             {
-                 int verticalSpacing = 180;
-                 int gap = 20;
-
-                 if (parent.Children == null || parent.Children.Count == 0)
-                     return;
-
-                 double allocatedWidth = ComputeSubtreeWidth(parent, gap);
-                 double startX = parent.X - allocatedWidth / 2;
-                 int childY = parent.Y + verticalSpacing;
-
-                 double currentX = startX;
-                 foreach (Guid childGuid in parent.Children)
-                 {
-                     if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
-                     {
-                         double childWidth = ComputeSubtreeWidth(child, gap);
-                         child.X = (int)(currentX + childWidth / 2);
-                         child.Y = childY;
-                         currentX += childWidth + gap;
-                         ArrangeChildren(child);
-                     }
-                 }
-             }
-             private double ComputeSubtreeWidth(FTAitem node, int gap)
-             {
-                 if (node.Children == null || node.Children.Count == 0)
-                     return Constants.EventWidth;
-
-                 double totalWidth = 0;
-                 foreach (Guid childGuid in node.Children)
-                 {
-                     if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
-                     {
-                         totalWidth += ComputeSubtreeWidth(child, gap) + gap;
-                     }
-                 }
-                 totalWidth -= gap;
-                 return Math.Max(totalWidth, Constants.EventWidth);
-             }*/
 
         private void Undo()
         {
@@ -751,8 +696,7 @@ namespace OpenFTA
         private void toolStripButtonrReport_Click(object sender, EventArgs e)
         {
 
-            EngineLogic.PerformFullTest();
-            return;
+         
             EngineLogic.GenerateHTMLreport();
 
             ReportForm r = new ReportForm();
@@ -763,6 +707,9 @@ namespace OpenFTA
 
         private void freqvencyToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!EngineLogic.PerformFullTest())
+                return;
+
             String vysledok;
             var TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
             EngineLogic.ComputeTree();
@@ -1041,6 +988,9 @@ namespace OpenFTA
 
         private void minimalCutSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if(!EngineLogic.PerformFullTest())
+                return;
+
 
             string equation = "";
             string simplifiedEquation = "";
@@ -1058,9 +1008,9 @@ namespace OpenFTA
             foreach (var item in EngineLogic.MCSStructure)
             {
                 if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
-            }
-            EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);
-
+            } 
+             
+            EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);            
             List<FTAitem> l = EngineLogic.GenerateListOfBasicEvents();
 
             dataGridViewMCSResults.Rows.Clear();
@@ -1203,6 +1153,9 @@ namespace OpenFTA
 
         private void importanceMeasureToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!EngineLogic.PerformFullTest())
+                return;
+
             DataTable dt = new DataTable();
             dt.Columns.Add("Event Name", typeof(string));
             dt.Columns.Add("Event GUID", typeof(string));

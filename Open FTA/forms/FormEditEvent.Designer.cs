@@ -36,53 +36,48 @@
             comboBoxUnits = new ComboBox();
             buttonDatabase = new Button();
             textBoxFrequency = new TextBox();
-            label3 = new Label();
+            labelMetricType = new Label();
             comboBoxMetricType = new ComboBox();
             label8 = new Label();
-            tabControlfailure_metrics = new TabControl();
-            tabPage1 = new TabPage();
-            tabPage2 = new TabPage();
-            label5 = new Label();
-            tabPage3 = new TabPage();
-            label6 = new Label();
-            tabPage4 = new TabPage();
-            label7 = new Label();
             pictureBox1 = new PictureBox();
             comboBoxGates = new ComboBox();
             textBoxDescription = new TextBox();
-            tabPageIntermediate = new TabPage();
             label2 = new Label();
-            tabPageBasic = new TabPage();
             comboBoxEventType = new ComboBox();
             pictureBox2 = new PictureBox();
             label1 = new Label();
             textBoxName = new TextBox();
             button2 = new Button();
             button1 = new Button();
-            tabControl1 = new TabControl();
             panel1 = new Panel();
             groupBox3 = new GroupBox();
             groupBoxDetailSettings = new GroupBox();
+            panelShowMetric = new Panel();
+            panelShowGates = new Panel();
+            label3 = new Label();
+            tabControlMain = new TabControl();
+            tabPageMain1 = new TabPage();
+            tabPageMain2 = new TabPage();
+            groupBoxReference = new GroupBox();
+            buttonAddreference = new Button();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
-            tabControlfailure_metrics.SuspendLayout();
-            tabPage1.SuspendLayout();
-            tabPage2.SuspendLayout();
-            tabPage3.SuspendLayout();
-            tabPage4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            tabPageIntermediate.SuspendLayout();
-            tabPageBasic.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
-            tabControl1.SuspendLayout();
             panel1.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBoxDetailSettings.SuspendLayout();
+            panelShowMetric.SuspendLayout();
+            panelShowGates.SuspendLayout();
+            tabControlMain.SuspendLayout();
+            tabPageMain1.SuspendLayout();
+            tabPageMain2.SuspendLayout();
+            groupBoxReference.SuspendLayout();
             SuspendLayout();
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(31, 149);
+            label4.Location = new Point(30, 146);
             label4.Margin = new Padding(2, 0, 2, 0);
             label4.Name = "label4";
             label4.Size = new Size(67, 15);
@@ -95,17 +90,17 @@
             // 
             // textBoxTag
             // 
-            textBoxTag.Location = new Point(124, 109);
+            textBoxTag.Location = new Point(124, 64);
             textBoxTag.Margin = new Padding(4, 3, 4, 3);
             textBoxTag.Name = "textBoxTag";
-            textBoxTag.Size = new Size(139, 23);
+            textBoxTag.Size = new Size(120, 23);
             textBoxTag.TabIndex = 21;
             textBoxTag.TextChanged += textBoxTag_TextChanged;
             // 
             // TAG
             // 
             TAG.AutoSize = true;
-            TAG.Location = new Point(31, 113);
+            TAG.Location = new Point(30, 67);
             TAG.Margin = new Padding(4, 0, 4, 0);
             TAG.Name = "TAG";
             TAG.Size = new Size(28, 15);
@@ -115,7 +110,7 @@
             // comboBoxUnits
             // 
             comboBoxUnits.FormattingEnabled = true;
-            comboBoxUnits.Location = new Point(214, 17);
+            comboBoxUnits.Location = new Point(242, 75);
             comboBoxUnits.Margin = new Padding(2);
             comboBoxUnits.Name = "comboBoxUnits";
             comboBoxUnits.Size = new Size(45, 23);
@@ -124,7 +119,7 @@
             // 
             // buttonDatabase
             // 
-            buttonDatabase.Location = new Point(309, 15);
+            buttonDatabase.Location = new Point(308, 26);
             buttonDatabase.Margin = new Padding(2);
             buttonDatabase.Name = "buttonDatabase";
             buttonDatabase.Size = new Size(88, 22);
@@ -135,7 +130,7 @@
             // 
             // textBoxFrequency
             // 
-            textBoxFrequency.Location = new Point(92, 17);
+            textBoxFrequency.Location = new Point(120, 75);
             textBoxFrequency.Margin = new Padding(4, 3, 4, 3);
             textBoxFrequency.Name = "textBoxFrequency";
             textBoxFrequency.Size = new Size(116, 23);
@@ -143,22 +138,22 @@
             textBoxFrequency.TextChanged += textBoxFrequency_TextChanged;
             textBoxFrequency.Validating += textBoxFrequency_Validating;
             // 
-            // label3
+            // labelMetricType
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(8, 20);
-            label3.Margin = new Padding(4, 0, 4, 0);
-            label3.Name = "label3";
-            label3.Size = new Size(83, 15);
-            label3.TabIndex = 0;
-            label3.Text = "Frequency f = ";
-            label3.Click += label3_Click;
+            labelMetricType.AutoSize = true;
+            labelMetricType.Location = new Point(18, 78);
+            labelMetricType.Margin = new Padding(4, 0, 4, 0);
+            labelMetricType.Name = "labelMetricType";
+            labelMetricType.Size = new Size(83, 15);
+            labelMetricType.TabIndex = 0;
+            labelMetricType.Text = "Frequency f = ";
+            labelMetricType.Click += label3_Click;
             // 
             // comboBoxMetricType
             // 
             comboBoxMetricType.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxMetricType.FormattingEnabled = true;
-            comboBoxMetricType.Location = new Point(108, 16);
+            comboBoxMetricType.Location = new Point(120, 27);
             comboBoxMetricType.Name = "comboBoxMetricType";
             comboBoxMetricType.Size = new Size(174, 23);
             comboBoxMetricType.TabIndex = 6;
@@ -167,113 +162,24 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(15, 19);
+            label8.Location = new Point(14, 30);
             label8.Name = "label8";
             label8.Size = new Size(87, 15);
             label8.TabIndex = 5;
             label8.Text = "Select a metric:";
             // 
-            // tabControlfailure_metrics
-            // 
-            tabControlfailure_metrics.Controls.Add(tabPage1);
-            tabControlfailure_metrics.Controls.Add(tabPage2);
-            tabControlfailure_metrics.Controls.Add(tabPage3);
-            tabControlfailure_metrics.Controls.Add(tabPage4);
-            tabControlfailure_metrics.Location = new Point(15, 45);
-            tabControlfailure_metrics.Name = "tabControlfailure_metrics";
-            tabControlfailure_metrics.SelectedIndex = 0;
-            tabControlfailure_metrics.Size = new Size(366, 99);
-            tabControlfailure_metrics.TabIndex = 4;
-            // 
-            // tabPage1
-            // 
-            tabPage1.Controls.Add(textBoxFrequency);
-            tabPage1.Controls.Add(comboBoxUnits);
-            tabPage1.Controls.Add(label3);
-            tabPage1.Location = new Point(4, 24);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(358, 71);
-            tabPage1.TabIndex = 0;
-            tabPage1.Text = "tabPage1";
-            tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            tabPage2.Controls.Add(label5);
-            tabPage2.Location = new Point(4, 24);
-            tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(358, 71);
-            tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
-            tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new Point(8, 20);
-            label5.Margin = new Padding(4, 0, 4, 0);
-            label5.Name = "label5";
-            label5.Size = new Size(88, 15);
-            label5.TabIndex = 2;
-            label5.Text = "Probability  P =";
-            // 
-            // tabPage3
-            // 
-            tabPage3.Controls.Add(label6);
-            tabPage3.Location = new Point(4, 24);
-            tabPage3.Name = "tabPage3";
-            tabPage3.Padding = new Padding(3);
-            tabPage3.Size = new Size(358, 71);
-            tabPage3.TabIndex = 2;
-            tabPage3.Text = "tabPage3";
-            tabPage3.UseVisualStyleBackColor = true;
-            tabPage3.Click += tabPage3_Click;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new Point(8, 20);
-            label6.Margin = new Padding(4, 0, 4, 0);
-            label6.Name = "label6";
-            label6.Size = new Size(76, 15);
-            label6.TabIndex = 4;
-            label6.Text = "Reliability R=";
-            // 
-            // tabPage4
-            // 
-            tabPage4.Controls.Add(label7);
-            tabPage4.Location = new Point(4, 24);
-            tabPage4.Name = "tabPage4";
-            tabPage4.Padding = new Padding(3);
-            tabPage4.Size = new Size(358, 71);
-            tabPage4.TabIndex = 3;
-            tabPage4.Text = "tabPage4";
-            tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Location = new Point(10, 18);
-            label7.Margin = new Padding(4, 0, 4, 0);
-            label7.Name = "label7";
-            label7.Size = new Size(82, 15);
-            label7.TabIndex = 6;
-            label7.Text = "Failure rate λ=";
-            // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(200, 25);
+            pictureBox1.Location = new Point(250, 30);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(110, 110);
+            pictureBox1.Size = new Size(82, 73);
             pictureBox1.TabIndex = 1;
             pictureBox1.TabStop = false;
             // 
             // comboBoxGates
             // 
-            comboBoxGates.Location = new Point(24, 25);
+            comboBoxGates.Location = new Point(108, 30);
             comboBoxGates.Name = "comboBoxGates";
             comboBoxGates.Size = new Size(121, 23);
             comboBoxGates.TabIndex = 0;
@@ -285,51 +191,23 @@
             textBoxDescription.Margin = new Padding(2);
             textBoxDescription.Multiline = true;
             textBoxDescription.Name = "textBoxDescription";
-            textBoxDescription.Size = new Size(140, 36);
+            textBoxDescription.Size = new Size(292, 63);
             textBoxDescription.TabIndex = 22;
-            // 
-            // tabPageIntermediate
-            // 
-            tabPageIntermediate.Controls.Add(comboBoxGates);
-            tabPageIntermediate.Controls.Add(pictureBox1);
-            tabPageIntermediate.Location = new Point(4, 24);
-            tabPageIntermediate.Margin = new Padding(4, 3, 4, 3);
-            tabPageIntermediate.Name = "tabPageIntermediate";
-            tabPageIntermediate.Padding = new Padding(4, 3, 4, 3);
-            tabPageIntermediate.Size = new Size(423, 168);
-            tabPageIntermediate.TabIndex = 0;
-            tabPageIntermediate.Text = "tabPage1";
-            tabPageIntermediate.UseVisualStyleBackColor = true;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(31, 72);
+            label2.Location = new Point(30, 105);
             label2.Margin = new Padding(4, 0, 4, 0);
             label2.Name = "label2";
             label2.Size = new Size(62, 15);
             label2.TabIndex = 18;
             label2.Text = "Event type";
             // 
-            // tabPageBasic
-            // 
-            tabPageBasic.Controls.Add(tabControlfailure_metrics);
-            tabPageBasic.Controls.Add(label8);
-            tabPageBasic.Controls.Add(comboBoxMetricType);
-            tabPageBasic.Controls.Add(buttonDatabase);
-            tabPageBasic.Location = new Point(4, 24);
-            tabPageBasic.Margin = new Padding(4, 3, 4, 3);
-            tabPageBasic.Name = "tabPageBasic";
-            tabPageBasic.Padding = new Padding(4, 3, 4, 3);
-            tabPageBasic.Size = new Size(423, 168);
-            tabPageBasic.TabIndex = 1;
-            tabPageBasic.Text = "tabPage2";
-            tabPageBasic.UseVisualStyleBackColor = true;
-            // 
             // comboBoxEventType
             // 
             comboBoxEventType.FormattingEnabled = true;
-            comboBoxEventType.Location = new Point(124, 69);
+            comboBoxEventType.Location = new Point(124, 102);
             comboBoxEventType.Margin = new Padding(4, 3, 4, 3);
             comboBoxEventType.Name = "comboBoxEventType";
             comboBoxEventType.Size = new Size(140, 23);
@@ -338,17 +216,17 @@
             // 
             // pictureBox2
             // 
-            pictureBox2.Location = new Point(291, 25);
+            pictureBox2.Location = new Point(335, 64);
             pictureBox2.Margin = new Padding(4, 3, 4, 3);
             pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(110, 110);
+            pictureBox2.Size = new Size(81, 73);
             pictureBox2.TabIndex = 16;
             pictureBox2.TabStop = false;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(31, 25);
+            label1.Location = new Point(30, 25);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(72, 15);
@@ -360,14 +238,14 @@
             textBoxName.Location = new Point(124, 22);
             textBoxName.Margin = new Padding(4, 3, 4, 3);
             textBoxName.Name = "textBoxName";
-            textBoxName.Size = new Size(140, 23);
+            textBoxName.Size = new Size(292, 23);
             textBoxName.TabIndex = 14;
             // 
             // button2
             // 
             button2.DialogResult = DialogResult.Cancel;
             button2.Dock = DockStyle.Right;
-            button2.Location = new Point(261, 0);
+            button2.Location = new Point(652, 0);
             button2.Margin = new Padding(4, 3, 4, 3);
             button2.Name = "button2";
             button2.Size = new Size(88, 40);
@@ -379,7 +257,7 @@
             // 
             button1.DialogResult = DialogResult.OK;
             button1.Dock = DockStyle.Right;
-            button1.Location = new Point(349, 0);
+            button1.Location = new Point(740, 0);
             button1.Margin = new Padding(4, 3, 4, 3);
             button1.Name = "button1";
             button1.Size = new Size(88, 40);
@@ -388,27 +266,15 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
-            // tabControl1
-            // 
-            tabControl1.Controls.Add(tabPageIntermediate);
-            tabControl1.Controls.Add(tabPageBasic);
-            tabControl1.Dock = DockStyle.Fill;
-            tabControl1.Location = new Point(3, 19);
-            tabControl1.Margin = new Padding(4, 3, 4, 3);
-            tabControl1.Name = "tabControl1";
-            tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(431, 196);
-            tabControl1.TabIndex = 19;
-            // 
             // panel1
             // 
             panel1.Controls.Add(button2);
             panel1.Controls.Add(button1);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(0, 422);
+            panel1.Location = new Point(0, 627);
             panel1.Margin = new Padding(4, 3, 4, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(437, 40);
+            panel1.Size = new Size(828, 40);
             panel1.TabIndex = 13;
             // 
             // groupBox3
@@ -423,57 +289,139 @@
             groupBox3.Controls.Add(textBoxDescription);
             groupBox3.Controls.Add(label2);
             groupBox3.Dock = DockStyle.Top;
-            groupBox3.Location = new Point(0, 0);
+            groupBox3.Location = new Point(3, 3);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(437, 197);
+            groupBox3.Size = new Size(814, 228);
             groupBox3.TabIndex = 24;
             groupBox3.TabStop = false;
-            groupBox3.Text = "groupBox3";
+            groupBox3.Text = "   Identification";
             // 
             // groupBoxDetailSettings
             // 
-            groupBoxDetailSettings.Controls.Add(tabControl1);
+            groupBoxDetailSettings.BackColor = SystemColors.Control;
+            groupBoxDetailSettings.Controls.Add(panelShowMetric);
+            groupBoxDetailSettings.Controls.Add(panelShowGates);
             groupBoxDetailSettings.Dock = DockStyle.Top;
-            groupBoxDetailSettings.Location = new Point(0, 197);
+            groupBoxDetailSettings.Location = new Point(3, 231);
             groupBoxDetailSettings.Name = "groupBoxDetailSettings";
-            groupBoxDetailSettings.Size = new Size(437, 218);
+            groupBoxDetailSettings.Size = new Size(814, 215);
             groupBoxDetailSettings.TabIndex = 25;
             groupBoxDetailSettings.TabStop = false;
             groupBoxDetailSettings.Text = "groupBox4";
+            // 
+            // panelShowMetric
+            // 
+            panelShowMetric.Controls.Add(comboBoxUnits);
+            panelShowMetric.Controls.Add(textBoxFrequency);
+            panelShowMetric.Controls.Add(buttonDatabase);
+            panelShowMetric.Controls.Add(label8);
+            panelShowMetric.Controls.Add(labelMetricType);
+            panelShowMetric.Controls.Add(comboBoxMetricType);
+            panelShowMetric.Location = new Point(409, 22);
+            panelShowMetric.Name = "panelShowMetric";
+            panelShowMetric.Size = new Size(409, 155);
+            panelShowMetric.TabIndex = 1;
+            // 
+            // panelShowGates
+            // 
+            panelShowGates.Controls.Add(label3);
+            panelShowGates.Controls.Add(pictureBox1);
+            panelShowGates.Controls.Add(comboBoxGates);
+            panelShowGates.Location = new Point(20, 22);
+            panelShowGates.Name = "panelShowGates";
+            panelShowGates.Size = new Size(362, 155);
+            panelShowGates.TabIndex = 0;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(30, 33);
+            label3.Name = "label3";
+            label3.Size = new Size(73, 15);
+            label3.TabIndex = 2;
+            label3.Text = "Choose gate";
+            // 
+            // tabControlMain
+            // 
+            tabControlMain.Controls.Add(tabPageMain1);
+            tabControlMain.Controls.Add(tabPageMain2);
+            tabControlMain.Dock = DockStyle.Fill;
+            tabControlMain.Location = new Point(0, 0);
+            tabControlMain.Name = "tabControlMain";
+            tabControlMain.SelectedIndex = 0;
+            tabControlMain.Size = new Size(828, 627);
+            tabControlMain.TabIndex = 26;
+            // 
+            // tabPageMain1
+            // 
+            tabPageMain1.Controls.Add(groupBoxDetailSettings);
+            tabPageMain1.Controls.Add(groupBox3);
+            tabPageMain1.Location = new Point(4, 24);
+            tabPageMain1.Name = "tabPageMain1";
+            tabPageMain1.Padding = new Padding(3);
+            tabPageMain1.Size = new Size(820, 599);
+            tabPageMain1.TabIndex = 0;
+            tabPageMain1.Text = "General";
+            tabPageMain1.UseVisualStyleBackColor = true;
+            // 
+            // tabPageMain2
+            // 
+            tabPageMain2.Controls.Add(groupBoxReference);
+            tabPageMain2.Location = new Point(4, 24);
+            tabPageMain2.Name = "tabPageMain2";
+            tabPageMain2.Padding = new Padding(3);
+            tabPageMain2.Size = new Size(505, 599);
+            tabPageMain2.TabIndex = 1;
+            tabPageMain2.Text = "Basic Event Settings";
+            tabPageMain2.UseVisualStyleBackColor = true;
+            // 
+            // groupBoxReference
+            // 
+            groupBoxReference.Controls.Add(buttonAddreference);
+            groupBoxReference.Dock = DockStyle.Top;
+            groupBoxReference.Location = new Point(3, 3);
+            groupBoxReference.Name = "groupBoxReference";
+            groupBoxReference.Size = new Size(499, 165);
+            groupBoxReference.TabIndex = 0;
+            groupBoxReference.TabStop = false;
+            groupBoxReference.Text = "Reference";
+            // 
+            // buttonAddreference
+            // 
+            buttonAddreference.Location = new Point(6, 22);
+            buttonAddreference.Name = "buttonAddreference";
+            buttonAddreference.Size = new Size(91, 23);
+            buttonAddreference.TabIndex = 0;
+            buttonAddreference.Text = "Add new";
+            buttonAddreference.UseVisualStyleBackColor = true;
             // 
             // FormEditEvent
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(437, 462);
-            Controls.Add(groupBoxDetailSettings);
+            ClientSize = new Size(828, 667);
+            Controls.Add(tabControlMain);
             Controls.Add(panel1);
-            Controls.Add(groupBox3);
             Margin = new Padding(4, 3, 4, 3);
             Name = "FormEditEvent";
             Text = "FormEditEvent";
             FormClosing += FormEditEvent_FormClosing;
             Load += FormEditEvent_Load;
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
-            tabControlfailure_metrics.ResumeLayout(false);
-            tabPage1.ResumeLayout(false);
-            tabPage1.PerformLayout();
-            tabPage2.ResumeLayout(false);
-            tabPage2.PerformLayout();
-            tabPage3.ResumeLayout(false);
-            tabPage3.PerformLayout();
-            tabPage4.ResumeLayout(false);
-            tabPage4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            tabPageIntermediate.ResumeLayout(false);
-            tabPageBasic.ResumeLayout(false);
-            tabPageBasic.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
-            tabControl1.ResumeLayout(false);
             panel1.ResumeLayout(false);
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             groupBoxDetailSettings.ResumeLayout(false);
+            panelShowMetric.ResumeLayout(false);
+            panelShowMetric.PerformLayout();
+            panelShowGates.ResumeLayout(false);
+            panelShowGates.PerformLayout();
+            tabControlMain.ResumeLayout(false);
+            tabPageMain1.ResumeLayout(false);
+            tabPageMain2.ResumeLayout(false);
+            groupBoxReference.ResumeLayout(false);
             ResumeLayout(false);
 
         }
@@ -490,29 +438,26 @@
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.Label label1;
         public System.Windows.Forms.TextBox textBoxName;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPageIntermediate;
         private System.Windows.Forms.PictureBox pictureBox1;
         public System.Windows.Forms.ComboBox comboBoxGates;
-        private System.Windows.Forms.TabPage tabPageBasic;
         public System.Windows.Forms.ComboBox comboBoxUnits;
         private System.Windows.Forms.Button buttonDatabase;
         public System.Windows.Forms.TextBox textBoxFrequency;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label labelMetricType;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
-        private TabControl tabControlfailure_metrics;
-        private TabPage tabPage1;
-        private TabPage tabPage2;
-        private Label label5;
-        private TabPage tabPage3;
-        private TabPage tabPage4;
-        private Label label6;
-        private Label label7;
         private Label label8;
         private GroupBox groupBox3;
         private GroupBox groupBoxDetailSettings;
         public ComboBox comboBoxMetricType;
+        private TabControl tabControlMain;
+        private TabPage tabPageMain1;
+        private TabPage tabPageMain2;
+        private Panel panelShowGates;
+        private Panel panelShowMetric;
+        private Label label3;
+        private GroupBox groupBoxReference;
+        private Button buttonAddreference;
     }
 }

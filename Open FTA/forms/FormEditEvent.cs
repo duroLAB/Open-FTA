@@ -12,16 +12,24 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace OpenFTA
 {
+
+   
     public partial class FormEditEvent : Form
     {
         string strPICPath;
         public FTAlogic EngineLogic;
         private string previousUnit = "y⁻¹";
         private bool isLoading = false;
+
         public FormEditEvent(FTAlogic EngineLogic)
         {
             InitializeComponent();
+            Width = 650;
+            Height = 650;
+            
+
             this.Text = "New Event";
+            
 
             string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             strPICPath = System.IO.Path.GetDirectoryName(strExeFilePath);
@@ -49,13 +57,7 @@ namespace OpenFTA
             comboBoxMetricType.SelectedIndex = 0;
             comboBoxUnits.SelectedIndex = 0;
 
-            tabControl1.Appearance = TabAppearance.FlatButtons;
-            tabControl1.ItemSize = new Size(0, 1);
-            tabControl1.SizeMode = TabSizeMode.Fixed;
-
-            tabControlfailure_metrics.Appearance = TabAppearance.FlatButtons;
-            tabControlfailure_metrics.ItemSize = new Size(0, 1);
-            tabControlfailure_metrics.SizeMode = TabSizeMode.Fixed;
+       
 
    
             button1.CausesValidation = false;
@@ -63,6 +65,28 @@ namespace OpenFTA
 
             pictureBox1.BackColor = Color.Transparent;
             pictureBox2.BackColor = Color.Transparent;
+
+            UIEngine u = new UIEngine(EngineLogic);
+            u.MakeTabControlModern(tabControlMain);
+        
+
+           
+
+            u.MakeGroupBoxModern(groupBoxDetailSettings);
+            u.MakeGroupBoxModern(groupBox3);
+
+
+            
+            //panelShowGates.Parent = groupBoxDetailSettings;
+            panelShowGates.Left = 10;
+            panelShowGates.Top  = 20;
+
+          //  panelShowMetric.Parent = panelShowGates;
+            panelShowMetric.Left = panelShowGates.Left;
+            panelShowMetric.Top = panelShowGates.Top;
+
+
+
         }
 
         private void comboBoxGates_SelectedIndexChanged(object sender, EventArgs e)
@@ -95,20 +119,25 @@ namespace OpenFTA
             }
 
             if (comboBoxEventType.SelectedIndex == 0)
-                tabControl1.Enabled = false;
+            {
+            }
             else
             {
-                tabControl1.Enabled = true;
+
 
                 if (comboBoxEventType.SelectedIndex < 2)
                 {
-                    tabControl1.SelectedTab = tabControl1.TabPages["tabPageIntermediate"];
+                    // tabControl1.SelectedTab = tabControl1.TabPages["tabPageIntermediate"];
+                    panelShowGates.Visible = true;
+                    panelShowMetric.Visible = false;
                     groupBoxDetailSettings.Text = "Gate definition";
                 }
                 else
 
                 {
-                    tabControl1.SelectedTab = tabControl1.TabPages["tabPageBasic"];
+                    panelShowGates.Visible = false;
+                    panelShowMetric.Visible = true;
+                    //tabControl1.SelectedTab = tabControl1.TabPages["tabPageBasic"];
                     groupBoxDetailSettings.Text = "Reliability Metrics";
                 }
             }
@@ -272,13 +301,26 @@ namespace OpenFTA
 
         private void comboBoxMetricType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            tabControlfailure_metrics.SelectedIndex = comboBoxMetricType.SelectedIndex;
-            textBoxFrequency.Parent = tabControlfailure_metrics.TabPages[comboBoxMetricType.SelectedIndex];
-            comboBoxUnits.Parent = textBoxFrequency.Parent;
+            //tabControlfailure_metrics.SelectedIndex = comboBoxMetricType.SelectedIndex;
+            //textBoxFrequency.Parent = tabControlfailure_metrics.TabPages[comboBoxMetricType.SelectedIndex];
+            //comboBoxUnits.Parent = textBoxFrequency.Parent;
 
             if (comboBoxMetricType.SelectedIndex == 0 || comboBoxMetricType.SelectedIndex == 3)
                 comboBoxUnits.Visible = true;
             else comboBoxUnits.Visible = false;
+
+            if (comboBoxMetricType.SelectedIndex == 0)
+            labelMetricType.Text = "Frequency f =";
+            if (comboBoxMetricType.SelectedIndex == 1)
+                labelMetricType.Text = "Probability  P =";
+            if (comboBoxMetricType.SelectedIndex == 2)
+                labelMetricType.Text = "Reliability R =";
+            if (comboBoxMetricType.SelectedIndex == 3)
+                labelMetricType.Text = "Failure rate λ =";
+
+            
+
+
 
         }
 

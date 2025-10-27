@@ -1022,14 +1022,7 @@ public class FTAlogic
 
     public void GenerateMCS(out string equation,out string simplifiedEquation)
     {
-        // Set default frequency for basic events if not set.
-        foreach (var item in FTAStructure.Values)
-        {
-            if (item.ItemType == 2 && item.Frequency == 0)
-            {
-                item.Frequency = 0.001;
-            }
-        }
+      
 
         MCSStructure.Clear();
 
@@ -1332,6 +1325,85 @@ public class FTAlogic
     }
 
     public void GenerateReport_MCS(StringBuilder html)
+    {
+        string equation = "";
+        string simplifiedEquation = "";
+
+        GenerateMCS(out equation, out simplifiedEquation);
+
+        String temp;
+        html.AppendLine("<br>    <h1>Minimal cut sets</h1>");
+        // html.AppendLine("    <table>");
+        html.AppendLine("<table class='sortable'>");
+        html.AppendLine("        <thead>");
+        html.AppendLine("            <tr>");
+        html.AppendLine("                <th>Name</th>");
+        html.AppendLine("               <th>Events</th>");
+        html.AppendLine("                <th>Metric</th>");
+        /*   html.AppendLine("                <th>Metric</th>");*/
+        html.AppendLine("            </tr>");
+        html.AppendLine("        </thead>");
+        html.AppendLine("        <tbody>");
+
+        /*  int MSCcount = 1;
+          for (int i = 0; i < mcs.CutSets.Count; i++)
+          {
+              if (mcs.CutSets[i].IsMinimal)
+              {
+                  temp = "<tr><td>";
+                  temp += "MSC - " + MSCcount.ToString();
+                  MSCcount = MSCcount + 1;
+                  temp += "</td><td>";
+                  for (int j = 0; j < mcs.CutSets[i].items.Count; j++)
+                      temp += "{" + mcs.CutSets[i].items[j].Tag + "} - ";
+                  temp = temp.Remove(temp.Length - 2);
+                  temp += "</td><td>";
+                  temp += mcs.CutSets[i].Freq.ToString();
+                  temp += "</td></tr>";
+                  html.AppendLine(temp);
+              }
+          }*/
+        FTAitem TopEvent = null;
+        foreach (var item in MCSStructure)
+        {
+            if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
+        }
+        SumChildren(TopEvent, MCSStructure);
+
+        foreach (var item in MCSStructure)
+        {
+                    temp = "<tr><td>";
+            temp += "MSC - ";
+            temp += "</td>";
+            if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
+            {
+               // item.Value.Value;
+                temp += "<td>";
+                for (int i = 0; i < item.Value.Children.Count; i++)
+                {
+                    
+
+                    FTAitem fTAitem = GetItem(item.Value.Children[i], MCSStructure);
+                    
+                    temp+="{"+fTAitem.Name+"} - ";
+
+                                      
+
+                }
+                temp = temp.Remove(temp.Length - 2);
+                temp += "</td><td>";
+                temp += item.Value.Value.ToString();
+                temp += "</td></tr>";
+                    html.AppendLine(temp);
+            }
+        }
+
+
+        html.AppendLine("        </tbody>");
+        html.AppendLine("    </table>");
+    }
+
+    public void GenerateReport_MCSv2(StringBuilder html)
     {
         // MCSEngine mcs = new MCSEngine(this);
         MSC_Engine_v2 mcs = new MSC_Engine_v2(this);

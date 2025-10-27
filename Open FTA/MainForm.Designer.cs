@@ -197,7 +197,7 @@
             // 
             // toolStripDropDownButtonEvaluate
             // 
-            toolStripDropDownButtonEvaluate.DropDownItems.AddRange(new ToolStripItem[] { minimalCutSetToolStripMenuItem, freqvencyToolStripMenuItem, importanceMeasureToolStripMenuItem, monteCarloToolStripMenuItem });
+            toolStripDropDownButtonEvaluate.DropDownItems.AddRange(new ToolStripItem[] { freqvencyToolStripMenuItem, minimalCutSetToolStripMenuItem, importanceMeasureToolStripMenuItem, monteCarloToolStripMenuItem });
             toolStripDropDownButtonEvaluate.Image = Open_FTA.Properties.Resources.CalculatorMethod;
             toolStripDropDownButtonEvaluate.ImageScaling = ToolStripItemImageScaling.None;
             toolStripDropDownButtonEvaluate.ImageTransparentColor = Color.Magenta;
@@ -231,6 +231,7 @@
             monteCarloToolStripMenuItem.Name = "monteCarloToolStripMenuItem";
             monteCarloToolStripMenuItem.Size = new Size(199, 22);
             monteCarloToolStripMenuItem.Text = "Monte Carlo simulation";
+            monteCarloToolStripMenuItem.Visible = false;
             // 
             // toolStripSeparator5
             // 
