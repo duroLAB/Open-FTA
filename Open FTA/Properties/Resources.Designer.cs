@@ -103,6 +103,16 @@ namespace Open_FTA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddDataItem {
+            get {
+                object obj = ResourceManager.GetObject("AddDataItem", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddIEv2 {
             get {
                 object obj = ResourceManager.GetObject("AddIEv2", resourceCulture);
@@ -146,6 +156,26 @@ namespace Open_FTA.Properties {
         internal static System.Drawing.Bitmap Copy_24 {
             get {
                 object obj = ResourceManager.GetObject("Copy_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Database32 {
+            get {
+                object obj = ResourceManager.GetObject("Database32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeleteDatabase24 {
+            get {
+                object obj = ResourceManager.GetObject("DeleteDatabase24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -386,6 +416,16 @@ namespace Open_FTA.Properties {
         internal static System.Drawing.Bitmap TakeSnapshot {
             get {
                 object obj = ResourceManager.GetObject("TakeSnapshot", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap UpdateDatabase24 {
+            get {
+                object obj = ResourceManager.GetObject("UpdateDatabase24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

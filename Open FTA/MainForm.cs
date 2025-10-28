@@ -908,6 +908,9 @@ namespace OpenFTA
 
                 toolStripMenuItem_DELETE.Enabled = true;
                 toolStripMenuItem_EDIT.Enabled = true;
+
+                toolStripMenuItemSELECTCHILDREN.Enabled = true;
+                toolStripMenuItem_SELECTALLCHILDREN.Enabled = true;
             }
             /*else  ///MultiSelection
             {
@@ -1265,6 +1268,7 @@ namespace OpenFTA
         private void toolStripButton1_Click_1(object sender, EventArgs e)
         {
             FormDbViewer dbViewer = new FormDbViewer(EngineLogic);
+            dbViewer.panelButtons.Visible = false;
             dbViewer.ShowDialog();
         }
     }

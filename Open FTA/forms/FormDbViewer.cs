@@ -11,16 +11,21 @@ using System.Windows.Forms;
 
 namespace Open_FTA.forms
 {
+    
     public partial class FormDbViewer : Form
     {
+        UIEngine u;
+
         public FormDbViewer(FTAlogic EngineLogic)
         {
             InitializeComponent();
 
-            UIEngine u = new UIEngine(EngineLogic);
+            u = new UIEngine(EngineLogic);
             u.MakeTabControlModern(tabControlMain);
-            u.SetupModernGrid(dataGridView1);
-            u.SetupModernGrid(dataGridView2);
+//            u.SetupModernGrid(dataGridView1);
+          //  u.SetupModernGrid(dataGridView2);
+
+            FillDGV();
         }
 
         private void FillDGV()
@@ -29,64 +34,50 @@ namespace Open_FTA.forms
             dataGridView1.DataSource = data;
 
 
+            u.SetupModernGrid(dataGridView2);
+            u.SetupModernGrid(dataGridView1);
+
+
+            Application.DoEvents();
+
+            if (dataGridView1.Columns.Contains("Id"))
+            {
+                dataGridView1.Columns["Id"].Visible = false;
+            }
+
+            if (dataGridView1.Columns.Contains("Year"))
+                dataGridView1.Columns["Year"].FillWeight = 30;
+
+
             DataTable data2 = DBEngine.Instance.GetReliabilityDataTablev2();
             dataGridView2.DataSource = data2;
 
 
+            Application.DoEvents();
 
-            dataGridView1.DataBindingComplete += (s, e) =>
+            try
             {
-                if (dataGridView1.Columns.Contains("Id"))
-                {
-                    dataGridView1.Columns["Id"].Visible = false;
-                }
+                
+                    dataGridView2.Columns["Id"].Visible = false;                 
+                    dataGridView2.Columns["MetricUnit"].FillWeight = 30;
+                    dataGridView2.Columns["Val"].FillWeight = 30; 
 
-                dataGridView1.Columns["Year"].Width = 60;
-            };
-
-
-            dataGridView2.DataBindingComplete += (s, e) =>
-            {
-                if (dataGridView2 == null)
-                {
-                    Console.WriteLine("dataGridView2 je null!");
-                }
-                else if (dataGridView2.Columns == null)
-                {
-                    Console.WriteLine("Columns kolekcia je null!");
-                }
-                else
-                {
-                    Console.WriteLine($"Columns count: {dataGridView2.Columns.Count}");
-                }
+                 
+            }
+            catch { }
 
 
 
-                try
-                {
-                    if (dataGridView2.Columns.Contains("Id"))
-                    {
-                        dataGridView2.Columns["Id"].Visible = false;
-                    }
 
-                    if (dataGridView2.Columns.Contains("MetricUnit"))
-                    {
-                        dataGridView2.Columns["MetricUnit"].Width = 80;
-                    }
-                    if (dataGridView2.Columns.Contains("Val"))
-                    {
-                        dataGridView2.Columns["Val"].Width = 80;
-                    }
-                }
-                catch { }
-            };
 
         }
 
         private void FormDbViewer_Load(object sender, EventArgs e)
         {
 
-            FillDGV();
+
+
+
 
         }
 
@@ -139,7 +130,7 @@ namespace Open_FTA.forms
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            
+
             if (dataGridView1.CurrentRow == null) return;
             string id = dataGridView1.CurrentRow.Cells["Id"].Value.ToString();
 
@@ -252,7 +243,7 @@ namespace Open_FTA.forms
             if (dataGridView1.CurrentRow == null) return;
             string id = dataGridView1.CurrentRow.Cells["Id"].Value.ToString();
 
-            if(DBEngine.Instance.CanDeleteReference(id) == false)
+            if (DBEngine.Instance.CanDeleteReference(id) == false)
             {
                 MessageBox.Show("This reference cannot be deleted because it is being used by one or more reliability entries.", "Cannot Delete", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -262,7 +253,16 @@ namespace Open_FTA.forms
                 bool res = DBEngine.Instance.DeleteReference(id);
                 FillDGV();
             }
-             
+
+        }
+
+        private void FormDbViewer_Shown(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void dataGridView2_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        { 
         }
     }
 }

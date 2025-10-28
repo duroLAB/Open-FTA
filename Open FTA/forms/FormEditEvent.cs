@@ -299,7 +299,7 @@ namespace OpenFTA
                     textBoxFrequency.Text = R_Val.ToString();
                     comboBoxUnits.SelectedValue = MetricUnitId;
                     comboBoxMetricType.SelectedIndex = 0; // Frequency    
-                    textBoxDescription.Text += " " + title;
+                    textBoxDescription.Text += title + " f=" + R_Val.ToString() + EngineLogic.MetricUnitsList[MetricUnitId];
 
                     DBEngine.Instance.GetReferenceById(ReferenceId, out string title2);
                     textBoxReference.Text = title2;

@@ -127,11 +127,12 @@ class UIEngine
 
         // 🟧 Alternujúce farby riadkov
         grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 248, 248);
-        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
         grid.GridColor = Color.LightGray; // alebo iná decentná farba
 
         grid.AllowUserToResizeColumns = true;        
+
 
     }
 

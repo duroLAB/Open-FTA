@@ -47,6 +47,8 @@
             toolStripButtonExportImage = new ToolStripButton();
             toolStripButtonrReport = new ToolStripButton();
             toolStripSeparator8 = new ToolStripSeparator();
+            toolStripButton1 = new ToolStripButton();
+            toolStripSeparator2 = new ToolStripSeparator();
             toolStripButtonSettings = new ToolStripButton();
             toolStripButtonCenter = new ToolStripButton();
             toolStripButtonSort = new ToolStripButton();
@@ -96,8 +98,6 @@
             splitter2 = new Splitter();
             panelLeft = new Panel();
             treeView1 = new TreeView();
-            toolStripButton1 = new ToolStripButton();
-            toolStripSeparator2 = new ToolStripSeparator();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -264,6 +264,21 @@
             // 
             toolStripSeparator8.Name = "toolStripSeparator8";
             toolStripSeparator8.Size = new Size(6, 55);
+            // 
+            // toolStripButton1
+            // 
+            toolStripButton1.Image = Open_FTA.Properties.Resources.Database32;
+            toolStripButton1.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(103, 52);
+            toolStripButton1.Text = "DB browser";
+            toolStripButton1.Click += toolStripButton1_Click_1;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(6, 55);
             // 
             // toolStripButtonSettings
             // 
@@ -732,21 +747,6 @@
             treeView1.Size = new Size(233, 577);
             treeView1.TabIndex = 0;
             treeView1.AfterSelect += treeView1_AfterSelect;
-            // 
-            // toolStripButton1
-            // 
-            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
-            toolStripButton1.ImageTransparentColor = Color.Magenta;
-            toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(24, 52);
-            toolStripButton1.Text = "toolStripButtonDBOpen";
-            toolStripButton1.Click += toolStripButton1_Click_1;
-            // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(6, 55);
             // 
             // MainForm
             // 
