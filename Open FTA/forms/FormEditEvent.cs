@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Open_FTA.forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,7 +14,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 namespace OpenFTA
 {
 
-   
+
     public partial class FormEditEvent : Form
     {
         string strPICPath;
@@ -24,12 +25,12 @@ namespace OpenFTA
         public FormEditEvent(FTAlogic EngineLogic)
         {
             InitializeComponent();
-            Width = 650;
-            Height = 650;
-            
+            Width = 450;
+            Height = 550;
+
 
             this.Text = "New Event";
-            
+
 
             string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             strPICPath = System.IO.Path.GetDirectoryName(strExeFilePath);
@@ -38,7 +39,12 @@ namespace OpenFTA
             comboBoxGates.DisplayMember = "Value";
             comboBoxGates.ValueMember = "Key";*/
 
-            comboBoxGates.DataSource = Enum.GetValues(typeof(Gates));
+            // comboBoxGates.DataSource = Enum.GetValues(typeof(Gates));
+
+            comboBoxGates.DataSource = Enum.GetValues(typeof(Gates))
+                           .Cast<Gates>()
+                           .Where(g => g != Gates.NotSet) // filtrovanie NotSet
+                           .ToList();
 
             comboBoxEventType.DataSource = new BindingSource(EngineLogic.EventsList, null);
             comboBoxEventType.DisplayMember = "Value";
@@ -57,9 +63,9 @@ namespace OpenFTA
             comboBoxMetricType.SelectedIndex = 0;
             comboBoxUnits.SelectedIndex = 0;
 
-       
 
-   
+
+
             button1.CausesValidation = false;
             errorProvider1.BlinkStyle = ErrorBlinkStyle.NeverBlink;
 
@@ -68,20 +74,21 @@ namespace OpenFTA
 
             UIEngine u = new UIEngine(EngineLogic);
             u.MakeTabControlModern(tabControlMain);
-        
 
-           
+
+
 
             u.MakeGroupBoxModern(groupBoxDetailSettings);
             u.MakeGroupBoxModern(groupBox3);
+            u.MakeGroupBoxModern(groupBoxReference);
 
 
-            
+
             //panelShowGates.Parent = groupBoxDetailSettings;
             panelShowGates.Left = 10;
-            panelShowGates.Top  = 20;
+            panelShowGates.Top = 20;
 
-          //  panelShowMetric.Parent = panelShowGates;
+            //  panelShowMetric.Parent = panelShowGates;
             panelShowMetric.Left = panelShowGates.Left;
             panelShowMetric.Top = panelShowGates.Top;
 
@@ -118,29 +125,25 @@ namespace OpenFTA
                 }
             }
 
+
+
+
             if (comboBoxEventType.SelectedIndex == 0)
             {
+                // tabControl1.SelectedTab = tabControl1.TabPages["tabPageIntermediate"];
+                panelShowGates.Visible = true;
+                panelShowMetric.Visible = false;
+                groupBoxDetailSettings.Text = "Gate definition";
             }
             else
+
             {
-
-
-                if (comboBoxEventType.SelectedIndex < 2)
-                {
-                    // tabControl1.SelectedTab = tabControl1.TabPages["tabPageIntermediate"];
-                    panelShowGates.Visible = true;
-                    panelShowMetric.Visible = false;
-                    groupBoxDetailSettings.Text = "Gate definition";
-                }
-                else
-
-                {
-                    panelShowGates.Visible = false;
-                    panelShowMetric.Visible = true;
-                    //tabControl1.SelectedTab = tabControl1.TabPages["tabPageBasic"];
-                    groupBoxDetailSettings.Text = "Reliability Metrics";
-                }
+                panelShowGates.Visible = false;
+                panelShowMetric.Visible = true;
+                //tabControl1.SelectedTab = tabControl1.TabPages["tabPageBasic"];
+                groupBoxDetailSettings.Text = "Reliability Metrics";
             }
+
 
 
         }
@@ -276,7 +279,38 @@ namespace OpenFTA
 
         private void buttonDatabase_Click_1(object sender, EventArgs e)
         {
+            FormDbViewer dbForm = new FormDbViewer(EngineLogic);
 
+            dbForm.tabPage1.Visible = false;
+            dbForm.tabControlMain.TabPages.Remove(dbForm.tabPage1);
+
+            dbForm.ShowDialog();
+
+
+
+            if (dbForm.DialogResult == DialogResult.OK)
+            {
+                try
+                {
+
+                    string id = dbForm.dataGridView2.CurrentRow.Cells["Id"].Value.ToString();
+                    bool res = DBEngine.Instance.GetReliabilityById(id, out string title, out double R_Val, out int MetricUnitId, out string ReferenceId);
+
+                    textBoxFrequency.Text = R_Val.ToString();
+                    comboBoxUnits.SelectedValue = MetricUnitId;
+                    comboBoxMetricType.SelectedIndex = 0; // Frequency    
+                    textBoxDescription.Text += " " + title;
+
+                    DBEngine.Instance.GetReferenceById(ReferenceId, out string title2);
+                    textBoxReference.Text = title2;
+                }
+                catch
+                {
+                    // ignorujeme chyby
+                }
+            }
+
+               
         }
 
         private void label3_Click(object sender, EventArgs e)
@@ -310,7 +344,7 @@ namespace OpenFTA
             else comboBoxUnits.Visible = false;
 
             if (comboBoxMetricType.SelectedIndex == 0)
-            labelMetricType.Text = "Frequency f =";
+                labelMetricType.Text = "Frequency f =";
             if (comboBoxMetricType.SelectedIndex == 1)
                 labelMetricType.Text = "Probability  P =";
             if (comboBoxMetricType.SelectedIndex == 2)
@@ -318,7 +352,7 @@ namespace OpenFTA
             if (comboBoxMetricType.SelectedIndex == 3)
                 labelMetricType.Text = "Failure rate λ =";
 
-            
+
 
 
 
@@ -402,6 +436,28 @@ namespace OpenFTA
             return (valid);
 
         }
+
+        private void buttonAddreference_Click(object sender, EventArgs e)
+        {
+            FormDbViewer dbForm = new FormDbViewer(EngineLogic);
+
+            dbForm.tabPage1.Visible = false;
+            dbForm.tabControlMain.TabPages.Remove(dbForm.tabPage2);
+
+            dbForm.ShowDialog();
+
+
+
+            if (dbForm.DialogResult == DialogResult.OK)
+            {
+                string id = dbForm.dataGridView1.CurrentRow.Cells["Id"].Value.ToString();
+                bool res = DBEngine.Instance.GetReferenceById(id, out string title);
+                textBoxReference.Text = title;
+
+
+            }
+
+        }
     }
 
-    }
+}

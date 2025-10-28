@@ -39,8 +39,8 @@
             toolStripButtonRedo = new ToolStripButton();
             toolStripSeparator3 = new ToolStripSeparator();
             toolStripDropDownButtonEvaluate = new ToolStripDropDownButton();
-            minimalCutSetToolStripMenuItem = new ToolStripMenuItem();
             freqvencyToolStripMenuItem = new ToolStripMenuItem();
+            minimalCutSetToolStripMenuItem = new ToolStripMenuItem();
             importanceMeasureToolStripMenuItem = new ToolStripMenuItem();
             monteCarloToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
@@ -96,6 +96,8 @@
             splitter2 = new Splitter();
             panelLeft = new Panel();
             treeView1 = new TreeView();
+            toolStripButton1 = new ToolStripButton();
+            toolStripSeparator2 = new ToolStripSeparator();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -123,7 +125,7 @@
             toolStrip1.CanOverflow = false;
             toolStrip1.GripMargin = new Padding(0);
             toolStrip1.ImageScalingSize = new Size(20, 20);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButtonNew, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator6, toolStripButtonUndo, toolStripButtonRedo, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripButtonrReport, toolStripSeparator8, toolStripButtonSettings });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButtonNew, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator6, toolStripButtonUndo, toolStripButtonRedo, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripButtonrReport, toolStripSeparator8, toolStripButton1, toolStripSeparator2, toolStripButtonSettings });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
@@ -205,19 +207,19 @@
             toolStripDropDownButtonEvaluate.Size = new Size(96, 52);
             toolStripDropDownButtonEvaluate.Text = "Evaluate";
             // 
-            // minimalCutSetToolStripMenuItem
-            // 
-            minimalCutSetToolStripMenuItem.Name = "minimalCutSetToolStripMenuItem";
-            minimalCutSetToolStripMenuItem.Size = new Size(199, 22);
-            minimalCutSetToolStripMenuItem.Text = "Minimal cut set";
-            minimalCutSetToolStripMenuItem.Click += minimalCutSetToolStripMenuItem_Click;
-            // 
             // freqvencyToolStripMenuItem
             // 
             freqvencyToolStripMenuItem.Name = "freqvencyToolStripMenuItem";
             freqvencyToolStripMenuItem.Size = new Size(199, 22);
             freqvencyToolStripMenuItem.Text = "Frequency";
             freqvencyToolStripMenuItem.Click += freqvencyToolStripMenuItem_Click;
+            // 
+            // minimalCutSetToolStripMenuItem
+            // 
+            minimalCutSetToolStripMenuItem.Name = "minimalCutSetToolStripMenuItem";
+            minimalCutSetToolStripMenuItem.Size = new Size(199, 22);
+            minimalCutSetToolStripMenuItem.Text = "Minimal cut set";
+            minimalCutSetToolStripMenuItem.Click += minimalCutSetToolStripMenuItem_Click;
             // 
             // importanceMeasureToolStripMenuItem
             // 
@@ -452,6 +454,7 @@
             toolStripMenuItem_NEWIE.Name = "toolStripMenuItem_NEWIE";
             toolStripMenuItem_NEWIE.Size = new Size(202, 26);
             toolStripMenuItem_NEWIE.Text = "Add Intermediate Event";
+            toolStripMenuItem_NEWIE.Click += toolStripButtonAddIntermediateEvent_Click;
             // 
             // toolStripMenuItem_EDIT
             // 
@@ -730,6 +733,21 @@
             treeView1.TabIndex = 0;
             treeView1.AfterSelect += treeView1_AfterSelect;
             // 
+            // toolStripButton1
+            // 
+            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(24, 52);
+            toolStripButton1.Text = "toolStripButtonDBOpen";
+            toolStripButton1.Click += toolStripButton1_Click_1;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(6, 55);
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -842,6 +860,8 @@
         private ToolStripButton toolStripButtonExportToCSV;
         private TabPage tabPage3;
         private DataGridView dataGridViewImportanceMeasureResults;
+        private ToolStripButton toolStripButton1;
+        private ToolStripSeparator toolStripSeparator2;
     }
 }
 

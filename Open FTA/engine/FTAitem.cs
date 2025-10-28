@@ -29,6 +29,8 @@
     public double UpperBoundFrequency { get; set; }
     public double BIM { get; set; }
 
+    public string Reference{ get; set; }
+
     public FTAitem()
     {
         // generovanie unikátneho Guid
@@ -67,6 +69,7 @@
             LowerBoundFrequency = source.LowerBoundFrequency,
             UpperBoundFrequency = source.UpperBoundFrequency,
             BIM = source.BIM,
+            Reference = source.Reference,
 
             // nový GUID pre kópiu
             GuidCode = Guid.NewGuid(),

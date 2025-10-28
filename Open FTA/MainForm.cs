@@ -24,6 +24,7 @@ namespace OpenFTA
         FTAlogic EngineLogicMCS;
         UIEngine MyUIEngine;
         DrawingEngine MyDrawingEngine;
+       
 
 
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
@@ -62,7 +63,17 @@ namespace OpenFTA
 
             UpdateMainFormControls();
 
-         
+
+            //MyDBEngine.InsertDefaultReferences();
+          //  bool res =  DBEngine.Instance.InsertReliability(Guid.NewGuid().ToString(), "Pipings,D<75mm,Leakage", 5.7E-10, 2);
+        /*  DBEngine.Instance.InitializeDatabase();
+            DBEngine.Instance.SeedData();*/
+
+            /* string refId = Guid.NewGuid().ToString();
+             bool inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy", "Vydavateľ", "Autor1, Autor2", 2025);
+             refId = Guid.NewGuid().ToString();
+             inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy 2", "Vydavateľ 2", "Autorasda, Autorasda", 2025);*/
+
 
         }
 
@@ -137,10 +148,10 @@ namespace OpenFTA
             if (e.Control && e.KeyCode == Keys.C)
             {
                 // iba ak je focus na PictureBox
-                 
-                   MessageBox.Show("Ctrl+C detected on PictureBox - Copying selected events.");
-                    
-                 
+
+                MessageBox.Show("Ctrl+C detected on PictureBox - Copying selected events.");
+
+
             }
             pictureBox1.Invalidate();
         }
@@ -261,7 +272,7 @@ namespace OpenFTA
                         OffsetX = MyDrawingEngine.offsetX,
                         OffsetY = MyDrawingEngine.offsetY,
                         FtaStructure = EngineLogic.FTAStructure
-                    }; 
+                    };
 
                     saveData.SaveToFile(sfd.FileName);
 
@@ -338,7 +349,7 @@ namespace OpenFTA
                     EngineLogic.FTAStructure.Clear();
                     EngineLogic.FTAStructure = loadedData.FtaStructure;
 
-                 
+
 
                     FTAitem root = EngineLogic.FTAStructure.Values.FirstOrDefault(item => item.Parent == Guid.Empty);
 
@@ -349,7 +360,7 @@ namespace OpenFTA
                     MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
                     pictureBox1.Invalidate();
 
-                     
+
                 }
                 catch (Exception ex)
                 {
@@ -425,7 +436,8 @@ namespace OpenFTA
 
         private void toolStripButtonAddBasicEvent_Click(object sender, EventArgs e)
         {
-            CreateNewEvent(EngineLogic.SelectedEvents[0], true);
+            if (EngineLogic.SelectedEvents.Count == 1)
+                CreateNewEvent(EngineLogic.SelectedEvents[0], true);
         }
 
         private void OpenEditFormForEvent(bool isNew)
@@ -454,6 +466,7 @@ namespace OpenFTA
                 edit.comboBoxEventType.SelectedValue = 1;
                 edit.textBoxFrequency.Text = "0";
                 edit.textBoxTag.Text = "NewTag";
+                edit.textBoxReference.Text = "";
 
             }
             else
@@ -470,7 +483,12 @@ namespace OpenFTA
                 edit.comboBoxUnits.SelectedIndex = selectedEvent.ValueUnit;
 
                 edit.comboBoxMetricType.SelectedIndex = (int)selectedEvent.ValueType;
-                edit.Text = "Event:" + selectedEvent.Name + " (" + selectedEvent.Tag+")";
+                edit.Text = "Event:" + selectedEvent.Name + " (" + selectedEvent.Tag + ")";
+
+                if (selectedEvent.Children.Count > 0)
+                    edit.comboBoxEventType.Enabled = false;
+                edit.textBoxReference.Text = selectedEvent.Reference;
+
             }
 
 
@@ -518,7 +536,7 @@ namespace OpenFTA
             var newEvent = EngineLogic.GetItem(A);
 
 
-         //   newEvent.Name = "New Item";
+            //   newEvent.Name = "New Item";
             // newEvent.Tag = "NewTag";
             newEvent.Gate = Gates.OR;
             newEvent.Frequency = 0;
@@ -535,7 +553,8 @@ namespace OpenFTA
 
         private void toolStripButtonAddIntermediateEvent_Click(object sender, EventArgs e)
         {
-            CreateNewEvent(EngineLogic.SelectedEvents[0], false);
+            if (EngineLogic.SelectedEvents.Count == 1)
+                CreateNewEvent(EngineLogic.SelectedEvents[0], false);
         }
         private void toolStripButtonEdit_Click(object sender, EventArgs e)
         {
@@ -613,6 +632,7 @@ namespace OpenFTA
 
                 item.ValueUnit = edit.comboBoxUnits.SelectedIndex;
             }
+            item.Reference = edit.textBoxReference.Text;
         }
 
         private double ConvertToYears(double freq, string unit)
@@ -696,7 +716,7 @@ namespace OpenFTA
         private void toolStripButtonrReport_Click(object sender, EventArgs e)
         {
 
-         
+
             EngineLogic.GenerateHTMLreport();
 
             ReportForm r = new ReportForm();
@@ -847,7 +867,8 @@ namespace OpenFTA
             toolStripButtonEdit.Enabled = false;
             toolStripButtonCopy.Enabled = false;
             toolStripButtonDelete.Enabled = false;
-
+            toolStripMenuItemSELECTCHILDREN.Enabled = false;
+            toolStripMenuItem_SELECTALLCHILDREN.Enabled = false;
 
             if (EngineLogic.SelectedEvents.Count > 0)
                 UpdateMainFormControls_EventsAreSelected();
@@ -859,7 +880,7 @@ namespace OpenFTA
             toolStripMenuItem_EDIT.Enabled = toolStripButtonEdit.Enabled;
 
 
-            if(undoStack.Count > 0)
+            if (undoStack.Count > 0)
                 toolStripButtonUndo.Enabled = true;
             else
                 toolStripButtonUndo.Enabled = false;
@@ -884,6 +905,9 @@ namespace OpenFTA
                 toolStripButtonAddBasicEvent.Enabled = true;
                 toolStripButtonAddIntermediateEvent.Enabled = true;
                 toolStripButtonEdit.Enabled = true;
+
+                toolStripMenuItem_DELETE.Enabled = true;
+                toolStripMenuItem_EDIT.Enabled = true;
             }
             /*else  ///MultiSelection
             {
@@ -947,7 +971,7 @@ namespace OpenFTA
 
             EngineLogic.HighlightedMCS = "";
             ////Minimal cutset test
-            EngineLogic.HighlightedEvents.Clear();             
+            EngineLogic.HighlightedEvents.Clear();
             var selectedMSCItem = EngineLogic.GetItem(treeView1.SelectedNode.Name, EngineLogic.MCSStructure);
             if (selectedMSCItem != null)
             {
@@ -963,9 +987,9 @@ namespace OpenFTA
 
                     }
                 }
-             }
+            }
 
-            
+
 
 
 
@@ -988,7 +1012,7 @@ namespace OpenFTA
 
         private void minimalCutSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(!EngineLogic.PerformFullTest())
+            if (!EngineLogic.PerformFullTest())
                 return;
 
 
@@ -1008,9 +1032,9 @@ namespace OpenFTA
             foreach (var item in EngineLogic.MCSStructure)
             {
                 if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
-            } 
-             
-            EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);            
+            }
+
+            EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);
             List<FTAitem> l = EngineLogic.GenerateListOfBasicEvents();
 
             dataGridViewMCSResults.Rows.Clear();
@@ -1072,7 +1096,7 @@ namespace OpenFTA
 
             tabControl1.SelectedTab = tabPage2;
 
-            
+
         }
 
         private void SaveGridToCsv(DataGridView grid)
@@ -1235,7 +1259,13 @@ namespace OpenFTA
             MyDrawingEngine.offsetY = 0;
             pictureBox1.Invalidate();
             UpdateMainFormControls();
-            
+
+        }
+
+        private void toolStripButton1_Click_1(object sender, EventArgs e)
+        {
+            FormDbViewer dbViewer = new FormDbViewer(EngineLogic);
+            dbViewer.ShowDialog();
         }
     }
 }

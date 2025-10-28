@@ -59,6 +59,7 @@
             tabPageMain1 = new TabPage();
             tabPageMain2 = new TabPage();
             groupBoxReference = new GroupBox();
+            textBoxReference = new TextBox();
             buttonAddreference = new Button();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -119,10 +120,10 @@
             // 
             // buttonDatabase
             // 
-            buttonDatabase.Location = new Point(308, 26);
+            buttonDatabase.Location = new Point(301, 74);
             buttonDatabase.Margin = new Padding(2);
             buttonDatabase.Name = "buttonDatabase";
-            buttonDatabase.Size = new Size(88, 22);
+            buttonDatabase.Size = new Size(88, 23);
             buttonDatabase.TabIndex = 2;
             buttonDatabase.Text = "Database";
             buttonDatabase.UseVisualStyleBackColor = true;
@@ -370,21 +371,30 @@
             tabPageMain2.Location = new Point(4, 24);
             tabPageMain2.Name = "tabPageMain2";
             tabPageMain2.Padding = new Padding(3);
-            tabPageMain2.Size = new Size(505, 599);
+            tabPageMain2.Size = new Size(820, 599);
             tabPageMain2.TabIndex = 1;
             tabPageMain2.Text = "Basic Event Settings";
             tabPageMain2.UseVisualStyleBackColor = true;
             // 
             // groupBoxReference
             // 
+            groupBoxReference.Controls.Add(textBoxReference);
             groupBoxReference.Controls.Add(buttonAddreference);
             groupBoxReference.Dock = DockStyle.Top;
             groupBoxReference.Location = new Point(3, 3);
             groupBoxReference.Name = "groupBoxReference";
-            groupBoxReference.Size = new Size(499, 165);
+            groupBoxReference.Size = new Size(814, 165);
             groupBoxReference.TabIndex = 0;
             groupBoxReference.TabStop = false;
             groupBoxReference.Text = "Reference";
+            // 
+            // textBoxReference
+            // 
+            textBoxReference.Location = new Point(6, 51);
+            textBoxReference.Multiline = true;
+            textBoxReference.Name = "textBoxReference";
+            textBoxReference.Size = new Size(396, 108);
+            textBoxReference.TabIndex = 1;
             // 
             // buttonAddreference
             // 
@@ -394,6 +404,7 @@
             buttonAddreference.TabIndex = 0;
             buttonAddreference.Text = "Add new";
             buttonAddreference.UseVisualStyleBackColor = true;
+            buttonAddreference.Click += buttonAddreference_Click;
             // 
             // FormEditEvent
             // 
@@ -422,6 +433,7 @@
             tabPageMain1.ResumeLayout(false);
             tabPageMain2.ResumeLayout(false);
             groupBoxReference.ResumeLayout(false);
+            groupBoxReference.PerformLayout();
             ResumeLayout(false);
 
         }
@@ -459,5 +471,6 @@
         private Label label3;
         private GroupBox groupBoxReference;
         private Button buttonAddreference;
+        public TextBox textBoxReference;
     }
 }

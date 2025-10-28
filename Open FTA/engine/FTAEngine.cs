@@ -97,7 +97,7 @@ public class FTAlogic
         FTAitem FI = new FTAitem();
         FI.Name = "Top Event";
         FI.Tag = "TE";
-        FI.ItemType = 0;
+        FI.ItemType = 1;
         FI.Gate = Gates.OR;
         FI.X = 200;
         FI.Y = 100;
@@ -330,7 +330,7 @@ public class FTAlogic
     private void GenerateGatesList()
     {
         //https://relyence.com/2019/12/04/fault-tree-gates-events-explained/
-        GatesList.Add(-1, "Not set");
+       // GatesList.Add(-1, "Not set");
         GatesList.Add(1, "OR");
         GatesList.Add(2, "AND");
         /*GatesList.Add(3, "NOT");
@@ -344,7 +344,7 @@ public class FTAlogic
 
     private void GenerateEvetsList()
     {
-        EventsList.Add(-1, "Not set");
+    //    EventsList.Add(-1, "Not set");
         EventsList.Add(1, "Intermediate");
         EventsList.Add(2, "Basic");
         EventsList.Add(3, "House");
@@ -623,24 +623,25 @@ public class FTAlogic
 
     private static double ConvertToProbability(FTAitem e)
     {
-        double Tsource = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
+        //double Tsource = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
+        double Tsource = 1.0 / TimeUnitFactors[(int)e.ValueUnit];
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
 
         double P;
 
-        
+
         if (!MainAppSettings.Instance.SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
             P = e.Value;
         else
-                P = e.ValueType switch
-               {
-                   // ValueTypes.F => 1 - Math.Exp(-e.Value * Tsource),
-                   ValueTypes.F => 1 - Math.Exp(-e.Value*Tbase),
-                   ValueTypes.P => e.Value,
-                   ValueTypes.R => 1 - e.Value,
-                   ValueTypes.Lambda => 1 - Math.Exp(-e.Value * Tsource),
-                   _ => throw new ArgumentException("Neznámy typ hodnoty")
-               }; 
+            P = e.ValueType switch
+            {
+                //ValueTypes.F => 1 - Math.Exp(-e.Value * Tsource),
+                ValueTypes.F => 1 - Math.Exp(-e.Value*Tbase),
+                ValueTypes.P => e.Value,
+                ValueTypes.R => 1 - e.Value,
+                ValueTypes.Lambda => 1 - Math.Exp(-e.Value * Tbase),
+                _ => throw new ArgumentException("Neznámy typ hodnoty")
+            }; 
          /*   P = e.UserMetricType switch
             {
                 0 => 1 - Math.Exp(-e.Value * Tsource),
