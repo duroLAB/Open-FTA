@@ -16,10 +16,36 @@
 
     public List<Guid> Children { get; set; }
     public int Level { get; set; }
-    public double X1 { get; set; }
+    public double X1 { get; set ; }
     public double Y1 { get; set; }
-    public int X { get; set; }
-    public int Y { get; set; }
+ 
+
+    private int _x;
+    private int _y;
+
+    public int X
+    {
+        get => _x;
+        set
+        {
+            _x = value;
+       
+            // rect = new RectangleF(_x, rect.Y, rect.Width, rect.Height);
+             rect = new RectangleF(_x - Constants.EventHorizontalSpacing / 2, rect.Y, Constants.EventWidth + Constants.EventHorizontalSpacing, rect.Height);
+        }
+    }
+
+    public int Y
+    {
+        get => _y;
+        set
+        {
+            _y = value;            
+           // rect = new RectangleF(rect.X, _y, Constants.EventWidth , rect.Height);
+            rect = new RectangleF(_x - Constants.EventHorizontalSpacing / 2, _y, Constants.EventWidth + Constants.EventHorizontalSpacing, rect.Height);
+        }
+    }
+
 
     public int level { get; set; }
     public bool ItemState { get; set; }
@@ -31,6 +57,8 @@
 
     public string Reference{ get; set; }
 
+    public RectangleF rect { get; set; }
+
     public FTAitem()
     {
         // generovanie unikátneho Guid
@@ -39,6 +67,9 @@
         LowerBoundFrequency = 0;
         UpperBoundFrequency = 0;
         BIM = 0;
+
+        rect = new Rectangle(0,0,Constants.EventWidth,Constants.EventHeight);
+
     }
 
     public FTAitem DeepCopyFrom(FTAitem source)

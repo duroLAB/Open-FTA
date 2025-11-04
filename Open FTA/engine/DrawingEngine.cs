@@ -43,31 +43,11 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         DrawLinesAndGates(e);
         DrawProgressBars(e);
 
-       /* using (var stream = new FileStream("vystup.emf", FileMode.Create))
-        {
-            // 2️⃣ Získaj HDC
-            IntPtr hdc = e.GetHdc();
-
-            // 3️⃣ Vytvor Metafile s tým istým HDC (aby mal rovnaké rozlíšenie)
-            using (Metafile metafile = new Metafile(stream, hdc))
-            {
-                e.ReleaseHdc(hdc);
-
-                // 4️⃣ Vytvor Graphics z metafilu a kresli
-                using (Graphics gMeta = Graphics.FromImage(metafile))
-                {
-                    // všetko čo tu nakreslíš sa uloží do .emf súboru
-                    gMeta.Clear(Color.White);
-                    gMeta.DrawEllipse(Pens.Blue, 10, 10, 200, 100);
-                    gMeta.DrawString("Ahoj EMF!", new Font("Arial", 16), Brushes.Red, 20, 60);
-
-                    DrawBackGround(gMeta);
-                    DrawEvents(gMeta);
-                    DrawLinesAndGates(gMeta);
-                    DrawProgressBars(gMeta);
-                }
-            }
-        }*/
+        if(EngineLogic.IsAnyItemOverlapping())
+        {             Rectangle headerRect = new Rectangle(0, 30, 300, 25);
+            string t = "Warning: Some items are overlapping!";
+            DrawMCSHeader(e, headerRect, t, 25, 10);
+        }
 
 
     }

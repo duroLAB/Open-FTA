@@ -54,6 +54,7 @@ namespace OpenFTA
 
 
             MainAppSettings.Instance.Load();
+            //Constants.EventVerticalSpacing = 30;
 
             tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControl1.Padding = new Point(20, 5);
@@ -411,7 +412,13 @@ namespace OpenFTA
 
         private void toolStripButtonSort_Click(object sender, EventArgs e)
         {
-            MyDrawingEngine.ArrangeMainTreeHierarchically();
+   //         MyDrawingEngine.ArrangeMainTreeHierarchically();
+
+             
+            EngineLogic.TemActualX = 0;
+            EngineLogic.PrepareTreeForAlign(EngineLogic.GetItem(EngineLogic.TopEventGuid), 0);
+            EngineLogic.ArrangeEventsAlgo1();
+         
 
             pictureBox1.Invalidate();
         }
@@ -743,12 +750,7 @@ namespace OpenFTA
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
             FormSettings settingsForm = new FormSettings();
-            settingsForm.ShowDialog();
-
-
-
-
-
+            settingsForm.ShowDialog(); 
         }
 
         private void toolStripButtonExportImage_Click(object sender, EventArgs e)
@@ -1269,7 +1271,7 @@ namespace OpenFTA
         {
             FormDbViewer dbViewer = new FormDbViewer(EngineLogic);
             dbViewer.panelButtons.Visible = false;
-            dbViewer.ShowDialog();
+            dbViewer.ShowDialog();             
         }
     }
 }

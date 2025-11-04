@@ -7,12 +7,17 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 using static Open_FTA.forms.ErrorDialog;
+using static System.Collections.Specialized.BitVector32;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 
 public class MessageItem
@@ -1708,13 +1713,207 @@ public class FTAlogic
         return (res);
     }
 
+    public bool IsAnyItemOverlapping()
+    {
+        var items = FTAStructure.Values.ToList();
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            var rect1 = items[i].rect;
+
+            for (int j = i + 1; j < items.Count; j++)
+            {
+                var rect2 = items[j].rect;
+
+                if (rect1.IntersectsWith(rect2))
+                    return true;  
+            }
+        }
+
+        return false;  
+    }
+
+
+    bool TempTreeAlignSuccess;
+
+    public void ArrangeEventsAlgo1()
+    {
+        AssignLevelsToAllEvents();
+        SetDefaultYpositions(GetItem(TopEventGuid), GetItem(TopEventGuid).Y);
+        AddParentToMiddle(GetItem(TopEventGuid));     
+        GlobalStop = false;
+
+        for (int i = 0; i < 100; i++)
+        {
+            TempTreeAlignSuccess = false;
+            MoveSubtreeToLeft(GetItem(TopEventGuid), 90);
+            if(!TempTreeAlignSuccess|| GlobalStop)
+                break;
+        }
+               
+        for (int i = 0; i < 500; i++)
+        {
+            TempTreeAlignSuccess = false;
+            MoveSubtreeToLeft(GetItem(TopEventGuid), 50);
+            if(!TempTreeAlignSuccess || GlobalStop)
+                break;
+        }
+
+        for (int i = 0; i < 500; i++)
+        {
+            TempTreeAlignSuccess = false;
+            MoveSubtreeToLeft(GetItem(TopEventGuid), 10);
+            if (!TempTreeAlignSuccess || GlobalStop)
+                break;
+        }
+
+       
+         for (int i = 0; i < 500; i++)
+         {
+             TempTreeAlignSuccess = false;
+             MoveSubtreeToLeft(GetItem(TopEventGuid), 1);
+             if(!TempTreeAlignSuccess)
+                 break;
+         }  
+
+
+    }
+
+    public void SetDefaultYpositions(FTAitem itm,int TopEventY)
+    {
+        for (int i = 0; i < itm.Children.Count; i++)
+        {
+            FTAitem c = GetItem(itm.Children[i]);
+            c.Y = c.level * (int)(Constants.EventVerticalSpacing + Constants.EventHeight) + TopEventY;
+
+            SetDefaultYpositions(c, TopEventY);
+        }
+        itm.Y = itm.level * (int)(Constants.EventVerticalSpacing + Constants.EventHeight) + TopEventY;
+    }
+
+    public void AddParentToMiddle(FTAitem itm)
+    {        
+        int  min = 111111111;
+        int  max = -111111111; 
+       for (int i = 0; i < itm.Children.Count; i++)
+       {
+            FTAitem c = GetItem(itm.Children[i]);
+            AddParentToMiddle(c);
+
+            if (c.X > max)
+                max = c.X;
+            if (c.X < min)
+                min = c.X;
+
+            if (i == itm.Children.Count - 1)
+                itm.X = (max - min) / 2 + min;
+
+             if (i == itm.Children.Count - 1)
+                 itm.X = GetItem(itm.Children[0]).X;
+
+           itm.X = GetItem(itm.Children[0]).X + (int)Math.Round((GetItem(itm.Children[itm.Children.Count - 1]).X - GetItem(itm.Children[0]).X) / 2.0,MidpointRounding.ToPositiveInfinity);
+         
+        }
+        
+    }
+
+    public void AddParentToMiddle()
+    {
+        AddParentToMiddle(GetItem(TopEventGuid));
+    }
+     
+    bool GlobalStop;
+    public void MoveSubtreeToLeft(FTAitem fTAitem, int shift)
+    {
+           
+        for (int i = 0; i < fTAitem.Children.Count; i++)
+        {
+         
+            var child = GetItem(fTAitem.Children[i]);
+
+             if ((i>0))
+                {             
+
+                        
+                OneStepLeft(child, shift);               
+                AddParentToMiddle();
+
+
+                if (IsAnyItemOverlapping())
+                {                
+                    OneStepLeft(child, -shift);
+                    AddParentToMiddle();
+                } 
+                else
+                    TempTreeAlignSuccess = true;
+
+                if (IsAnyItemOverlapping())
+                {
+                    OneStepLeft(child, -1);
+                    AddParentToMiddle();                    
+                }
+            }
+            AddParentToMiddle(fTAitem);            
+            MoveSubtreeToLeft(child, shift);       
+                       
+        }
+        
+    }
+
+    public void OneStepLeft(FTAitem fTAitem, int shift)
+    {
+         
+        
+        foreach (var childGuid in fTAitem.Children)
+        {
+            var child = GetItem(childGuid);
+            OneStepLeft(child, shift);
+            child.X = child.X - shift;
+        }
+
+        fTAitem.X = fTAitem.X - shift;
+    }
+
+    public void OneStepBack(FTAitem fTAitem, int shift)
+    {
+        
+            fTAitem.X = fTAitem.X + shift;
+        foreach (var childGuid in fTAitem.Children)
+        {
+            var child = GetItem(childGuid);
+            OneStepBack(child, shift);
+            child.X = child.X + shift;
+        }
+    }
+
+
+    public int TemActualX;
+    public void PrepareTreeForAlign(FTAitem fTAitem,int actualx)
+    {
+     
+        foreach (var childGuid in fTAitem.Children)
+        {
+            var child = GetItem(childGuid);
+            PrepareTreeForAlign(child, actualx);
+
+            child.X = TemActualX;
+            // TemActualX = TemActualX + Constants.EventWidth+22;            
+            TemActualX = TemActualX + Constants.EventWidth + Constants.EventHorizontalSpacing + 1;
+        }
+        fTAitem.X = TemActualX;
+        
+
+
+    }
 
 }
 
 public static class Constants
 {
-    public const int EventWidth = 140;
-    public const int EventHeight = 90;
+    public static int EventWidth { get; set; } = 140;
+    public static int EventHeight { get; set; } = 90;
+    public static int EventHorizontalSpacing { get; set; } = 20;
+    public static int EventVerticalSpacing { get; set; } = 80;
 }
 
 
