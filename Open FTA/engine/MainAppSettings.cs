@@ -35,6 +35,27 @@ public class MainAppSettings
     [DisplayName("Event pen type")]
     public PenSettings ItemPen { get; set; } = new PenSettings();
 
+    [Category("Display settings")]
+    [DisplayName("Default event width")]
+    [Description("Default event width in pixels")]
+    public int EventWidth { get; set; } = 140;
+
+    [Category("Display settings")]
+    [DisplayName("Default event heigth")]
+    [Description("Default event heigth in pixels")]
+    public int EventHeight { get; set; } = 90;
+
+    [Category("Display settings")]
+    [DisplayName("Default event horizontal spacing")]
+    [Description("Default event horizontal spacing in pixels")]
+    public int EventHorizontalSpacing { get; set; } = 20;
+
+
+    [Category("Display settings")]
+    [DisplayName("Default event vertical spacing")]
+    [Description("Default event vertical spacing in pixels")]
+    public int EventVerticalSpacing { get; set; } = 80;
+
     [Category("Computation settings")]
     [DisplayName("Base time unit")]
     public MainCompTimeUnit BaseTimeUnit { get; set; } = MainCompTimeUnit.Year;
@@ -49,7 +70,7 @@ public class MainAppSettings
      
      
 
-   [Category("General settings")]
+    [Category("General settings")]
     [DisplayName("Auto sort tree after paste")]
     public bool AutoSortTree { get; set; } = true;
     // Cesta k súboru – vždy vedľa exe

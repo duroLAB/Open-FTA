@@ -223,9 +223,69 @@ namespace Open_FTA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap eventBasic {
+            get {
+                object obj = ResourceManager.GetObject("eventBasic", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap eventHouse {
+            get {
+                object obj = ResourceManager.GetObject("eventHouse", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap eventIntermediate {
+            get {
+                object obj = ResourceManager.GetObject("eventIntermediate", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap eventUndeveloped {
+            get {
+                object obj = ResourceManager.GetObject("eventUndeveloped", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ExportToWord {
             get {
                 object obj = ResourceManager.GetObject("ExportToWord", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap gateAnd {
+            get {
+                object obj = ResourceManager.GetObject("gateAnd", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap gateOr {
+            get {
+                object obj = ResourceManager.GetObject("gateOr", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -416,6 +476,16 @@ namespace Open_FTA.Properties {
         internal static System.Drawing.Bitmap TakeSnapshot {
             get {
                 object obj = ResourceManager.GetObject("TakeSnapshot", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Transferin {
+            get {
+                object obj = ResourceManager.GetObject("Transferin", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

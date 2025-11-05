@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Open_FTA.Properties;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -630,6 +631,37 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         int imageY = r.Y + r.Height + verticalOffset;
         Rectangle imageRect = new Rectangle(imageX, imageY, imageWidth, imageHeight);
 
+
+        if (imageFilename.Contains("eventBasic"))
+        {
+            g.DrawImage(Resources.eventBasic, imageRect);
+            return;
+        }
+
+        if (imageFilename.Contains("eventHouse"))
+        {
+            g.DrawImage(Resources.eventHouse, imageRect);
+            return;
+        }
+
+        if (imageFilename.Contains("eventIntermediate"))
+        {
+            g.DrawImage(Resources.eventIntermediate, imageRect);
+            return;
+        }
+
+        if (imageFilename.Contains("eventIntermediate"))
+        {
+            g.DrawImage(Resources.eventUndeveloped, imageRect);
+            return;
+        }
+
+        if (imageFilename.Contains("Transferin"))
+        {
+            g.DrawImage(Resources.Transferin, imageRect);
+            return;
+        }
+
         // Build the absolute path to the image.       
         string imagePath = System.IO.Path.Combine(picPath, imageFilename);
 
@@ -662,6 +694,20 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         int imageY = r.Y + r.Height + verticalOffset;
         Rectangle imageRect = new Rectangle(imageX, imageY, imageWidth, imageHeight);
 
+
+        if (imageFilename.Contains("gateAnd"))
+        {
+            g.DrawImage(Resources.gateAnd, imageRect);
+            return;
+        }
+
+        if (imageFilename.Contains("gateOr"))
+        {
+            g.DrawImage(Resources.gateOr, imageRect);
+            return;
+        }
+
+
         // Získanie cesty k obrázku        
         string imagePath = System.IO.Path.Combine(picPath, imageFilename);
 
@@ -681,6 +727,10 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             }
             g.DrawRectangle(fallbackPen ?? Pens.Black, imageRect);
         }
+
+
+       //Resources.gateAnd
+         
     }
 
 
@@ -906,9 +956,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         totalWidth -= gap;
         return Math.Max(totalWidth, Constants.EventWidth);
     }
-
-
-    public void Mouse_DragEvent(Point mouseCoordinates)
+        public void Mouse_DragEvent(Point mouseCoordinates)
     {
         if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)
         {

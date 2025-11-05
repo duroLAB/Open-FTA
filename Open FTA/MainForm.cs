@@ -53,8 +53,9 @@ namespace OpenFTA
                         toolStrip1.Items.Insert(8, host);*/
 
 
-            MainAppSettings.Instance.Load();
-            //Constants.EventVerticalSpacing = 30;
+ 
+      
+
 
             tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControl1.Padding = new Point(20, 5);
@@ -76,6 +77,19 @@ namespace OpenFTA
              inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy 2", "Vydavateľ 2", "Autorasda, Autorasda", 2025);*/
 
 
+        }
+
+        public void LoadAppSettings()
+        {
+            MainAppSettings.Instance.Load();           
+        }
+
+        public void GetAppSetings()
+        {
+            Constants.EventVerticalSpacing = MainAppSettings.Instance.EventVerticalSpacing;
+            Constants.EventHorizontalSpacing = MainAppSettings.Instance.EventHorizontalSpacing;
+            Constants.EventWidth = MainAppSettings.Instance.EventWidth;
+            Constants.EventHeight = MainAppSettings.Instance.EventHeight;
         }
 
         private void TabControl1_DrawItem(object sender, DrawItemEventArgs e)
@@ -188,8 +202,10 @@ namespace OpenFTA
                 if (EventWasSelected)
                 {
                     MyDrawingEngine.SetLastDragPosition(me.Location);
+                    pictureBox1.Cursor = Cursors.Cross;
                 }
-                pictureBox1.Cursor = Cursors.Cross;
+                else
+                    pictureBox1.Cursor = Cursors.NoMove2D;
                 pictureBox1.Invalidate();
             }
 
@@ -750,7 +766,12 @@ namespace OpenFTA
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
             FormSettings settingsForm = new FormSettings();
-            settingsForm.ShowDialog(); 
+            
+
+            if(settingsForm.ShowDialog() == DialogResult.OK)
+            {
+                GetAppSetings();
+            }
         }
 
         private void toolStripButtonExportImage_Click(object sender, EventArgs e)
@@ -1263,6 +1284,7 @@ namespace OpenFTA
             MyDrawingEngine.offsetX = 0;
             MyDrawingEngine.offsetY = 0;
             pictureBox1.Invalidate();
+            MyUIEngine.FillTreeView(treeView1);
             UpdateMainFormControls();
 
         }

@@ -1,4 +1,5 @@
 ﻿using Open_FTA.forms;
+using Open_FTA.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -103,11 +104,15 @@ namespace OpenFTA
             {
                 String Filename = "pic\\gates\\gate" + selected_item_text.Replace(" ", "") + ".png";
                 String Imagepath = System.IO.Path.Combine(strPICPath, Filename);
+
+                if (Filename.Contains("gateOr")) pictureBox1.Image = Resources.gateOr;
+                if (Filename.Contains("gateAnd")) pictureBox1.Image = Resources.gateAnd;
+                /*
                 if (File.Exists(Imagepath))
                 {
                     Image image1 = Image.FromFile(Imagepath);
                     pictureBox1.Image = image1;
-                }
+                }*/
             }
         }
 
@@ -118,14 +123,19 @@ namespace OpenFTA
             {
                 String Filename = "pic\\events\\event" + selected_item_text.Replace(" ", "") + ".png";
                 String Imagepath = System.IO.Path.Combine(strPICPath, Filename);
-                if (File.Exists(Imagepath))
+                Image image1;
+               /* if (File.Exists(Imagepath))
                 {
-                    Image image1 = Image.FromFile(Imagepath);
+                    image1 = Image.FromFile(Imagepath);
                     pictureBox2.Image = image1;
-                }
+                }*/
+
+                if (Filename.Contains("eventBasic")) pictureBox2.Image = Resources.eventBasic;
+                if (Filename.Contains("eventHouse")) pictureBox2.Image = Resources.eventHouse;
+                if (Filename.Contains("eventUndeveloped")) pictureBox2.Image = Resources.eventUndeveloped;
+                if (Filename.Contains("eventIntermediate")) pictureBox2.Image = Resources.eventIntermediate;
+                if (Filename.Contains("Transferin")) pictureBox2.Image = Resources.Transferin;
             }
-
-
 
 
             if (comboBoxEventType.SelectedIndex == 0)
