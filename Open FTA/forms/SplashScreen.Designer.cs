@@ -1,6 +1,6 @@
 ﻿namespace Open_FTA.forms
 {
-    partial class ExportDialogForm
+    partial class SplashScreen
     {
         /// <summary>
         /// Required designer variable.
@@ -28,23 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            timer1 = new System.Windows.Forms.Timer(components);
             SuspendLayout();
             // 
-            // ExportDialogForm
+            // SplashScreen
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Name = "ExportDialogForm";
-            Text = "ExportDialogForm";
-            Load += ExportDialogForm_Load;
+            Name = "SplashScreen";
+            Text = "SplashScreen";
+            Load += SplashScreen_Load;
             ResumeLayout(false);
         }
 
         #endregion
-
-        private System.Windows.Forms.Timer timer1;
     }
 }
