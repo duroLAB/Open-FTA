@@ -554,7 +554,7 @@ public class FTAlogic
 
    // public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
    // public static bool SimplificationStrategy = true; // P=f
-    public static bool SimplificationStrategyLinearOR = true; // P(A OR B) = Pa+Pb
+    public static bool SimplificationStrategyLinearOR = false; // P(A OR B) = Pa+Pb
 
     public void SumChildren(FTAitem parent,Dictionary<Guid,FTAitem> str)
     {
@@ -634,6 +634,10 @@ public class FTAlogic
 
         double P;
 
+        if(e.ValueType == ValueTypes.P|| e.ValueType == ValueTypes.R)
+        {
+            Tsource = Tbase;
+        }
 
         if (!MainAppSettings.Instance.SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
             P = e.Value;
@@ -659,24 +663,33 @@ public class FTAlogic
         if(Tbase==Tsource)
             return P;
         else
-            return 1 - Math.Pow(1 - P, Tsource / Tbase);        
+            if (!MainAppSettings.Instance.SimplificationStrategy)
+            {
+             P = P * Tbase/Tsource;
+            return(P);
+            } 
+        else
+             return 1 - Math.Pow(1 - P, Tsource / Tbase);        
 
         
     }
 
     public static double ProbabilityToFrequency(double P)
     {
+     
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
         double res = 0;
         if (MainAppSettings.Instance.SimplificationStrategy)
         {
-            res = -Math.Log(1 - P) / Tbase;
+            // res = -Math.Log(1 - P) / Tbase;
+            res = -Math.Log(1 - P) ;
         }
         else
         {
-            res = P / Tbase;
+            //res = P * Tbase / Tsource; 
+            res = P;
         }
-        //return -Math.Log(1 - P) / Tbase;
+         
         return (res);
     }
 
