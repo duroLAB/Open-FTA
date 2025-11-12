@@ -1,5 +1,6 @@
 ﻿using Open_FTA.Properties;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -49,8 +50,6 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             string t = "Warning: Some items are overlapping!";
             DrawMCSHeader(e, headerRect, t, 25, 10);
         }
-
-
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
@@ -155,8 +154,6 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                         headerRect.Width = r.Width/2-5;
 
                         DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS,16,8);
-
-
                     }
 
 
@@ -169,6 +166,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                     if (evt.IsHidden)
                     {
+                        /*
                         // Zobrazíme trojuholník len pre najvyššiu skrytú udalosť
                         if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
                         {
@@ -196,11 +194,18 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                                     g.DrawPolygon(redDashPen, trianglePoints);
                                 }
                             }
-                        }
+                        }*/
                     }
 
-                    else
-                    {
+                    bool temp = false;
+                   /* if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
+                        temp = true;*/
+                    if (!evt.IsHidden)
+                        temp = true;
+
+
+                    if (temp)
+                     {
                         // Vykreslíme udalosť podľa jej typu – pomocou bitmapy, ak je to definované.
                         switch (evt.ItemType)
                         {
@@ -454,6 +459,8 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 if (parent.IsHidden || (DrawingStructure.ContainsKey(parent.Parent) && DrawingStructure[parent.Parent].IsHidden))
                     continue;
 
+                
+
                 if (parent.Children.Count > 0)
                 {
                     Rectangle parentRect = RealPositionToPixel(new Rectangle
@@ -479,7 +486,8 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     // Child-Gate line
                     foreach (var childGuid in parent.Children)
                     {
-                        var child = EngineLogic.GetItem(childGuid);
+                        var child = EngineLogic.GetItem(childGuid, DrawingStructure);
+                        if(child.IsHidden) continue;
 
                         Rectangle childRect = RealPositionToPixel(new Rectangle
                         {
@@ -956,7 +964,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         totalWidth -= gap;
         return Math.Max(totalWidth, Constants.EventWidth);
     }
-        public void Mouse_DragEvent(Point mouseCoordinates)
+    public void Mouse_DragEvent(Point mouseCoordinates)
     {
         if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)
         {

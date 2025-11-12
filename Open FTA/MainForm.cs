@@ -183,7 +183,9 @@ namespace OpenFTA
                 var selectedEvent = EngineLogic.SelectedEvents.Count == 1 ? EngineLogic.SelectedEvents.First() : null;
                 if (selectedEvent != null)
                 {
-                    toolStripMenuItem_HIDEUNHIDE.Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
+                    if(selectedEvent.Children.Count > 0)
+                        
+                    toolStripMenuItem_HIDEUNHIDE.Text = EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden ? "Unhide" : "Hide";
 
                 }
                 contextMenuStrip_Treeview.Show(pictureBox1, e.Location);
@@ -428,14 +430,17 @@ namespace OpenFTA
 
         private void toolStripButtonSort_Click(object sender, EventArgs e)
         {
-   //         MyDrawingEngine.ArrangeMainTreeHierarchically();
+            //         MyDrawingEngine.ArrangeMainTreeHierarchically();
 
-             
-            EngineLogic.TemActualX = 0;
-            EngineLogic.PrepareTreeForAlign(EngineLogic.GetItem(EngineLogic.TopEventGuid), 0);
+
+            //EngineLogic.ArrangeEventsAlgo1();         
+
+           /* EngineLogic.FTAStructure = new Dictionary<Guid, FTAitem>(EngineLogic.MCSStructure);
+            EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
+
             EngineLogic.ArrangeEventsAlgo1();
-         
 
+            MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -765,8 +770,12 @@ namespace OpenFTA
 
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
-            FormSettings settingsForm = new FormSettings();
-            
+
+            MyDrawingEngine.SetStructure(EngineLogic.MCSStructure);
+
+            return;
+
+            FormSettings settingsForm = new FormSettings();            
 
             if(settingsForm.ShowDialog() == DialogResult.OK)
             {
@@ -865,7 +874,6 @@ namespace OpenFTA
             }
         }
 
-
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
             EngineLogic = new FTAlogic();
@@ -957,6 +965,14 @@ namespace OpenFTA
             {
                 EngineLogic.SelectChildren(EngineLogic.SelectedEvents[0], true);
             }
+
+           /* for(int i=0;i< EngineLogic.SelectedEvents.Count; i++)
+            {
+                EngineLogic.DisplayStructure.Add(EngineLogic.SelectedEvents[i].GuidCode,EngineLogic.GetItem(EngineLogic.SelectedEvents[i].GuidCode));
+            }
+            MyDrawingEngine.SetStructure(EngineLogic.DisplayStructure);*/
+
+
             pictureBox1.Invalidate();
         }
 
@@ -1025,12 +1041,26 @@ namespace OpenFTA
 
         private void toolStripMenuItem_HIDEUNHIDE_Click(object sender, EventArgs e)
         {
+           /* if (EngineLogic.SelectedEvents.Count == 1)
+            {
+                var selectedEvent = EngineLogic.SelectedEvents.First();
+                // selectedEvent.IsHidden = !selectedEvent.IsHidden;
+                //HideSubtree(selectedEvent, selectedEvent.IsHidden);
+                HideSubtree(selectedEvent, true);
+                ((ToolStripMenuItem)sender).Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
+
+                pictureBox1.Invalidate();
+            }*/
+
             if (EngineLogic.SelectedEvents.Count == 1)
             {
                 var selectedEvent = EngineLogic.SelectedEvents.First();
-                selectedEvent.IsHidden = !selectedEvent.IsHidden;
-                HideSubtree(selectedEvent, selectedEvent.IsHidden);
-                ((ToolStripMenuItem)sender).Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
+                if (selectedEvent.Children.Count > 0)
+                {
+                    HideSubtree(selectedEvent, !EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden);
+                    ((ToolStripMenuItem)sender).Text = EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden ? "Unhide" : "Hide";
+                }
+                 
 
                 pictureBox1.Invalidate();
             }

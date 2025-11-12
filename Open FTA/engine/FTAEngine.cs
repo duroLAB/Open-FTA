@@ -44,6 +44,8 @@ public enum Gates {NotSet, OR, AND }
 public class FTAlogic
 {
     public Dictionary<Guid, FTAitem> FTAStructure { get; set; }  = new Dictionary<Guid, FTAitem>();
+
+    public Dictionary<Guid, FTAitem> TempStructure { get; set; } = new Dictionary<Guid, FTAitem>();
     public Guid TopEventGuid;
     public Dictionary<int, String> GatesList {  get; private set; } = new Dictionary<int, String>();
     public Dictionary<int, String> EventsList { get; private set; } = new Dictionary<int, String>();
@@ -384,6 +386,21 @@ public class FTAlogic
         {
             Guid Parent = Event.Value.Parent;
             FTAitem fi = GetItem(Event.Value.Parent);
+            if (fi != null)
+                fi.Children.Add(Event.Value.GuidCode);
+        }
+    }
+
+    public void FindAllChilren(Dictionary<Guid, FTAitem> s)
+    {
+        foreach (var Event in s)
+        {
+            Event.Value.Children.Clear();
+        }
+        foreach (var Event in s)
+        {
+            Guid Parent = Event.Value.Parent;
+            FTAitem fi = GetItem(Event.Value.Parent,s);
             if (fi != null)
                 fi.Children.Add(Event.Value.GuidCode);
         }
@@ -1738,7 +1755,8 @@ public class FTAlogic
             {
                 var rect2 = items[j].rect;
 
-                if (rect1.IntersectsWith(rect2))
+                  // if (rect1.IntersectsWith(rect2) && items[i].IsHidden == false && items[j].IsHidden == false)
+                 if (rect1.IntersectsWith(rect2))
                     return true;  
             }
         }
@@ -1751,18 +1769,34 @@ public class FTAlogic
 
     public void ArrangeEventsAlgo1()
     {
+        var backup = new Dictionary<Guid, FTAitem>(FTAStructure);
+        foreach (FTAitem evnt in FTAStructure.Values)
+        {
+            if (evnt.IsHidden)
+                FTAStructure.Remove(evnt.GuidCode);
+        }
+        FindAllChilren(FTAStructure);
+
+        TemActualX = 0;
+        PrepareTreeForAlign(FTAStructure.Values.First(), 0);     
+     
+
+
         AssignLevelsToAllEvents();
         SetDefaultYpositions(GetItem(TopEventGuid), GetItem(TopEventGuid).Y);
         AddParentToMiddle(GetItem(TopEventGuid));     
         GlobalStop = false;
 
-        for (int i = 0; i < 100; i++)
+         
+        for (int i = 0; i < 5; i++)
         {
             TempTreeAlignSuccess = false;
             MoveSubtreeToLeft(GetItem(TopEventGuid), 90);
             if(!TempTreeAlignSuccess|| GlobalStop)
                 break;
         }
+
+      
                
         for (int i = 0; i < 500; i++)
         {
@@ -1787,8 +1821,10 @@ public class FTAlogic
              MoveSubtreeToLeft(GetItem(TopEventGuid), 1);
              if(!TempTreeAlignSuccess)
                  break;
-         }  
+         }
 
+        FTAStructure = new Dictionary<Guid, FTAitem>(backup);
+        FindAllChilren(FTAStructure);
 
     }
 
@@ -1913,8 +1949,7 @@ public class FTAlogic
             // TemActualX = TemActualX + Constants.EventWidth+22;            
             TemActualX = TemActualX + Constants.EventWidth + Constants.EventHorizontalSpacing + 1;
         }
-        fTAitem.X = TemActualX;
-        
+        fTAitem.X = TemActualX;      
 
 
     }
