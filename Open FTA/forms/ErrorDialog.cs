@@ -1,13 +1,5 @@
 ﻿using Open_FTA.Properties;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Open_FTA.forms
 {
@@ -36,7 +28,7 @@ namespace Open_FTA.forms
             Info
         }
 
- 
+
 
         public ErrorDialog(IEnumerable<MessageItem> messages)
         {
@@ -83,14 +75,14 @@ namespace Open_FTA.forms
             };
 
             listView.Columns.Add("", 40);
-          
+
             listView.Columns.Add("Message", 520);
 
             foreach (var msg in messages)
             {
                 string key = msg.Type.ToString();
                 var item = new ListViewItem("", key);
-             
+
                 item.SubItems.Add(msg.Text);
                 listView.Items.Add(item);
             }

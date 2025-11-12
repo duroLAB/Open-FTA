@@ -1,19 +1,7 @@
 ﻿using Open_FTA.Properties;
-using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Drawing.Printing;
-using System.Linq;
 using System.Text;
-using System.Windows.Forms;
-using System.Xml.Linq;
-
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 {
@@ -28,8 +16,9 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     private Point LastMousePosition;
     private Point _lastDragPosition;
     Dictionary<Guid, FTAitem> DrawingStructure = structure;
+    public FTAitem TopEvent;
 
-    readonly string picPath = AppContext.BaseDirectory;    
+    readonly string picPath = AppContext.BaseDirectory;
 
     public void SetDimensions(int fTAWidth, int fTAHeight)
     {
@@ -39,14 +28,26 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
     public void DrawFTA(Graphics e)
     {
+        DrawFTA(e, TopEvent);
+    }
+
+    public void DrawFTA(Graphics e, FTAitem top)
+    {
+        TopEvent = top;
+
+        if (TopEvent == null)
+            TopEvent = DrawingStructure.First().Value;
 
         DrawBackGround(e);
-        DrawEvents(e);
+        //DrawEvents(e,EngineLogic.GetItem(EngineLogic.TopEventGuid));
+        DrawEvents(e, TopEvent);
+
         DrawLinesAndGates(e);
         DrawProgressBars(e);
 
-        if(EngineLogic.IsAnyItemOverlapping())
-        {             Rectangle headerRect = new Rectangle(0, 30, 300, 25);
+        if (EngineLogic.IsAnyItemOverlapping())
+        {
+            Rectangle headerRect = new Rectangle(0, 30, 300, 25);
             string t = "Warning: Some items are overlapping!";
             DrawMCSHeader(e, headerRect, t, 25, 10);
         }
@@ -55,6 +56,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
     {
         DrawingStructure = structure;
+        TopEvent = structure.First().Value;
     }
 
     private void DrawBackGround(Graphics g)
@@ -65,7 +67,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
-    private void DrawMCSHeader(Graphics g, Rectangle rect, string text,int Height,int FontSize)
+    private void DrawMCSHeader(Graphics g, Rectangle rect, string text, int Height, int FontSize)
     {
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
@@ -102,227 +104,237 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
-    private void DrawEvents(Graphics g)
+    private void DrawEvents(Graphics g, FTAitem top)
+    {
+        for (int i = 0; i < top.Children.Count; i++)
+        {
+            DrawEvents(g, EngineLogic.GetItem(top.Children[i]));
+        }
+        DrawEvent(g, top);
+    }
+    private void DrawEvent(Graphics g, FTAitem evt)
     {
         // using (Pen selPen = new Pen(Color.Blue))
         using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
         {
             // Prejdeme všetky udalosti v hlavnej štruktúre
-            foreach (var evtPair in DrawingStructure)
+            /* foreach (var evtPair in DrawingStructure)
+             {*/
+
+            // FTAitem evt = evtPair.Value;
+
             {
-
-                FTAitem evt = evtPair.Value;
-
+                // Určíme polohu a rozmery udalosti
+                Rectangle r = new Rectangle
                 {
-                    // Určíme polohu a rozmery udalosti
-                    Rectangle r = new Rectangle
+                    X = evt.X,
+                    Y = evt.Y,
+                    Width = Constants.EventWidth,
+                    Height = Constants.EventHeight
+                };
+                r = RealPositionToPixel(r);
+
+                // Nastavíme farbu pera podľa toho, či je udalosť vybraná (multiselect)
+                if (evt.IsSelected)
+                {
+                    selPen.Color = Color.Red;
+                    selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+                }
+                else
+                {
+                    selPen.Color = MainAppSettings.Instance.ItemPen.Color;
+                    selPen.Width = MainAppSettings.Instance.ItemPen.Width;
+                }
+
+
+                string searchGuid = evt.Tag;
+                bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
+                if (exists)
+                {
+                    selPen.Color = Color.Green;
+
+                    selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+                    Rectangle headerRect = new Rectangle(0, 0, 220, 25);
+                    string t = "Minimal Cut Set:" + EngineLogic.HighlightedMCS;
+                    DrawMCSHeader(g, headerRect, t, 25, 10);
+
+                    headerRect = r;
+                    headerRect.X = r.X + r.Width / 2 + 2;
+                    headerRect.Y = r.Y - 18;
+                    headerRect.Width = r.Width / 2 - 5;
+
+                    DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS, 16, 8);
+                }
+
+
+                // Ak je aktívny režim ťahania a udalosť je vybraná, použijeme čierne perá so šrafovaním.
+                if (SelectedEventDrag && evt.IsSelected)
+                {
+                    selPen.Color = Color.Black;
+                    selPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                }
+
+                if (evt.IsHidden)
+                {
+                    /*
+                    // Zobrazíme trojuholník len pre najvyššiu skrytú udalosť
+                    if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
                     {
-                        X = evt.X,
-                        Y = evt.Y,
-                        Width = Constants.EventWidth,
-                        Height = Constants.EventHeight
-                    };
-                    r = RealPositionToPixel(r);
+                        // Vykreslíme obrázok trojuholníka pomocou bitmapy
+                        DrawEventBitmap(g, r, "pic\\events\\Transferin.png", verticalOffset: -r.Height);
 
-                    // Nastavíme farbu pera podľa toho, či je udalosť vybraná (multiselect)
-                    if (evt.IsSelected)
-                    {
-                        selPen.Color = Color.Red;
-                        selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-                    }
-                    else
-                    {
-                        selPen.Color = MainAppSettings.Instance.ItemPen.Color;
-                        selPen.Width = MainAppSettings.Instance.ItemPen.Width ;
-                    }
-                
-
-                    string searchGuid = evt.Tag;
-                    bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
-                    if (exists)
-                    {
-                        selPen.Color = Color.Green;
-
-                        selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-                        Rectangle headerRect = new Rectangle(0, 0, 220, 25);
-                        string t = "Minimal Cut Set:"+EngineLogic.HighlightedMCS;
-                        DrawMCSHeader(g, headerRect, t,25,10);
-
-                        headerRect = r;
-                        headerRect.X = r.X + r.Width/2+2;
-                        headerRect.Y = r.Y-18;
-                        headerRect.Width = r.Width/2-5;
-
-                        DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS,16,8);
-                    }
-
-
-                        // Ak je aktívny režim ťahania a udalosť je vybraná, použijeme čierne perá so šrafovaním.
-                        if (SelectedEventDrag && evt.IsSelected)
-                    {
-                        selPen.Color = Color.Black;
-                        selPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                    }
-
-                    if (evt.IsHidden)
-                    {
-                        /*
-                        // Zobrazíme trojuholník len pre najvyššiu skrytú udalosť
-                        if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
+                        // Ak je udalosť vybraná, zvýrazníme obrys trojuholníka
+                        if (evt.IsSelected)
                         {
-                            // Vykreslíme obrázok trojuholníka pomocou bitmapy
-                            DrawEventBitmap(g, r, "pic\\events\\Transferin.png", verticalOffset: -r.Height);
+                            // Vypočítame rozmery obrázku trojuholníka (používame predvolené scale faktory z DrawEventBitmap)
+                            int imageWidth = (int)(r.Width * 0.5f);
+                            int imageHeight = (int)(r.Height * 0.5f);
+                            int imageX = r.X + (r.Width - imageWidth) / 2;
+                            int imageY = r.Y;
 
-                            // Ak je udalosť vybraná, zvýrazníme obrys trojuholníka
-                            if (evt.IsSelected)
+                            // Definujeme body trojuholníka
+                            Point topVertex = new Point(imageX + imageWidth / 2, imageY);
+                            Point bottomLeft = new Point(imageX, imageY + imageHeight);
+                            Point bottomRight = new Point(imageX + imageWidth, imageY + imageHeight);
+                            Point[] trianglePoints = new Point[] { topVertex, bottomLeft, bottomRight };
+
+                            using (Pen redDashPen = new Pen(Color.Red, 1))
                             {
-                                // Vypočítame rozmery obrázku trojuholníka (používame predvolené scale faktory z DrawEventBitmap)
-                                int imageWidth = (int)(r.Width * 0.5f);
-                                int imageHeight = (int)(r.Height * 0.5f);
-                                int imageX = r.X + (r.Width - imageWidth) / 2;
-                                int imageY = r.Y;
-
-                                // Definujeme body trojuholníka
-                                Point topVertex = new Point(imageX + imageWidth / 2, imageY);
-                                Point bottomLeft = new Point(imageX, imageY + imageHeight);
-                                Point bottomRight = new Point(imageX + imageWidth, imageY + imageHeight);
-                                Point[] trianglePoints = new Point[] { topVertex, bottomLeft, bottomRight };
-
-                                using (Pen redDashPen = new Pen(Color.Red, 1))
-                                {
-                                    redDashPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                                    g.DrawPolygon(redDashPen, trianglePoints);
-                                }
+                                redDashPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                                g.DrawPolygon(redDashPen, trianglePoints);
                             }
-                        }*/
+                        }
+                    }*/
+                }
+
+                bool temp = false;
+                /* if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
+                     temp = true;*/
+                if (!evt.IsHidden)
+                    temp = true;
+
+
+                if (temp)
+                {
+                    // Vykreslíme udalosť podľa jej typu – pomocou bitmapy, ak je to definované.
+                    switch (evt.ItemType)
+                    {
+                        case 1:
+                            if (evt.Children.Count > 0)
+                                if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
+                                    DrawEventBitmap(g, r, "pic\\events\\gateTransfer.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            break;
+                        case 2: // Basic Event
+                                // Pre Basic Event použijeme bitmapu s miernym scalingom
+                            DrawEventBitmap(g, r, "pic\\events\\eventBasic.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            break;
+                        case 3: // House Event
+                            DrawEventBitmap(g, r, "pic\\events\\eventHouse.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            break;
+                        case 4: // Undeveloped Event 
+                            DrawEventBitmap(g, r, "pic\\events\\eventUndeveloped.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            break;
+                        case 5: // Conditioning Event 
+                                // Pre Conditioning Event použijeme odlišný scaling, aby vznikol oválny tvar
+                            DrawEventBitmap(g, r, "pic\\events\\eventConditioning.png", verticalOffset: 0, scaleFactorWidth: 0.4f, scaleFactorHeight: 0.35f);
+                            break;
+                        case 6: // Basic Repeat Event 
+                                // Prípadne vykreslite obdĺžnik alebo inú bitmapu pre Basic Repeat Event.
+                            break;
+                        default: // Not Set 
+                            break;
                     }
 
-                    bool temp = false;
-                   /* if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
-                        temp = true;*/
-                    if (!evt.IsHidden)
-                        temp = true;
 
 
-                    if (temp)
-                     {
-                        // Vykreslíme udalosť podľa jej typu – pomocou bitmapy, ak je to definované.
-                        switch (evt.ItemType)
-                        {
-                            case 1: // Intermediate Event 
-                                    // Môžete pridať vlastné vykreslenie pre Intermediate Event
-                                break;
-                            case 2: // Basic Event
-                                    // Pre Basic Event použijeme bitmapu s miernym scalingom
-                                DrawEventBitmap(g, r, "pic\\events\\eventBasic.png", verticalOffset: 0, scaleFactorWidth: 0.4f, scaleFactorHeight: 0.45f);
-                                break;
-                            case 3: // House Event
-                                DrawEventBitmap(g, r, "pic\\events\\eventHouse.png");
-                                break;
-                            case 4: // Undeveloped Event 
-                                DrawEventBitmap(g, r, "pic\\events\\eventUndeveloped.png");
-                                break;
-                            case 5: // Conditioning Event 
-                                    // Pre Conditioning Event použijeme odlišný scaling, aby vznikol oválny tvar
-                                DrawEventBitmap(g, r, "pic\\events\\eventConditioning.png", verticalOffset: 0, scaleFactorWidth: 0.4f, scaleFactorHeight: 0.35f);
-                                break;
-                            case 6: // Basic Repeat Event 
-                                    // Prípadne vykreslite obdĺžnik alebo inú bitmapu pre Basic Repeat Event.
-                                break;
-                            default: // Not Set 
-                                break;
-                        }
+                    // Definujeme rozloženie textu v udalosti: horná časť pre TAG, stred pre názov, spodná pre frekvenciu.
+                    int topRowHeight = r.Height / 6;
+                    int bottomRowHeight = r.Height / 6;
+                    int middleHeight = r.Height - topRowHeight - bottomRowHeight;
 
-                         
+                    Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
+                    Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
+                    Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
 
-                        // Definujeme rozloženie textu v udalosti: horná časť pre TAG, stred pre názov, spodná pre frekvenciu.
-                        int topRowHeight = r.Height / 6;
-                        int bottomRowHeight = r.Height / 6;
-                        int middleHeight = r.Height - topRowHeight - bottomRowHeight;
+                    // Nakreslíme oddelenie jednotlivých častí pomocou čiar.
+                    g.DrawLine(selPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
+                    g.DrawLine(selPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
 
-                        Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
-                        Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
-                        Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
+                    // Vykreslenie TAG textu v hornej časti
+                    string tagText = evt.Tag;
+                    Font tagFont = FindFittingFont(g, tagText, topRect);
+                    SizeF tagSize = g.MeasureString(tagText, tagFont);
+                    PointF tagPos = new PointF(
+                        topRect.X + (topRect.Width - tagSize.Width) / 2,
+                        topRect.Y + (topRect.Height - tagSize.Height) / 2
+                    );
+                    g.DrawString(tagText, tagFont, Brushes.Black, tagPos);
 
-                        // Nakreslíme oddelenie jednotlivých častí pomocou čiar.
-                        g.DrawLine(selPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
-                        g.DrawLine(selPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
+                    // Vykreslenie názvu udalosti v strednej časti
+                    //   string nameText = evt.Name;
+                    string nameText = SplitStringToLines(evt.Name);
 
-                        // Vykreslenie TAG textu v hornej časti
-                        string tagText = evt.Tag;
-                        Font tagFont = FindFittingFont(g, tagText, topRect);
-                        SizeF tagSize = g.MeasureString(tagText, tagFont);
-                        PointF tagPos = new PointF(
-                            topRect.X + (topRect.Width - tagSize.Width) / 2,
-                            topRect.Y + (topRect.Height - tagSize.Height) / 2
+                    Font nameFont = FindFittingFont(g, nameText, middleRect);
+                    SizeF nameSize = g.MeasureString(nameText, nameFont);
+
+                    // Overíme, či sa text zmestí do obdlžníka
+                    if (nameSize.Width <= middleRect.Width && nameSize.Height <= middleRect.Height)
+                    {
+                        PointF namePos = new PointF(
+                            middleRect.X + (middleRect.Width - nameSize.Width) / 2,
+                            middleRect.Y + (middleRect.Height - nameSize.Height) / 2
                         );
-                        g.DrawString(tagText, tagFont, Brushes.Black, tagPos);
 
-                        // Vykreslenie názvu udalosti v strednej časti
-                        //   string nameText = evt.Name;
-                        string nameText = SplitStringToLines(evt.Name);
+                        // Nastavenie zarovnania
+                        StringFormat format = new StringFormat();
+                        format.Alignment = StringAlignment.Center;
+                        format.LineAlignment = StringAlignment.Center;
 
-                        Font nameFont = FindFittingFont(g, nameText, middleRect);
-                        SizeF nameSize = g.MeasureString(nameText, nameFont);
+                        //g.DrawString(nameText, nameFont, Brushes.Black, namePos);
+                        g.DrawString(nameText, nameFont, Brushes.Black, middleRect, format);
 
-                        // Overíme, či sa text zmestí do obdlžníka
-                        if (nameSize.Width <= middleRect.Width && nameSize.Height <= middleRect.Height)
-                        {
-                            PointF namePos = new PointF(
-                                middleRect.X + (middleRect.Width - nameSize.Width) / 2,
-                                middleRect.Y + (middleRect.Height - nameSize.Height) / 2
-                            );
-
-                            // Nastavenie zarovnania
-                            StringFormat format = new StringFormat();
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Center;
-
-                            //g.DrawString(nameText, nameFont, Brushes.Black, namePos);
-                            g.DrawString(nameText, nameFont, Brushes.Black, middleRect, format);
-
-                        }
-
-                        // Vykreslenie frekvencie v spodnej časti
-                        string freqText = (evt.Frequency == 0) ? "" :
-                                  (evt.Frequency < 0.001) ? evt.Frequency.ToString("0.0000E+0") :
-                                  evt.Frequency.ToString("F6");
-
-                        if (evt.ItemType > -1)
-                        {
-
-                            freqText = evt.ValueType switch
-                            {
-                                ValueTypes.F => "f=",
-                                ValueTypes.P => "P=",
-                                ValueTypes.R => "R=",
-                                ValueTypes.Lambda => "λ=",
-                                _ => ""
-                            };
-                            freqText += (evt.Value < 0.001) ? evt.Value.ToString("0.0000E+0") : evt.Value.ToString("F6");
-                            if (evt.ValueType == ValueTypes.F || evt.ValueType == ValueTypes.Lambda) { freqText += " " + EngineLogic.MetricUnitsList[evt.ValueUnit]; }
-
-                        }
-
-                        Font freqFont = FindFittingFont(g, freqText, bottomRect);
-                        SizeF freqSize = g.MeasureString(freqText, freqFont);
-                        PointF freqPos = new PointF(
-                            bottomRect.X + (bottomRect.Width - freqSize.Width) / 2,
-                            bottomRect.Y + (bottomRect.Height - freqSize.Height) / 2
-                        );
-                        g.DrawString(freqText, freqFont, Brushes.Black, freqPos);
-
-                        // Nakreslíme vonkajšie zaoblené okraje udalosti.
-                        using (GraphicsPath roundedRect = GetRoundedRectangle(r, 5))
-                        {
-                            g.DrawPath(selPen, roundedRect);
-                        }
-
-                        
                     }
+
+                    // Vykreslenie frekvencie v spodnej časti
+                    string freqText = (evt.Frequency == 0) ? "" :
+                              (evt.Frequency < 0.001) ? evt.Frequency.ToString("0.0000E+0") :
+                              evt.Frequency.ToString("F6");
+
+                    if (evt.ItemType > -1)
+                    {
+
+                        freqText = evt.ValueType switch
+                        {
+                            ValueTypes.F => "f=",
+                            ValueTypes.P => "P=",
+                            ValueTypes.R => "R=",
+                            ValueTypes.Lambda => "λ=",
+                            _ => ""
+                        };
+                        freqText += (evt.Value < 0.001) ? evt.Value.ToString("0.0000E+0") : evt.Value.ToString("F6");
+                        if (evt.ValueType == ValueTypes.F || evt.ValueType == ValueTypes.Lambda) { freqText += " " + EngineLogic.MetricUnitsList[evt.ValueUnit]; }
+
+                    }
+
+                    Font freqFont = FindFittingFont(g, freqText, bottomRect);
+                    SizeF freqSize = g.MeasureString(freqText, freqFont);
+                    PointF freqPos = new PointF(
+                        bottomRect.X + (bottomRect.Width - freqSize.Width) / 2,
+                        bottomRect.Y + (bottomRect.Height - freqSize.Height) / 2
+                    );
+                    g.DrawString(freqText, freqFont, Brushes.Black, freqPos);
+
+                    // Nakreslíme vonkajšie zaoblené okraje udalosti.
+                    using (GraphicsPath roundedRect = GetRoundedRectangle(r, 5))
+                    {
+                        g.DrawPath(selPen, roundedRect);
+                    }
+
+
                 }
             }
         }
+        //}
     }
 
     private void DrawProgressBars(Graphics g)
@@ -341,12 +353,12 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             return;
         }
 
-        if (maxBIM == 0||minBIM==maxBIM)
+        if (maxBIM == 0 || minBIM == maxBIM)
             return;
 
         foreach (var evtPair in DrawingStructure)
         {
-         
+
             FTAitem evt = evtPair.Value;
             if (evt.ItemType >= 2) // Len pre Basic Event
             {
@@ -361,13 +373,13 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 };
                 r = RealPositionToPixel(r);
 
-                double bimPercent = 100*(evt.BIM - minBIM) / (maxBIM- minBIM);
+                double bimPercent = 100 * (evt.BIM - minBIM) / (maxBIM - minBIM);
                 String txt = $"BIM: {bimPercent:F4}";
                 DrawTurboProgressBar(g, r, (float)bimPercent, txt);
             }
         }
 
-         
+
     }
 
     static string SplitStringToLines(string text)
@@ -381,7 +393,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         int totalLength = text.Length;
 
-       
+
         int lineCount;
         if (totalLength < 15)
             lineCount = 1;
@@ -391,12 +403,12 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             lineCount = 3;
 
         if (lineCount == 1)
-            return text;  
+            return text;
 
-        
+
         double[] thresholds;
         if (lineCount == 2)
-            thresholds = new double[] { 0.6 };  
+            thresholds = new double[] { 0.6 };
         else
             thresholds = new double[] { 0.5, 0.8 }; // 50% + 30% + 20%
 
@@ -445,7 +457,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
         return new Font("Arial", minFontSize);
     }
-  
+
     private void DrawLinesAndGates(Graphics g)
     {
 
@@ -459,7 +471,9 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 if (parent.IsHidden || (DrawingStructure.ContainsKey(parent.Parent) && DrawingStructure[parent.Parent].IsHidden))
                     continue;
 
-                
+                if(EngineLogic.HasEventHiddenChildren(parent))
+                    { continue; }   
+
 
                 if (parent.Children.Count > 0)
                 {
@@ -487,7 +501,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     foreach (var childGuid in parent.Children)
                     {
                         var child = EngineLogic.GetItem(childGuid, DrawingStructure);
-                        if(child.IsHidden) continue;
+                        if (child.IsHidden) continue;
 
                         Rectangle childRect = RealPositionToPixel(new Rectangle
                         {
@@ -513,12 +527,12 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                     if (MainAppSettings.Instance.Technicalgates)
                     {
-                        
+
                         if (parent.Gate == Gates.OR)
                         {
                             // OR Gate 
                             g.DrawArc(linePen, parentCenter.X - 20, gateY - 10, 40, 60, 0, -180);
-                            g.DrawArc(linePen, parentCenter.X - 20, gateY + 10, 40, 20, 0, -180);                          
+                            g.DrawArc(linePen, parentCenter.X - 20, gateY + 10, 40, 20, 0, -180);
                         }
                         else if (parent.Gate == Gates.AND)
                         {
@@ -534,6 +548,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                     else
                     {
+                        if(!EngineLogic.HasEventHiddenChildren(parent)) 
                         switch (parent.Gate)
                         {
                             case Gates.OR: // OR Gate
@@ -543,24 +558,24 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                             case Gates.AND: // AND Gate
                                 DrawGateBitmap(g, parentRect, "pic\\gates\\gateAnd.png", verticalOffset: 10);
                                 break;
-                          /*  case 3: // Not Gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateNot.png", verticalOffset: 10);
-                                break;
-                            case 4: // Nand Gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateNand.png", verticalOffset: 10);
-                                break;
-                            case 5: // Nor gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateNor.png", verticalOffset: 10);
-                                break;
-                            case 6: // Xor gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateXor.png", verticalOffset: 10);
-                                break;
-                            case 7: // Inhibit gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateInhibit.png", verticalOffset: 10);
-                                break;
-                            case 8: // Priority and gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gatePriorityand.png", verticalOffset: 10);
-                                break;*/
+                            /*  case 3: // Not Gate
+                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateNot.png", verticalOffset: 10);
+                                  break;
+                              case 4: // Nand Gate
+                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateNand.png", verticalOffset: 10);
+                                  break;
+                              case 5: // Nor gate
+                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateNor.png", verticalOffset: 10);
+                                  break;
+                              case 6: // Xor gate
+                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateXor.png", verticalOffset: 10);
+                                  break;
+                              case 7: // Inhibit gate
+                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateInhibit.png", verticalOffset: 10);
+                                  break;
+                              case 8: // Priority and gate
+                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gatePriorityand.png", verticalOffset: 10);
+                                  break;*/
                             default:
                                 break;
 
@@ -569,22 +584,22 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                 }
 
-                
+
             }
         }
     }
-   
+
     private bool IsTopHiddenParent(FTAitem evt)
     {
         if (!evt.IsHidden)
             return false;
 
-        if (evt.Parent != null && DrawingStructure.TryGetValue(evt.Parent, out FTAitem? parent) && parent!=null &&  parent.IsHidden)
+        if (evt.Parent != null && DrawingStructure.TryGetValue(evt.Parent, out FTAitem? parent) && parent != null && parent.IsHidden)
             return false;
 
         foreach (var childGuid in evt.Children)
         {
-            if (DrawingStructure.TryGetValue(childGuid, out FTAitem? child) && child !=null && !child.IsHidden)
+            if (DrawingStructure.TryGetValue(childGuid, out FTAitem? child) && child != null && !child.IsHidden)
                 return false;
         }
 
@@ -608,7 +623,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
         return path;
     }
-   
+
     public Rectangle RealPositionToPixel(Rectangle r)
     {
         Rectangle outR = new Rectangle();
@@ -658,7 +673,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             return;
         }
 
-        if (imageFilename.Contains("eventIntermediate"))
+        if (imageFilename.Contains("eventUndeveloped"))
         {
             g.DrawImage(Resources.eventUndeveloped, imageRect);
             return;
@@ -669,6 +684,14 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             g.DrawImage(Resources.Transferin, imageRect);
             return;
         }
+
+
+        if (imageFilename.Contains("gateTransfer"))
+        {
+            g.DrawImage(Resources.gateTransfer, imageRect);
+            return;
+        }
+
 
         // Build the absolute path to the image.       
         string imagePath = System.IO.Path.Combine(picPath, imageFilename);
@@ -688,7 +711,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 g.FillEllipse(redBrush, imageRect);
             }
             g.DrawEllipse(fallbackPen ?? Pens.Black, imageRect);
-        }      
+        }
     }
 
     private void DrawGateBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.6f, float scaleFactorHeight = 0.5f, Pen? fallbackPen = null)
@@ -737,8 +760,8 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
 
 
-       //Resources.gateAnd
-         
+        //Resources.gateAnd
+
     }
 
 
@@ -921,7 +944,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
         ArrangeChildren(topEvent);
 
-        
+
     }
     private void ArrangeChildren(FTAitem parent)
     {
@@ -1110,8 +1133,8 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     {
         var bounds = GetBounds(EngineLogic.FTAStructure);
         float margin = 10f;
-        float width = bounds.Width +200 + 2 * margin;
-        float height = bounds.Height +200+ 2 * margin;
+        float width = bounds.Width + 200 + 2 * margin;
+        float height = bounds.Height + 200 + 2 * margin;
 
         using (var stream = new FileStream(Filename, FileMode.Create))
         using (var refGraphics = Graphics.FromHwnd(IntPtr.Zero))
@@ -1128,7 +1151,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     // Posun, aby sa záporné hodnoty dostali do viditeľnej oblasti
                     gMeta.TranslateTransform(margin - bounds.Left, margin - bounds.Top);
 
-                    DrawFTA(gMeta);
+                    DrawFTA(gMeta, DrawingStructure.First().Value);
 
                     // Kreslenie všetkých položiek
                     /*  foreach (var fta in items.Values)
@@ -1176,9 +1199,9 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
         // Zmeníme rozmery – užšia a posunutá nižšie
         int newWidth = rect.Width / 3;   // zmenšenie šírky
-        int newHeight = (int)(rect.Height/1.3);     // výška zostáva rovnaká
+        int newHeight = (int)(rect.Height / 1.3);     // výška zostáva rovnaká
         int newX = rect.X + (rect.Width - newWidth) / 2; // vycentrované horizontálne
-        int newY = rect.Y + (int)( rect.Height*1.1);             // posunutie nižšie
+        int newY = rect.Y + (int)(rect.Height * 1.1);             // posunutie nižšie
 
         Rectangle adjustedRect = new Rectangle(newX, newY, newWidth, newHeight);
 

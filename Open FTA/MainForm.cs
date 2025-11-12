@@ -1,20 +1,7 @@
 ﻿using Open_FTA.forms;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Serialization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace OpenFTA
 {
@@ -24,8 +11,8 @@ namespace OpenFTA
         FTAlogic EngineLogicMCS;
         UIEngine MyUIEngine;
         DrawingEngine MyDrawingEngine;
-       
 
+        CustomTreeView treeView1;
 
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
         private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
@@ -46,15 +33,19 @@ namespace OpenFTA
             Height = 800;
             this.Text = "Open FTA";
 
-            /*
-                        ToolStripControlHost host = new ToolStripControlHost(tableLayoutPanel2);
-                        host.AutoSize = false;
-                        host.Size = new Size(50, 50);
-                        toolStrip1.Items.Insert(8, host);*/
 
 
- 
-      
+            treeView1 = new CustomTreeView();
+            treeView1.Parent = panelLeft;
+            treeView1.Dock = DockStyle.Fill;
+            panelLeft.Controls.Add(treeView1);
+            treeView1.AfterSelect += treeView1_AfterSelect;
+            treeView1.BeforeCollapse += TreeView1_BeforeCollapse;
+            treeView1.BeforeExpand += TreeView1_BeforeExpand;
+
+
+
+
 
 
             tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
@@ -67,9 +58,9 @@ namespace OpenFTA
 
 
             //MyDBEngine.InsertDefaultReferences();
-          //  bool res =  DBEngine.Instance.InsertReliability(Guid.NewGuid().ToString(), "Pipings,D<75mm,Leakage", 5.7E-10, 2);
-        /*  DBEngine.Instance.InitializeDatabase();
-            DBEngine.Instance.SeedData();*/
+            //  bool res =  DBEngine.Instance.InsertReliability(Guid.NewGuid().ToString(), "Pipings,D<75mm,Leakage", 5.7E-10, 2);
+            /*  DBEngine.Instance.InitializeDatabase();
+                DBEngine.Instance.SeedData();*/
 
             /* string refId = Guid.NewGuid().ToString();
              bool inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy", "Vydavateľ", "Autor1, Autor2", 2025);
@@ -79,9 +70,34 @@ namespace OpenFTA
 
         }
 
+        private void TreeView1_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
+        {
+            var tree = (CustomTreeView)sender;
+            var selectedItem = EngineLogic.GetItem(e.Node.Name);
+            if (tree.IsUserAction)
+            {
+                HideSubtree(selectedItem, false);
+                pictureBox1.Invalidate();
+            }
+
+
+        }
+
+        private void TreeView1_BeforeCollapse(object? sender, TreeViewCancelEventArgs e)
+        {
+            var tree = (CustomTreeView)sender;
+            var selectedItem = EngineLogic.GetItem(e.Node.Name);
+            if (tree.IsUserAction)
+            {
+                HideSubtree(selectedItem, true);
+                pictureBox1.Invalidate();
+            }
+
+        }
+
         public void LoadAppSettings()
         {
-            MainAppSettings.Instance.Load();           
+            MainAppSettings.Instance.Load();
         }
 
         public void GetAppSetings()
@@ -183,9 +199,9 @@ namespace OpenFTA
                 var selectedEvent = EngineLogic.SelectedEvents.Count == 1 ? EngineLogic.SelectedEvents.First() : null;
                 if (selectedEvent != null)
                 {
-                    if(selectedEvent.Children.Count > 0)
-                        
-                    toolStripMenuItem_HIDEUNHIDE.Text = EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden ? "Unhide" : "Hide";
+                    if (selectedEvent.Children.Count > 0)
+
+                        toolStripMenuItem_HIDEUNHIDE.Text = EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden ? "Unhide" : "Hide";
 
                 }
                 contextMenuStrip_Treeview.Show(pictureBox1, e.Location);
@@ -435,12 +451,18 @@ namespace OpenFTA
 
             //EngineLogic.ArrangeEventsAlgo1();         
 
-           /* EngineLogic.FTAStructure = new Dictionary<Guid, FTAitem>(EngineLogic.MCSStructure);
-            EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
+            /* EngineLogic.FTAStructure = new Dictionary<Guid, FTAitem>(EngineLogic.MCSStructure);
+             EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
+
+         /*   if (EngineLogic.SelectedEvents.Count == 1)
+                MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
+            else
+                MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);*/
+
 
             EngineLogic.ArrangeEventsAlgo1();
 
-            MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
+            MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -775,9 +797,9 @@ namespace OpenFTA
 
             return;
 
-            FormSettings settingsForm = new FormSettings();            
+            FormSettings settingsForm = new FormSettings();
 
-            if(settingsForm.ShowDialog() == DialogResult.OK)
+            if (settingsForm.ShowDialog() == DialogResult.OK)
             {
                 GetAppSetings();
             }
@@ -966,11 +988,11 @@ namespace OpenFTA
                 EngineLogic.SelectChildren(EngineLogic.SelectedEvents[0], true);
             }
 
-           /* for(int i=0;i< EngineLogic.SelectedEvents.Count; i++)
-            {
-                EngineLogic.DisplayStructure.Add(EngineLogic.SelectedEvents[i].GuidCode,EngineLogic.GetItem(EngineLogic.SelectedEvents[i].GuidCode));
-            }
-            MyDrawingEngine.SetStructure(EngineLogic.DisplayStructure);*/
+            /* for(int i=0;i< EngineLogic.SelectedEvents.Count; i++)
+             {
+                 EngineLogic.DisplayStructure.Add(EngineLogic.SelectedEvents[i].GuidCode,EngineLogic.GetItem(EngineLogic.SelectedEvents[i].GuidCode));
+             }
+             MyDrawingEngine.SetStructure(EngineLogic.DisplayStructure);*/
 
 
             pictureBox1.Invalidate();
@@ -1041,16 +1063,16 @@ namespace OpenFTA
 
         private void toolStripMenuItem_HIDEUNHIDE_Click(object sender, EventArgs e)
         {
-           /* if (EngineLogic.SelectedEvents.Count == 1)
-            {
-                var selectedEvent = EngineLogic.SelectedEvents.First();
-                // selectedEvent.IsHidden = !selectedEvent.IsHidden;
-                //HideSubtree(selectedEvent, selectedEvent.IsHidden);
-                HideSubtree(selectedEvent, true);
-                ((ToolStripMenuItem)sender).Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
+            /* if (EngineLogic.SelectedEvents.Count == 1)
+             {
+                 var selectedEvent = EngineLogic.SelectedEvents.First();
+                 // selectedEvent.IsHidden = !selectedEvent.IsHidden;
+                 //HideSubtree(selectedEvent, selectedEvent.IsHidden);
+                 HideSubtree(selectedEvent, true);
+                 ((ToolStripMenuItem)sender).Text = selectedEvent.IsHidden ? "Unhide" : "Hide";
 
-                pictureBox1.Invalidate();
-            }*/
+                 pictureBox1.Invalidate();
+             }*/
 
             if (EngineLogic.SelectedEvents.Count == 1)
             {
@@ -1059,8 +1081,25 @@ namespace OpenFTA
                 {
                     HideSubtree(selectedEvent, !EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden);
                     ((ToolStripMenuItem)sender).Text = EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden ? "Unhide" : "Hide";
+
+                    if (EngineLogic.GetItem(selectedEvent.Children[0]).IsHidden)
+                    {
+                        HideSubtree(selectedEvent, true);
+                        ((ToolStripMenuItem)sender).Text = "Hide";
+
+                        treeView1.CollapseNodeByText(selectedEvent.GuidCode.ToString());
+                    }
+                    else
+                    {
+                        HideSubtree(selectedEvent, false);
+                        ((ToolStripMenuItem)sender).Text = "Unhide";
+                        treeView1.ExpandNodeByText(selectedEvent.GuidCode.ToString());
+                    }
+
+
                 }
-                 
+
+
 
                 pictureBox1.Invalidate();
             }
@@ -1323,7 +1362,7 @@ namespace OpenFTA
         {
             FormDbViewer dbViewer = new FormDbViewer(EngineLogic);
             dbViewer.panelButtons.Visible = false;
-            dbViewer.ShowDialog();             
+            dbViewer.ShowDialog();
         }
     }
 }

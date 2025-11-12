@@ -1,9 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
-
-
-namespace Open_FTA.forms
+﻿namespace Open_FTA.forms
 {
     public partial class SplashScreen : Form
     {
@@ -31,9 +26,9 @@ namespace Open_FTA.forms
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
             this.TopMost = true;
-            this.Opacity = 0;  
+            this.Opacity = 0;
 
-             
+
             var picture = new PictureBox
             {
                 Image = Properties.Resources.splash, // pridaj svoje logo do Resources
@@ -43,7 +38,7 @@ namespace Open_FTA.forms
             };
             this.Controls.Add(picture);
 
-           
+
             var label = new Label
             {
                 Text = "Loading...",
@@ -52,7 +47,7 @@ namespace Open_FTA.forms
                 Location = new Point(60, 130)
             };
             this.Controls.Add(label);
- 
+
             progressBar = new ProgressBar
             {
                 Style = ProgressBarStyle.Continuous,

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
-
-class UIEngine
+﻿class UIEngine
 {
     FTAlogic EngineLogic;
     public UIEngine(FTAlogic f)
@@ -66,7 +58,7 @@ class UIEngine
         treeView1.ExpandAll();
     }
 
-    public void FillMinimalCutSets(TreeView treeView1,TreeNode MCSnode)
+    public void FillMinimalCutSets(TreeView treeView1, TreeNode MCSnode)
     {
         foreach (var evt in EngineLogic.MCSStructure.Values)
         {
@@ -88,7 +80,7 @@ class UIEngine
 
                     parentNode = newParentNode;
                 }
-               parentNode.Nodes.Add(childGuid.ToString(), EngineLogic.MCSStructure[childGuid].Name);
+                parentNode.Nodes.Add(childGuid.ToString(), EngineLogic.MCSStructure[childGuid].Name);
             }
         }
     }
@@ -131,7 +123,7 @@ class UIEngine
         grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
         grid.GridColor = Color.LightGray; // alebo iná decentná farba
 
-        grid.AllowUserToResizeColumns = true;        
+        grid.AllowUserToResizeColumns = true;
 
 
     }
@@ -224,7 +216,7 @@ class UIEngine
 
     public void MakeGroupBoxModern(GroupBox groupBox)
     {
-  
+
 
         groupBox.Paint += (s, e) =>
         {

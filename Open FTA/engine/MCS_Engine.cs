@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.Windows.Forms;
-using System.Drawing;
-
-using System.Collections;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 
 
 class MCSEngine
@@ -91,7 +82,7 @@ class MCSEngine
                 r[UniqueTags.Count + 1] = "Cut Set";
 
                 var template = CombinationMatrix[i];
-                CombinationMatrix = CombinationMatrix.Where(combination =>!combination.Where((bit, index) => bit && !template[index]).Any()).ToList();
+                CombinationMatrix = CombinationMatrix.Where(combination => !combination.Where((bit, index) => bit && !template[index]).Any()).ToList();
 
                 CutSetsStruct CS = new CutSetsStruct();
                 CS.IsMinimal = true;

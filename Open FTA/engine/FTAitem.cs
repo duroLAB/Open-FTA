@@ -16,9 +16,9 @@
 
     public List<Guid> Children { get; set; }
     public int Level { get; set; }
-    public double X1 { get; set ; }
+    public double X1 { get; set; }
     public double Y1 { get; set; }
- 
+
 
     private int _x;
     private int _y;
@@ -29,9 +29,9 @@
         set
         {
             _x = value;
-       
+
             // rect = new RectangleF(_x, rect.Y, rect.Width, rect.Height);
-             rect = new RectangleF(_x - Constants.EventHorizontalSpacing / 2, rect.Y, Constants.EventWidth + Constants.EventHorizontalSpacing, rect.Height);
+            rect = new RectangleF(_x - Constants.EventHorizontalSpacing / 2, rect.Y, Constants.EventWidth + Constants.EventHorizontalSpacing, rect.Height);
         }
     }
 
@@ -40,8 +40,8 @@
         get => _y;
         set
         {
-            _y = value;            
-           // rect = new RectangleF(rect.X, _y, Constants.EventWidth , rect.Height);
+            _y = value;
+            // rect = new RectangleF(rect.X, _y, Constants.EventWidth , rect.Height);
             rect = new RectangleF(_x - Constants.EventHorizontalSpacing / 2, _y, Constants.EventWidth + Constants.EventHorizontalSpacing, rect.Height);
         }
     }
@@ -55,7 +55,7 @@
     public double UpperBoundFrequency { get; set; }
     public double BIM { get; set; }
 
-    public string Reference{ get; set; }
+    public string Reference { get; set; }
 
     public RectangleF rect { get; set; }
 
@@ -68,7 +68,7 @@
         UpperBoundFrequency = 0;
         BIM = 0;
 
-        rect = new Rectangle(0,0,Constants.EventWidth,Constants.EventHeight);
+        rect = new Rectangle(0, 0, Constants.EventWidth, Constants.EventHeight);
 
     }
 
@@ -83,7 +83,7 @@
             Description = source.Description,
             Parent = source.Parent,
             ItemType = source.ItemType,
-            Tag = source.Tag,              
+            Tag = source.Tag,
             Frequency = source.Frequency,
             Value = source.Value,
             ValueUnit = source.ValueUnit,

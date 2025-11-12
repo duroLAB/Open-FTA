@@ -1,23 +1,9 @@
 ﻿using Open_FTA.forms;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Serialization;
 using static Open_FTA.forms.ErrorDialog;
-using static System.Collections.Specialized.BitVector32;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 
 public class MessageItem
@@ -40,19 +26,19 @@ public enum MainCompTimeUnit
     Second
 }
 public enum ValueTypes { F, P, R, Lambda }
-public enum Gates {NotSet, OR, AND }
+public enum Gates { NotSet, OR, AND }
 public class FTAlogic
 {
-    public Dictionary<Guid, FTAitem> FTAStructure { get; set; }  = new Dictionary<Guid, FTAitem>();
+    public Dictionary<Guid, FTAitem> FTAStructure { get; set; } = new Dictionary<Guid, FTAitem>();
 
     public Dictionary<Guid, FTAitem> TempStructure { get; set; } = new Dictionary<Guid, FTAitem>();
     public Guid TopEventGuid;
-    public Dictionary<int, String> GatesList {  get; private set; } = new Dictionary<int, String>();
+    public Dictionary<int, String> GatesList { get; private set; } = new Dictionary<int, String>();
     public Dictionary<int, String> EventsList { get; private set; } = new Dictionary<int, String>();
     public Dictionary<int, String> MetricList { get; private set; } = new Dictionary<int, String>();
-  //  public Dictionary<int, String> MetricUnitsList { get; private set; } = new Dictionary<int, String>();
+    //  public Dictionary<int, String> MetricUnitsList { get; private set; } = new Dictionary<int, String>();
 
-   
+
 
     public Dictionary<int, string> MetricUnitsList = new()
     {
@@ -79,13 +65,13 @@ public class FTAlogic
     public List<FTAitem> CopiedEvents { get; set; } = new List<FTAitem>();
     public bool IsHidden { get; set; } = false;
 
-    public StringBuilder html { get; set; }  = new StringBuilder();
+    public StringBuilder html { get; set; } = new StringBuilder();
 
     public List<FTAitem> ConvertStructureToList()
     {
         return FTAStructure.Values.ToList();
     }
-       
+
 
     public FTAlogic()
     {
@@ -99,7 +85,17 @@ public class FTAlogic
         GenereteMetricUnitsList();
     }
 
-   public void CreateNewTopEvent()
+    public bool HasEventHiddenChildren(FTAitem evn)
+    {
+        if(evn == null) return false;
+        if(evn.IsHidden) return false;
+        if(evn.Children.Count >0) 
+            if(GetItem(evn.Children[0]).IsHidden) return true;
+
+        return false;
+    }
+
+    public void CreateNewTopEvent()
     {
         FTAitem FI = new FTAitem();
         FI.Name = "Top Event";
@@ -114,17 +110,17 @@ public class FTAlogic
 
     public void CopySelectedEventsOLD()
     {
-         CopiedEvents.Clear();
+        CopiedEvents.Clear();
 
-        if ( SelectedEvents.Count == 0)
+        if (SelectedEvents.Count == 0)
         {
             MessageBox.Show("No events selected to copy.", "Copy Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
-        foreach (var evt in  SelectedEvents.OrderBy(item => item.level))
+        foreach (var evt in SelectedEvents.OrderBy(item => item.level))
         {
-             CopiedEvents.Add(evt);
+            CopiedEvents.Add(evt);
         }
 
         string json = JsonSerializer.Serialize(CopiedEvents, new JsonSerializerOptions
@@ -136,7 +132,7 @@ public class FTAlogic
         Clipboard.SetText(json);
 
         MessageBox.Show("Selected events have been copied.", "Copy");
-        
+
     }
 
     public void PasteCopiedEventsOLD()
@@ -160,7 +156,7 @@ public class FTAlogic
             MessageBox.Show("Cannot paste into a basic event.", "Paste Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
-       // SaveStateForUndo();
+        // SaveStateForUndo();
         List<Guid> copiedIDs = CopiedEvents.Select(evt => evt.GuidCode).ToList();
         Dictionary<Guid, Guid> cloneMapping = new Dictionary<Guid, Guid>();
         List<FTAitem> clonedEvents = new List<FTAitem>();
@@ -196,10 +192,10 @@ public class FTAlogic
 
         MessageBox.Show("Paste operation completed.", "Paste", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-        FindAllChilren(); 
+        FindAllChilren();
         AssignLevelsToAllEvents();
 
-        
+
     }
 
     public void CopySelectedEvents()
@@ -299,7 +295,7 @@ public class FTAlogic
     }
 
 
-    public  void DeleteSelectedEvents()
+    public void DeleteSelectedEvents()
     {
         if (SelectedEvents.Count == 0)
         {
@@ -323,7 +319,7 @@ public class FTAlogic
 
             return;
         }
-       
+
         foreach (var evt in SelectedEvents)
         {
             RemoveItem(evt.GuidCode);
@@ -331,13 +327,13 @@ public class FTAlogic
         SelectedEvents.Clear();
 
         AssignLevelsToAllEvents();
-        
+
     }
 
     private void GenerateGatesList()
     {
         //https://relyence.com/2019/12/04/fault-tree-gates-events-explained/
-       // GatesList.Add(-1, "Not set");
+        // GatesList.Add(-1, "Not set");
         GatesList.Add(1, "OR");
         GatesList.Add(2, "AND");
         /*GatesList.Add(3, "NOT");
@@ -351,7 +347,7 @@ public class FTAlogic
 
     private void GenerateEvetsList()
     {
-    //    EventsList.Add(-1, "Not set");
+        //    EventsList.Add(-1, "Not set");
         EventsList.Add(1, "Intermediate");
         EventsList.Add(2, "Basic");
         EventsList.Add(3, "House");
@@ -360,7 +356,7 @@ public class FTAlogic
     }
     private void GenerateMetrics()
     {
-       
+
         MetricList.Add(0, "Frequency(f)");
         MetricList.Add(1, "Probability(P)");
         MetricList.Add(2, "Reliability(R)");
@@ -369,10 +365,10 @@ public class FTAlogic
 
     private void GenereteMetricUnitsList()
     {
-       /* MetricUnitsList.Add(0,"y⁻¹");
-        MetricUnitsList.Add(1,"d⁻¹");
-        MetricUnitsList.Add(2,"h⁻¹");
-        MetricUnitsList.Add(3,"s⁻¹");*/
+        /* MetricUnitsList.Add(0,"y⁻¹");
+         MetricUnitsList.Add(1,"d⁻¹");
+         MetricUnitsList.Add(2,"h⁻¹");
+         MetricUnitsList.Add(3,"s⁻¹");*/
 
     }
 
@@ -400,7 +396,7 @@ public class FTAlogic
         foreach (var Event in s)
         {
             Guid Parent = Event.Value.Parent;
-            FTAitem fi = GetItem(Event.Value.Parent,s);
+            FTAitem fi = GetItem(Event.Value.Parent, s);
             if (fi != null)
                 fi.Children.Add(Event.Value.GuidCode);
         }
@@ -436,10 +432,10 @@ public class FTAlogic
         FI.Parent = Parent;
         FI.Frequency = Freq;
         //FI.Tag = Tag;
-        if(Tag.Length<2)
-        FI.Tag = GetNextAvailableTag(ItemType);
-        if(Name.Length<2)
-            FI.Name ="New - "+FI.Tag;
+        if (Tag.Length < 2)
+            FI.Tag = GetNextAvailableTag(ItemType);
+        if (Name.Length < 2)
+            FI.Name = "New - " + FI.Tag;
         FI.level = level;
 
         var ParentEvent = GetItem(Parent);
@@ -460,7 +456,7 @@ public class FTAlogic
             else
             {
                 FI.X = GetItem(ParentEvent.Children[ParentEvent.Children.Count - 1]).X + Constants.EventWidth;
-                FI.Y = ParentEvent.Y+150;
+                FI.Y = ParentEvent.Y + 150;
             }
         }
         AddItem(FI);
@@ -545,44 +541,44 @@ public class FTAlogic
 
     public void ComputeTree()
     {
-         /*
-        foreach (FTAitem item in FTAStructure.Values)
-       {
-           if (item.ItemType > 1)
-                 UserUnitsToFreq(item);
+        /*
+       foreach (FTAitem item in FTAStructure.Values)
+      {
+          if (item.ItemType > 1)
+                UserUnitsToFreq(item);
 
-            if (item.ItemType < 2)
-            {
-                item.Frequency = -1;
-                item.Value = -1;
-                item.UserMetricType = -1;
-                item.ValueUnit = -1;
-            }
-       }*/
+           if (item.ItemType < 2)
+           {
+               item.Frequency = -1;
+               item.Value = -1;
+               item.UserMetricType = -1;
+               item.ValueUnit = -1;
+           }
+      }*/
 
-     
+
 
         //ComputeTreeSimple();
-         SumChildren(GetItem(TopEventGuid));
+        SumChildren(GetItem(TopEventGuid));
 
-        
+
     }
 
 
-   // public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
-   // public static bool SimplificationStrategy = true; // P=f
+    // public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
+    // public static bool SimplificationStrategy = true; // P=f
     public static bool SimplificationStrategyLinearOR = false; // P(A OR B) = Pa+Pb
 
-    public void SumChildren(FTAitem parent,Dictionary<Guid,FTAitem> str)
+    public void SumChildren(FTAitem parent, Dictionary<Guid, FTAitem> str)
     {
         bool AllProbabilities = true;
         var events = new List<FTAitem>();
 
         for (int i = 0; i < parent.Children.Count; i++)
         {
-            FTAitem item = GetItem(parent.Children[i],str);
+            FTAitem item = GetItem(parent.Children[i], str);
 
-            SumChildren(item,str);
+            SumChildren(item, str);
 
 
             if (i == 0)
@@ -595,7 +591,7 @@ public class FTAlogic
                 AllProbabilities = false;
             }
 
-            events.Add(GetItem(parent.Children[i],str));
+            events.Add(GetItem(parent.Children[i], str));
 
             if (i == parent.Children.Count - 1)
             {
@@ -651,7 +647,7 @@ public class FTAlogic
 
         double P;
 
-        if(e.ValueType == ValueTypes.P|| e.ValueType == ValueTypes.R)
+        if (e.ValueType == ValueTypes.P || e.ValueType == ValueTypes.R)
         {
             Tsource = Tbase;
         }
@@ -662,51 +658,51 @@ public class FTAlogic
             P = e.ValueType switch
             {
                 //ValueTypes.F => 1 - Math.Exp(-e.Value * Tsource),
-                ValueTypes.F => 1 - Math.Exp(-e.Value*Tbase),
+                ValueTypes.F => 1 - Math.Exp(-e.Value * Tbase),
                 ValueTypes.P => e.Value,
                 ValueTypes.R => 1 - e.Value,
                 ValueTypes.Lambda => 1 - Math.Exp(-e.Value * Tbase),
                 _ => throw new ArgumentException("Neznámy typ hodnoty")
-            }; 
-         /*   P = e.UserMetricType switch
-            {
-                0 => 1 - Math.Exp(-e.Value * Tsource),
-                1 => e.Value,
-                2 => 1 - e.Value,
-                3 => 1 - Math.Exp(-e.Value * Tsource),
-                _ => throw new ArgumentException("Neznámy typ hodnoty")
-            };*/
+            };
+        /*   P = e.UserMetricType switch
+           {
+               0 => 1 - Math.Exp(-e.Value * Tsource),
+               1 => e.Value,
+               2 => 1 - e.Value,
+               3 => 1 - Math.Exp(-e.Value * Tsource),
+               _ => throw new ArgumentException("Neznámy typ hodnoty")
+           };*/
 
-        if(Tbase==Tsource)
+        if (Tbase == Tsource)
             return P;
         else
             if (!MainAppSettings.Instance.SimplificationStrategy)
-            {
-             P = P * Tbase/Tsource;
-            return(P);
-            } 
+        {
+            P = P * Tbase / Tsource;
+            return (P);
+        }
         else
-             return 1 - Math.Pow(1 - P, Tsource / Tbase);        
+            return 1 - Math.Pow(1 - P, Tsource / Tbase);
 
-        
+
     }
 
     public static double ProbabilityToFrequency(double P)
     {
-     
+
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
         double res = 0;
         if (MainAppSettings.Instance.SimplificationStrategy)
         {
             // res = -Math.Log(1 - P) / Tbase;
-            res = -Math.Log(1 - P) ;
+            res = -Math.Log(1 - P);
         }
         else
         {
             //res = P * Tbase / Tsource; 
             res = P;
         }
-         
+
         return (res);
     }
 
@@ -865,7 +861,7 @@ public class FTAlogic
         }
 
 
-        if (evt.ValueType==ValueTypes.P)
+        if (evt.ValueType == ValueTypes.P)
         {
             evt.Frequency = FrequencyFromProbability(evt.Value);
         }
@@ -1015,7 +1011,7 @@ public class FTAlogic
         return fv;
     }
 
-        
+
     //Generate equation for MCS
     public string GenerateEquation()
     {
@@ -1056,9 +1052,9 @@ public class FTAlogic
         return "";
     }
 
-    public void GenerateMCS(out string equation,out string simplifiedEquation)
+    public void GenerateMCS(out string equation, out string simplifiedEquation)
     {
-      
+
 
         MCSStructure.Clear();
 
@@ -1072,7 +1068,7 @@ public class FTAlogic
 
         string message = "Generated Tree Expression:\n" + equation +
                          "\n\nSimplified Expression:\n" + simplifiedEquation;
-       // MessageBox.Show(message, "MCS Equation Overview", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        // MessageBox.Show(message, "MCS Equation Overview", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         // 3) Create the top event for MCS with an OR gate.
         FTAitem topEvent = GetItem(TopEventGuid);
@@ -1127,7 +1123,7 @@ public class FTAlogic
                             Name = originalEvent.Name,
                             Tag = originalEvent.Tag,
                             ItemType = originalEvent.ItemType,
-                            Gate = originalEvent.Gate,                           
+                            Gate = originalEvent.Gate,
                             Frequency = originalEvent.Frequency,
                             Value = originalEvent.Value,
                             ValueType = originalEvent.ValueType,
@@ -1299,9 +1295,9 @@ public class FTAlogic
         html.AppendLine("</body>");
         html.AppendLine("</html>");
 
-        
-       /* string path = " .html";
-        File.WriteAllText(path, html.ToString(), Encoding.UTF8);*/
+
+        /* string path = " .html";
+         File.WriteAllText(path, html.ToString(), Encoding.UTF8);*/
     }
 
     public void GenerateReport_ListOfBE(StringBuilder html)
@@ -1324,34 +1320,34 @@ public class FTAlogic
 
         foreach (var Event in l)
         {
-         
-            
-                temp = "<tr><td>";
-                temp += Event.Tag;
-                temp += "</td><td>" + Event.Name + "</td ><td>" + Event.Description + "</td ><td>";
-
-                string freqText = Event.ValueType switch
-                {
-                    ValueTypes.F => "f=",
-                    ValueTypes.P => "P=",
-                    ValueTypes.R => "R=",
-                    ValueTypes.Lambda => "λ=",
-                    _ => ""
-                };
-                freqText += (Event.Value < 0.001) ? Event.Value.ToString("0.0000E+0") : Event.Value.ToString("F6");
-                if (Event.ValueType == ValueTypes.F || Event.ValueType == ValueTypes.Lambda)
-                {
-                    freqText += " " + MetricUnitsList[Event.ValueUnit];
-                     
-                }
-               // freqText = Event.Frequency.ToString();
-                temp += freqText;
-                temp += "</td></tr>";
-
-                html.AppendLine(temp);
 
 
-             
+            temp = "<tr><td>";
+            temp += Event.Tag;
+            temp += "</td><td>" + Event.Name + "</td ><td>" + Event.Description + "</td ><td>";
+
+            string freqText = Event.ValueType switch
+            {
+                ValueTypes.F => "f=",
+                ValueTypes.P => "P=",
+                ValueTypes.R => "R=",
+                ValueTypes.Lambda => "λ=",
+                _ => ""
+            };
+            freqText += (Event.Value < 0.001) ? Event.Value.ToString("0.0000E+0") : Event.Value.ToString("F6");
+            if (Event.ValueType == ValueTypes.F || Event.ValueType == ValueTypes.Lambda)
+            {
+                freqText += " " + MetricUnitsList[Event.ValueUnit];
+
+            }
+            // freqText = Event.Frequency.ToString();
+            temp += freqText;
+            temp += "</td></tr>";
+
+            html.AppendLine(temp);
+
+
+
 
         }
 
@@ -1408,29 +1404,29 @@ public class FTAlogic
 
         foreach (var item in MCSStructure)
         {
-                    temp = "<tr><td>";
+            temp = "<tr><td>";
             temp += "MSC - ";
             temp += "</td>";
             if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
             {
-               // item.Value.Value;
+                // item.Value.Value;
                 temp += "<td>";
                 for (int i = 0; i < item.Value.Children.Count; i++)
                 {
-                    
+
 
                     FTAitem fTAitem = GetItem(item.Value.Children[i], MCSStructure);
-                    
-                    temp+="{"+fTAitem.Name+"} - ";
 
-                                      
+                    temp += "{" + fTAitem.Name + "} - ";
+
+
 
                 }
                 temp = temp.Remove(temp.Length - 2);
                 temp += "</td><td>";
                 temp += item.Value.Value.ToString();
                 temp += "</td></tr>";
-                    html.AppendLine(temp);
+                html.AppendLine(temp);
             }
         }
 
@@ -1452,20 +1448,20 @@ public class FTAlogic
         html.AppendLine("        <thead>");
         html.AppendLine("            <tr>");
         html.AppendLine("                <th>Name</th>");
-         html.AppendLine("               <th>Events</th>");
+        html.AppendLine("               <th>Events</th>");
         html.AppendLine("                <th>Metric</th>");
-     /*   html.AppendLine("                <th>Metric</th>");*/
+        /*   html.AppendLine("                <th>Metric</th>");*/
         html.AppendLine("            </tr>");
         html.AppendLine("        </thead>");
         html.AppendLine("        <tbody>");
 
         int MSCcount = 1;
-        for(int i=0;i<mcs.CutSets.Count;i++)
+        for (int i = 0; i < mcs.CutSets.Count; i++)
         {
-            if(mcs.CutSets[i].IsMinimal)
+            if (mcs.CutSets[i].IsMinimal)
             {
                 temp = "<tr><td>";
-                temp += "MSC - "+ MSCcount.ToString();
+                temp += "MSC - " + MSCcount.ToString();
                 MSCcount = MSCcount + 1;
                 temp += "</td><td>";
                 for (int j = 0; j < mcs.CutSets[i].items.Count; j++)
@@ -1477,7 +1473,7 @@ public class FTAlogic
                 html.AppendLine(temp);
             }
         }
-        
+
 
         html.AppendLine("        </tbody>");
         html.AppendLine("    </table>");
@@ -1486,7 +1482,7 @@ public class FTAlogic
     public void GenerateReport_ImportanceMeasure(StringBuilder html)
     {
         String temp;
-        html.AppendLine("<br>    <h1>Importance Measures</h1>");       
+        html.AppendLine("<br>    <h1>Importance Measures</h1>");
         html.AppendLine("<table class='sortable'>");
         html.AppendLine("        <thead>");
         html.AppendLine("            <tr>");
@@ -1523,7 +1519,7 @@ public class FTAlogic
 
                 html.AppendLine(temp);
 
-               
+
 
             }
         }
@@ -1588,7 +1584,7 @@ public class FTAlogic
         return f / factor;
     }
 
-    public void SelectChildren(FTAitem parent,bool all)
+    public void SelectChildren(FTAitem parent, bool all)
     {
         foreach (var childGuid in parent.Children)
         {
@@ -1597,8 +1593,8 @@ public class FTAlogic
             {
                 child.IsSelected = true;
                 SelectedEvents.Add(child);
-                if(all)
-                    SelectChildren(child,all);
+                if (all)
+                    SelectChildren(child, all);
             }
         }
     }
@@ -1670,27 +1666,27 @@ public class FTAlogic
         return $"BE{next}";
     }
 
-     
 
-   List<MessageItem> ErrorMessages = new List<MessageItem>();
+
+    List<MessageItem> ErrorMessages = new List<MessageItem>();
     public bool PerformFullTest()
     {
         ErrorMessages.Clear();
 
-      
-        bool res=true;
+
+        bool res = true;
 
         if (!PerformTestHasbasicEvents())
         {
             res = false;
         }
 
-        if(!PerformTestAND_2F())
+        if (!PerformTestAND_2F())
         {
             res = false;
         }
 
-        if (!res)ErrorDialog.ShowMessages(ErrorMessages);
+        if (!res) ErrorDialog.ShowMessages(ErrorMessages);
 
         return (res);
     }
@@ -1699,11 +1695,11 @@ public class FTAlogic
         bool res = true;
         foreach (var item in FTAStructure.Values)
         {
-            if (item.Children.Count == 0 && (item.ItemType == 1|| item.ItemType == 0))
+            if (item.Children.Count == 0 && (item.ItemType == 1 || item.ItemType == 0))
             {
 
                 string txt = "Event: " + item.Name + " (" + item.Tag + ") is an intermediate event and has no children.";
-                ErrorMessages.Add(new MessageItem(MessageType.Error,txt));
+                ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
                 txt = "To fix it change event to basic event or add children events.";
                 ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
                 res = false;
@@ -1713,23 +1709,23 @@ public class FTAlogic
     }
 
     private bool PerformTestAND_2F()
-    {   
+    {
         bool res = true;
         foreach (var item in FTAStructure.Values)
         {
             int NumberOfChildrenWithFrequency = 0;
-            
+
             foreach (var childGuid in item.Children)
             {
                 if (FTAStructure.TryGetValue(childGuid, out FTAitem child))
                 {
-                    if(child.ValueType== ValueTypes.F || child.ValueType == ValueTypes.Lambda)
+                    if (child.ValueType == ValueTypes.F || child.ValueType == ValueTypes.Lambda)
                     {
                         NumberOfChildrenWithFrequency = NumberOfChildrenWithFrequency + 1;
                     }
                 }
             }
-            if(item.Gate == Gates.AND && NumberOfChildrenWithFrequency >= 2)
+            if (item.Gate == Gates.AND && NumberOfChildrenWithFrequency >= 2)
             {
                 string txt = "Event: " + item.Name + " (" + item.Tag + ") has an AND gate with " + NumberOfChildrenWithFrequency.ToString() + " children having frequency metric (F or λ).";
                 ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
@@ -1755,13 +1751,13 @@ public class FTAlogic
             {
                 var rect2 = items[j].rect;
 
-                  // if (rect1.IntersectsWith(rect2) && items[i].IsHidden == false && items[j].IsHidden == false)
-                 if (rect1.IntersectsWith(rect2))
-                    return true;  
+                if (rect1.IntersectsWith(rect2) && items[i].IsHidden == false && items[j].IsHidden == false)
+                    //if (rect1.IntersectsWith(rect2))
+                    return true;
             }
         }
 
-        return false;  
+        return false;
     }
 
 
@@ -1778,31 +1774,31 @@ public class FTAlogic
         FindAllChilren(FTAStructure);
 
         TemActualX = 0;
-        PrepareTreeForAlign(FTAStructure.Values.First(), 0);     
-     
+        PrepareTreeForAlign(FTAStructure.Values.First(), 0);
+
 
 
         AssignLevelsToAllEvents();
         SetDefaultYpositions(GetItem(TopEventGuid), GetItem(TopEventGuid).Y);
-        AddParentToMiddle(GetItem(TopEventGuid));     
+        AddParentToMiddle(GetItem(TopEventGuid));
         GlobalStop = false;
 
-         
+
         for (int i = 0; i < 5; i++)
         {
             TempTreeAlignSuccess = false;
             MoveSubtreeToLeft(GetItem(TopEventGuid), 90);
-            if(!TempTreeAlignSuccess|| GlobalStop)
+            if (!TempTreeAlignSuccess || GlobalStop)
                 break;
         }
 
-      
-               
+
+
         for (int i = 0; i < 500; i++)
         {
             TempTreeAlignSuccess = false;
             MoveSubtreeToLeft(GetItem(TopEventGuid), 50);
-            if(!TempTreeAlignSuccess || GlobalStop)
+            if (!TempTreeAlignSuccess || GlobalStop)
                 break;
         }
 
@@ -1814,21 +1810,21 @@ public class FTAlogic
                 break;
         }
 
-       
-         for (int i = 0; i < 500; i++)
-         {
-             TempTreeAlignSuccess = false;
-             MoveSubtreeToLeft(GetItem(TopEventGuid), 1);
-             if(!TempTreeAlignSuccess)
-                 break;
-         }
+
+        for (int i = 0; i < 500; i++)
+        {
+            TempTreeAlignSuccess = false;
+            MoveSubtreeToLeft(GetItem(TopEventGuid), 1);
+            if (!TempTreeAlignSuccess)
+                break;
+        }
 
         FTAStructure = new Dictionary<Guid, FTAitem>(backup);
         FindAllChilren(FTAStructure);
 
     }
 
-    public void SetDefaultYpositions(FTAitem itm,int TopEventY)
+    public void SetDefaultYpositions(FTAitem itm, int TopEventY)
     {
         for (int i = 0; i < itm.Children.Count; i++)
         {
@@ -1841,11 +1837,11 @@ public class FTAlogic
     }
 
     public void AddParentToMiddle(FTAitem itm)
-    {        
-        int  min = 111111111;
-        int  max = -111111111; 
-       for (int i = 0; i < itm.Children.Count; i++)
-       {
+    {
+        int min = 111111111;
+        int max = -111111111;
+        for (int i = 0; i < itm.Children.Count; i++)
+        {
             FTAitem c = GetItem(itm.Children[i]);
             AddParentToMiddle(c);
 
@@ -1857,62 +1853,62 @@ public class FTAlogic
             if (i == itm.Children.Count - 1)
                 itm.X = (max - min) / 2 + min;
 
-             if (i == itm.Children.Count - 1)
-                 itm.X = GetItem(itm.Children[0]).X;
+            if (i == itm.Children.Count - 1)
+                itm.X = GetItem(itm.Children[0]).X;
 
-           itm.X = GetItem(itm.Children[0]).X + (int)Math.Round((GetItem(itm.Children[itm.Children.Count - 1]).X - GetItem(itm.Children[0]).X) / 2.0,MidpointRounding.ToPositiveInfinity);
-         
+            itm.X = GetItem(itm.Children[0]).X + (int)Math.Round((GetItem(itm.Children[itm.Children.Count - 1]).X - GetItem(itm.Children[0]).X) / 2.0, MidpointRounding.ToPositiveInfinity);
+
         }
-        
+
     }
 
     public void AddParentToMiddle()
     {
         AddParentToMiddle(GetItem(TopEventGuid));
     }
-     
+
     bool GlobalStop;
     public void MoveSubtreeToLeft(FTAitem fTAitem, int shift)
     {
-           
+
         for (int i = 0; i < fTAitem.Children.Count; i++)
         {
-         
+
             var child = GetItem(fTAitem.Children[i]);
 
-             if ((i>0))
-                {             
+            if ((i > 0))
+            {
 
-                        
-                OneStepLeft(child, shift);               
+
+                OneStepLeft(child, shift);
                 AddParentToMiddle();
 
 
                 if (IsAnyItemOverlapping())
-                {                
+                {
                     OneStepLeft(child, -shift);
                     AddParentToMiddle();
-                } 
+                }
                 else
                     TempTreeAlignSuccess = true;
 
                 if (IsAnyItemOverlapping())
                 {
                     OneStepLeft(child, -1);
-                    AddParentToMiddle();                    
+                    AddParentToMiddle();
                 }
             }
-            AddParentToMiddle(fTAitem);            
-            MoveSubtreeToLeft(child, shift);       
-                       
+            AddParentToMiddle(fTAitem);
+            MoveSubtreeToLeft(child, shift);
+
         }
-        
+
     }
 
     public void OneStepLeft(FTAitem fTAitem, int shift)
     {
-         
-        
+
+
         foreach (var childGuid in fTAitem.Children)
         {
             var child = GetItem(childGuid);
@@ -1925,8 +1921,8 @@ public class FTAlogic
 
     public void OneStepBack(FTAitem fTAitem, int shift)
     {
-        
-            fTAitem.X = fTAitem.X + shift;
+
+        fTAitem.X = fTAitem.X + shift;
         foreach (var childGuid in fTAitem.Children)
         {
             var child = GetItem(childGuid);
@@ -1937,9 +1933,9 @@ public class FTAlogic
 
 
     public int TemActualX;
-    public void PrepareTreeForAlign(FTAitem fTAitem,int actualx)
+    public void PrepareTreeForAlign(FTAitem fTAitem, int actualx)
     {
-     
+
         foreach (var childGuid in fTAitem.Children)
         {
             var child = GetItem(childGuid);
@@ -1949,7 +1945,7 @@ public class FTAlogic
             // TemActualX = TemActualX + Constants.EventWidth+22;            
             TemActualX = TemActualX + Constants.EventWidth + Constants.EventHorizontalSpacing + 1;
         }
-        fTAitem.X = TemActualX;      
+        fTAitem.X = TemActualX;
 
 
     }

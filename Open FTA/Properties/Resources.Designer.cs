@@ -293,6 +293,16 @@ namespace Open_FTA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap gateTransfer {
+            get {
+                object obj = ResourceManager.GetObject("gateTransfer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap HTMLFile {
             get {
                 object obj = ResourceManager.GetObject("HTMLFile", resourceCulture);

@@ -1,8 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.IO;
 
 
 public class DBEngine
@@ -141,7 +138,7 @@ public class DBEngine
     public bool GetReferenceById(string id, out string title)
     {
         bool res = GetReferenceById(id, out string title2, out string publisher, out string authors, out int? year);
-        title = title2 + " " + publisher+" "+authors+" "+year;
+        title = title2 + " " + publisher + " " + authors + " " + year;
         return res;
     }
 
@@ -229,7 +226,7 @@ public class DBEngine
         connection.Open();
 
         using var cmd = connection.CreateCommand();
-        if(full)
+        if (full)
             cmd.CommandText = "SELECT Id, Title, Publisher, Authors, Year FROM ReferenceTable;";
         else
             cmd.CommandText = "SELECT Id, Title FROM ReferenceTable;";
@@ -237,21 +234,21 @@ public class DBEngine
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            if(full)
-            dt.Rows.Add(
-                reader.GetString(0),
-                reader.GetString(1),
-                reader.GetString(2),
-                reader.GetString(3),
-                reader.IsDBNull(4) ? (object)DBNull.Value : reader.GetInt32(4)
-            );
+            if (full)
+                dt.Rows.Add(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.IsDBNull(4) ? (object)DBNull.Value : reader.GetInt32(4)
+                );
             else
-            { 
+            {
                 dt.Rows.Add(
                 reader.GetString(0),
                 reader.GetString(1)
             );
-            }   
+            }
         }
 
         return dt;

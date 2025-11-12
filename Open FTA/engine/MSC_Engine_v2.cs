@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Data;
 
 public class MSC_Engine_v2
 {
@@ -13,7 +9,7 @@ public class MSC_Engine_v2
     DataTable MCSresultsTable;
 
     List<ulong> all;
-    HashSet<ulong> remaining; 
+    HashSet<ulong> remaining;
 
     struct UniqueTagsStruct
     {
@@ -35,7 +31,7 @@ public class MSC_Engine_v2
     List<UniqueTagsStruct> UniqueTags;
     public List<CutSetsStruct> CutSets;
 
-    public   MSC_Engine_v2(FTAlogic EngineLogicIN)
+    public MSC_Engine_v2(FTAlogic EngineLogicIN)
     {
         EngineLogic = EngineLogicIN;
         CombinationMatrix = new List<bool[]>();
@@ -53,10 +49,10 @@ public class MSC_Engine_v2
         UniqueTags.Clear();
         MCSCombinationResultsTable.Clear();
         GenrateUniqueTags();
-       
+
         GenerateCombinationMatrix();
 
-        remaining =  new HashSet<ulong>(all);
+        remaining = new HashSet<ulong>(all);
 
         TestAllCombinations();
         //EliminateSubSets();
@@ -67,9 +63,9 @@ public class MSC_Engine_v2
     {
         bool Solutionfound = false;
 
-        while(remaining.Count > UniqueTags.Count*4)
+        while (remaining.Count > UniqueTags.Count * 4)
         {
-            int val = Random.Shared.Next(0,all.Count); // 5 až MAX
+            int val = Random.Shared.Next(0, all.Count); // 5 až MAX
 
             TestOneExample(val);
             all.Clear();
@@ -87,7 +83,7 @@ public class MSC_Engine_v2
             {
                 Solutionfound = true;
                 break;
-                    }
+            }
         }
 
         int CutSetCount = 1;
@@ -116,10 +112,10 @@ public class MSC_Engine_v2
                 {
                     CS.items.Add(UTS.items[0]);
 
-                   /* if (Frek == 0)
-                        Frek = UTS.items[0].Frequency;
-                    else
-                        Frek *= UTS.items[0].Frequency;*/
+                    /* if (Frek == 0)
+                         Frek = UTS.items[0].Frequency;
+                     else
+                         Frek *= UTS.items[0].Frequency;*/
 
                     if (Frek == 0)
                         Frek = UTS.items[0].Value;
@@ -138,7 +134,7 @@ public class MSC_Engine_v2
 
     }
 
-   
+
     public bool TestOneExample(int i)
     {
         var temp = UlongToBoolArray(all[i], UniqueTags.Count);
@@ -152,41 +148,41 @@ public class MSC_Engine_v2
         {
             RemoveExact(all[i], remaining);
             return (true);
-        }       
+        }
     }
     public bool TestOneExample()
+    {
+        bool res = false;
+
+        for (int i = 0; i < all.Count; i++)
+        {
+            var temp = UlongToBoolArray(all[i], UniqueTags.Count);
+
+            ComputeTreeLogic(temp);
+
+
+
+            if (EngineLogic.GetItem(EngineLogic.TopEventGuid).ItemState == true)
             {
-                bool res = false;
 
-                for (int i = 0; i < all.Count; i++)
+                RemoveSupersets(all[i], UniqueTags.Count, remaining);
+                if (all.Count == remaining.Count)
                 {
-                    var temp = UlongToBoolArray(all[i], UniqueTags.Count);
 
-                    ComputeTreeLogic(temp);
-
-
-
-                    if (EngineLogic.GetItem(EngineLogic.TopEventGuid).ItemState == true)
-                    {
-
-                        RemoveSupersets(all[i], UniqueTags.Count, remaining);
-                        if (all.Count == remaining.Count)
-                        {
-
-                        }
-                        else
-                            return (true);
-                    }
-                    else
-                    {
-                        RemoveExact(all[i], remaining);
-                        return (true);
-                    }
                 }
-
-                return (false);
-
+                else
+                    return (true);
             }
+            else
+            {
+                RemoveExact(all[i], remaining);
+                return (true);
+            }
+        }
+
+        return (false);
+
+    }
 
     public void ComputeTreeLogic(bool[] TagsLogic)
     {

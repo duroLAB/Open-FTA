@@ -1,11 +1,9 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing.Design;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Xml.Serialization;
 
- 
+
 
 [Serializable]
 public class MainAppSettings
@@ -67,8 +65,8 @@ public class MainAppSettings
              " Otherwise:" +
              "P ≈ f⋅t")]
     public bool SimplificationStrategy { get; set; } = false;
-     
-     
+
+
 
     [Category("General settings")]
     [DisplayName("Auto sort tree after paste")]
@@ -107,7 +105,7 @@ public class MainAppSettings
                     if (loaded != null)
                     {
                         //Faktor = loaded.Faktor;
-                       
+
                     }
                 }
             }
@@ -121,14 +119,14 @@ public class MainAppSettings
     }
 }
 
- 
+
 [Serializable]
 [TypeConverter(typeof(ExpandableObjectConverter))]
 public class PenSettings
 {
     // Farba pera
     [XmlIgnore] // Farbu budeme serializovať ako ARGB
-     
+
     [Editor(typeof(System.Drawing.Design.ColorEditor), typeof(UITypeEditor))]
     public Color Color { get; set; } = Color.Blue;
 
@@ -142,6 +140,6 @@ public class PenSettings
     public override string ToString()
     {
         string s = $"Color: {Color}, Width: {Width}, DashStyle: {DashStyle}";
-        return (s);  
+        return (s);
     }
 }

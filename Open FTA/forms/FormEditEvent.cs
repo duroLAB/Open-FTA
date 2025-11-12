@@ -1,16 +1,7 @@
 ﻿using Open_FTA.forms;
 using Open_FTA.Properties;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace OpenFTA
 {
@@ -124,11 +115,11 @@ namespace OpenFTA
                 String Filename = "pic\\events\\event" + selected_item_text.Replace(" ", "") + ".png";
                 String Imagepath = System.IO.Path.Combine(strPICPath, Filename);
                 Image image1;
-               /* if (File.Exists(Imagepath))
-                {
-                    image1 = Image.FromFile(Imagepath);
-                    pictureBox2.Image = image1;
-                }*/
+                /* if (File.Exists(Imagepath))
+                 {
+                     image1 = Image.FromFile(Imagepath);
+                     pictureBox2.Image = image1;
+                 }*/
 
                 if (Filename.Contains("eventBasic")) pictureBox2.Image = Resources.eventBasic;
                 if (Filename.Contains("eventHouse")) pictureBox2.Image = Resources.eventHouse;
@@ -320,7 +311,7 @@ namespace OpenFTA
                 }
             }
 
-               
+
         }
 
         private void label3_Click(object sender, EventArgs e)

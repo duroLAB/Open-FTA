@@ -1,17 +1,9 @@
 ﻿using Open_FTA.engine;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Open_FTA.forms
 {
-    
+
     public partial class FormDbViewer : Form
     {
         UIEngine u;
@@ -22,8 +14,8 @@ namespace Open_FTA.forms
 
             u = new UIEngine(EngineLogic);
             u.MakeTabControlModern(tabControlMain);
-//            u.SetupModernGrid(dataGridView1);
-          //  u.SetupModernGrid(dataGridView2);
+            //            u.SetupModernGrid(dataGridView1);
+            //  u.SetupModernGrid(dataGridView2);
 
             FillDGV();
         }
@@ -57,12 +49,12 @@ namespace Open_FTA.forms
 
             try
             {
-                
-                    dataGridView2.Columns["Id"].Visible = false;                 
-                    dataGridView2.Columns["MetricUnit"].FillWeight = 30;
-                    dataGridView2.Columns["Val"].FillWeight = 30; 
 
-                 
+                dataGridView2.Columns["Id"].Visible = false;
+                dataGridView2.Columns["MetricUnit"].FillWeight = 30;
+                dataGridView2.Columns["Val"].FillWeight = 30;
+
+
             }
             catch { }
 
@@ -258,11 +250,11 @@ namespace Open_FTA.forms
 
         private void FormDbViewer_Shown(object sender, EventArgs e)
         {
-            
+
         }
 
         private void dataGridView2_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
-        { 
+        {
         }
     }
 }

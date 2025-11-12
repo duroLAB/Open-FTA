@@ -97,7 +97,6 @@
             dataGridViewImportanceMeasureResults = new DataGridView();
             splitter2 = new Splitter();
             panelLeft = new Panel();
-            treeView1 = new TreeView();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -115,7 +114,6 @@
             toolStrip3.SuspendLayout();
             tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewImportanceMeasureResults).BeginInit();
-            panelLeft.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
@@ -729,24 +727,12 @@
             // 
             // panelLeft
             // 
-            panelLeft.Controls.Add(treeView1);
             panelLeft.Dock = DockStyle.Left;
             panelLeft.Location = new Point(0, 0);
             panelLeft.Margin = new Padding(4, 3, 4, 3);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(233, 577);
             panelLeft.TabIndex = 0;
-            // 
-            // treeView1
-            // 
-            treeView1.ContextMenuStrip = contextMenuStrip_Treeview;
-            treeView1.Dock = DockStyle.Fill;
-            treeView1.Location = new Point(0, 0);
-            treeView1.Margin = new Padding(4, 3, 4, 3);
-            treeView1.Name = "treeView1";
-            treeView1.Size = new Size(233, 577);
-            treeView1.TabIndex = 0;
-            treeView1.AfterSelect += treeView1_AfterSelect;
             // 
             // MainForm
             // 
@@ -787,7 +773,6 @@
             toolStrip3.PerformLayout();
             tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridViewImportanceMeasureResults).EndInit();
-            panelLeft.ResumeLayout(false);
             ResumeLayout(false);
 
         }
@@ -821,7 +806,6 @@
         private System.Windows.Forms.Panel panelLeft;
         private System.Windows.Forms.Panel panelRight;
         private System.Windows.Forms.Splitter splitter2;
-        private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_Treeview;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_NEWBasic;
