@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using static Open_FTA.forms.ErrorDialog;
 
-
+ 
 public class MessageItem
 {
     public MessageType Type { get; set; }
@@ -31,6 +31,8 @@ public enum Gates { NotSet, OR, AND }
 public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left }
 public class FTAlogic
 {
+    public DrawingEngine MyDrawingEngine;
+
     public Dictionary<Guid, FTAitem> FTAStructure { get; set; } = new Dictionary<Guid, FTAitem>();
 
     public Dictionary<Guid, FTAitem> TempStructure { get; set; } = new Dictionary<Guid, FTAitem>();
@@ -85,6 +87,8 @@ public class FTAlogic
         GenerateEvetsList();
         GenerateMetrics();
         GenereteMetricUnitsList();
+
+        MyDrawingEngine = new DrawingEngine(this, FTAStructure);
     }
 
     public bool HasEventHiddenChildren(FTAitem evn)
@@ -1771,8 +1775,14 @@ public class FTAlogic
 
         if(MainAppSettings.Instance.SortingAlgoVersion==SortingStrategy.ALGOI)
             ArrangeEventsAlgo0();
-        if(MainAppSettings.Instance.SortingAlgoVersion ==SortingStrategy.ALGOII_centered || MainAppSettings.Instance.SortingAlgoVersion==SortingStrategy.ALGOII_align_left)
+        if (MainAppSettings.Instance.SortingAlgoVersion == SortingStrategy.ALGOII_centered || MainAppSettings.Instance.SortingAlgoVersion == SortingStrategy.ALGOII_align_left)
+        {
             ArrangeEventsAlgo1();
+
+            MyDrawingEngine.SetStructure(FTAStructure);
+        }
+
+        
     }
 
     public void ArrangeEventsAlgo1()
@@ -1869,8 +1879,7 @@ public class FTAlogic
     {
         AddParentToMiddle(GetItem(TopEventGuid));
     }
-
-     
+         
     public void MoveSubtreeToLeft(FTAitem fTAitem, int shift)
     {
 

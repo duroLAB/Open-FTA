@@ -3,7 +3,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Text;
 
-class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
+public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 {
     public FTAlogic EngineLogic = f;
     public int offsetX = 0;
@@ -56,7 +56,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
     {
         DrawingStructure = structure;
-        TopEvent = structure.First().Value;
+        TopEvent = structure.First().Value;        
     }
 
     private void DrawBackGround(Graphics g)
@@ -1073,6 +1073,27 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             LastMousePosition = mouseCoordinates;
             return false;
         }
+    }
+
+    public bool Mouse_OnEvevt(Point mouseCoordinates)
+    {
+        int X = 0;
+        int Y = 0;
+        PixelToRealPosition(mouseCoordinates, ref X, ref Y);
+
+        FTAitem? clickedEvent = null;
+        foreach (var evt in DrawingStructure.Values)
+        {
+
+            if (evt.IsHidden && !IsTopHiddenParent(evt))
+                continue;
+            if ((X > evt.X) && (X < evt.X + Constants.EventWidth) &&
+                (Y > evt.Y) && (Y < evt.Y + Constants.EventHeight))
+            {
+                return(true);
+            }
+        }
+        return(false);
     }
 
     public void ExportToMeta(string Filename)

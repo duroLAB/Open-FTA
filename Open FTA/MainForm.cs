@@ -10,7 +10,7 @@ namespace OpenFTA
         FTAlogic EngineLogic;
         FTAlogic EngineLogicMCS;
         UIEngine MyUIEngine;
-        DrawingEngine MyDrawingEngine;
+       // DrawingEngine EngineLogic.MyDrawingEngine;
 
         CustomTreeView treeView1;
 
@@ -19,11 +19,11 @@ namespace OpenFTA
 
         public MainForm()
         {
+             
             InitializeComponent();
-            EngineLogic = new FTAlogic();
-            EngineLogicMCS = new FTAlogic();
+            EngineLogic = new FTAlogic();         
             MyUIEngine = new UIEngine(EngineLogic);
-            MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
+           // EngineLogic.MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
             /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
              pictureBox1.Dock = DockStyle.Fill;
              pictureBox1.BackColor = Color.White;
@@ -150,7 +150,7 @@ namespace OpenFTA
         private void MainForm_Load(object sender, EventArgs e)
         {
             MyUIEngine.FillTreeView(treeView1);
-            MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
+            EngineLogic.MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             EngineLogic.AssignLevelsToAllEvents();
         }
@@ -162,16 +162,16 @@ namespace OpenFTA
             switch (e.KeyCode)
             {
                 case Keys.Left:
-                    MyDrawingEngine.offsetX = MyDrawingEngine.offsetX + 20;
+                    EngineLogic.MyDrawingEngine.offsetX = EngineLogic.MyDrawingEngine.offsetX + 20;
                     break;
                 case Keys.Right:
-                    MyDrawingEngine.offsetX = MyDrawingEngine.offsetX - 20;
+                    EngineLogic.MyDrawingEngine.offsetX = EngineLogic.MyDrawingEngine.offsetX - 20;
                     break;
                 case Keys.Up:
-                    MyDrawingEngine.offsetY = MyDrawingEngine.offsetY + 20;
+                    EngineLogic.MyDrawingEngine.offsetY = EngineLogic.MyDrawingEngine.offsetY + 20;
                     break;
                 case Keys.Down:
-                    MyDrawingEngine.offsetY = MyDrawingEngine.offsetY - 20;
+                    EngineLogic.MyDrawingEngine.offsetY = EngineLogic.MyDrawingEngine.offsetY - 20;
                     break;
 
             }
@@ -216,10 +216,10 @@ namespace OpenFTA
                 Point coordinates = me.Location;
                 toolStripMenuItem_ALIGN.Text = "Align";
 
-                bool EventWasSelected = MyDrawingEngine.Mouse_SelectEvent(coordinates);
+                bool EventWasSelected = EngineLogic.MyDrawingEngine.Mouse_SelectEvent(coordinates);
                 if (EventWasSelected)
                 {
-                    MyDrawingEngine.SetLastDragPosition(me.Location);
+                    EngineLogic.MyDrawingEngine.SetLastDragPosition(me.Location);
                     pictureBox1.Cursor = Cursors.Cross;
                 }
                 else
@@ -231,34 +231,42 @@ namespace OpenFTA
         }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (MyDrawingEngine.SelectedEventDrag || MyDrawingEngine.IsDraggingTree)
+
+
+
+            if (EngineLogic.MyDrawingEngine.SelectedEventDrag || EngineLogic.MyDrawingEngine.IsDraggingTree)
             {
-                MyDrawingEngine.Mouse_DragEvent(e.Location);
+                EngineLogic.MyDrawingEngine.Mouse_DragEvent(e.Location);
                 pictureBox1.Invalidate();
             }
+            else
+            if (EngineLogic.MyDrawingEngine.Mouse_OnEvevt(e.Location))
+                Cursor = Cursors.Hand;
+            else
+                Cursor = Cursors.Default;
 
             int X = 0;
             int Y = 0;
-            MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
+            EngineLogic.MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
             String str = "X:" + X + ", Y:" + Y + ")";
-            toolStripStatusLabelCoordinates.Text = str;
+            toolStripStatusLabelCoordinates.Text = str;          
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            MyDrawingEngine.Mouse_Up();
+            EngineLogic.MyDrawingEngine.Mouse_Up();
             pictureBox1.Cursor = Cursors.Default;
             pictureBox1.Invalidate();
         }
         private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
         {
-            MyDrawingEngine.offsetX += (int)(MyDrawingEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Width - e.X));
-            MyDrawingEngine.offsetY += (int)(MyDrawingEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Height - e.Y));
-            MyDrawingEngine.GlobalZoom = MyDrawingEngine.GlobalZoom * (1 + e.Delta * 0.0005);
+            EngineLogic.MyDrawingEngine.offsetX += (int)(EngineLogic.MyDrawingEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Width - e.X));
+            EngineLogic.MyDrawingEngine.offsetY += (int)(EngineLogic.MyDrawingEngine.GlobalZoom * 0.05 * (0.5 * pictureBox1.Height - e.Y));
+            EngineLogic.MyDrawingEngine.GlobalZoom = EngineLogic.MyDrawingEngine.GlobalZoom * (1 + e.Delta * 0.0005);
             pictureBox1.Invalidate();
         }
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            MyDrawingEngine.DrawFTA(e.Graphics);
+            EngineLogic.MyDrawingEngine.DrawFTA(e.Graphics);
         }
 
         #endregion
@@ -303,9 +311,9 @@ namespace OpenFTA
                     SaveTreeClass saveData = new SaveTreeClass
                     {
                         BuildVersion = "1.0.1.0",
-                        Zoom = MyDrawingEngine.GlobalZoom,
-                        OffsetX = MyDrawingEngine.offsetX,
-                        OffsetY = MyDrawingEngine.offsetY,
+                        Zoom = EngineLogic.MyDrawingEngine.GlobalZoom,
+                        OffsetX = EngineLogic.MyDrawingEngine.offsetX,
+                        OffsetY = EngineLogic.MyDrawingEngine.offsetY,
                         FtaStructure = EngineLogic.FTAStructure
                     };
 
@@ -378,9 +386,9 @@ namespace OpenFTA
                 {
                     SaveTreeClass loadedData = SaveTreeClass.LoadFromFile(ofd.FileName);
 
-                    MyDrawingEngine.GlobalZoom = loadedData.Zoom;
-                    MyDrawingEngine.offsetX = (int)loadedData.OffsetX;
-                    MyDrawingEngine.offsetY = (int)loadedData.OffsetY;
+                    EngineLogic.MyDrawingEngine.GlobalZoom = loadedData.Zoom;
+                    EngineLogic.MyDrawingEngine.offsetX = (int)loadedData.OffsetX;
+                    EngineLogic.MyDrawingEngine.offsetY = (int)loadedData.OffsetY;
                     EngineLogic.FTAStructure.Clear();
                     EngineLogic.FTAStructure = loadedData.FtaStructure;
 
@@ -392,7 +400,7 @@ namespace OpenFTA
                     EngineLogic.FindAllChilren();
                     EngineLogic.AssignLevelsToAllEvents();
                     MyUIEngine.FillTreeView(treeView1);
-                    MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
+                    EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
                     pictureBox1.Invalidate();
 
 
@@ -413,11 +421,11 @@ namespace OpenFTA
         private void toolStripButtonPaste_Click(object sender, EventArgs e)
         {
             EngineLogic.PasteCopiedEvents();
-            if (MainAppSettings.Instance.AutoSortTree)
+            if (MainAppSettings.Instance.AutoSortTreeCopyPaste)
             {
                 EngineLogic.ArrangeTree();
             }
-            treeView1.ExpandAll();
+           // treeView1.ExpandAll();
             pictureBox1.Invalidate();
             MyUIEngine.FillTreeView(treeView1);
         }
@@ -446,7 +454,7 @@ namespace OpenFTA
 
         private void toolStripButtonSort_Click(object sender, EventArgs e)
         {
-            //         MyDrawingEngine.ArrangeMainTreeHierarchically();
+            //         EngineLogic.MyDrawingEngine.ArrangeMainTreeHierarchically();
 
 
             //EngineLogic.ArrangeEventsAlgo1();         
@@ -455,14 +463,14 @@ namespace OpenFTA
              EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
 
             /*   if (EngineLogic.SelectedEvents.Count == 1)
-                   MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
+                   EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
                else
-                   MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);*/
+                   EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);*/
 
 
             EngineLogic.ArrangeTree();
 
-           // MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
+            EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -745,9 +753,9 @@ namespace OpenFTA
             int offsetX = (int)((pictureBox1.Width - treeWidth * newZoom) / 2 - minX * newZoom);
             int offsetY = (int)((pictureBox1.Height - treeHeight * newZoom) / 2 - minY * newZoom);
 
-            MyDrawingEngine.GlobalZoom = newZoom;
-            MyDrawingEngine.offsetX = offsetX;
-            MyDrawingEngine.offsetY = offsetY;
+            EngineLogic.MyDrawingEngine.GlobalZoom = newZoom;
+            EngineLogic.MyDrawingEngine.offsetX = offsetX;
+            EngineLogic.MyDrawingEngine.offsetY = offsetY;
             pictureBox1.Invalidate();
         }
 
@@ -834,13 +842,13 @@ namespace OpenFTA
 
         private void SaveToVector()
         {
-            double BackupGlobalZoom = MyDrawingEngine.GlobalZoom;
-            int BackupoffsetX = MyDrawingEngine.offsetX;
-            int BackupoffsetY = MyDrawingEngine.offsetY;
+            double BackupGlobalZoom = EngineLogic.MyDrawingEngine.GlobalZoom;
+            int BackupoffsetX = EngineLogic.MyDrawingEngine.offsetX;
+            int BackupoffsetY = EngineLogic.MyDrawingEngine.offsetY;
 
-            MyDrawingEngine.GlobalZoom = 1;
-            MyDrawingEngine.offsetX = 0;
-            MyDrawingEngine.offsetY = 0;
+            EngineLogic.MyDrawingEngine.GlobalZoom = 1;
+            EngineLogic.MyDrawingEngine.offsetX = 0;
+            EngineLogic.MyDrawingEngine.offsetY = 0;
 
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "wmf Image|*.wmf";
@@ -851,15 +859,15 @@ namespace OpenFTA
             pictureBox1.Invalidate();
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                MyDrawingEngine.ExportToMeta(sfd.FileName);
+                EngineLogic.MyDrawingEngine.ExportToMeta(sfd.FileName);
             }
 
 
 
 
-            MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
-            MyDrawingEngine.offsetX = BackupoffsetX;
-            MyDrawingEngine.offsetY = BackupoffsetY;
+            EngineLogic.MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
+            EngineLogic.MyDrawingEngine.offsetX = BackupoffsetX;
+            EngineLogic.MyDrawingEngine.offsetY = BackupoffsetY;
             pictureBox1.Invalidate();
         }
         private void SaveToBMP()
@@ -896,11 +904,11 @@ namespace OpenFTA
         {
             EngineLogic = new FTAlogic();
             MyUIEngine = new UIEngine(EngineLogic);
-            MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
+            EngineLogic.MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
 
 
             MyUIEngine.FillTreeView(treeView1);
-            MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
+            EngineLogic.MyDrawingEngine.SetDimensions(pictureBox1.Width, pictureBox1.Height);
 
             EngineLogic.AssignLevelsToAllEvents();
 
@@ -988,7 +996,7 @@ namespace OpenFTA
              {
                  EngineLogic.DisplayStructure.Add(EngineLogic.SelectedEvents[i].GuidCode,EngineLogic.GetItem(EngineLogic.SelectedEvents[i].GuidCode));
              }
-             MyDrawingEngine.SetStructure(EngineLogic.DisplayStructure);*/
+             EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.DisplayStructure);*/
 
 
             pictureBox1.Invalidate();
@@ -1345,9 +1353,9 @@ namespace OpenFTA
             EngineLogic.SelectedEvents.Clear();
             EngineLogic.CopiedEvents.Clear();
             EngineLogic.CreateNewTopEvent();
-            MyDrawingEngine.GlobalZoom = 1;
-            MyDrawingEngine.offsetX = 0;
-            MyDrawingEngine.offsetY = 0;
+            EngineLogic.MyDrawingEngine.GlobalZoom = 1;
+            EngineLogic.MyDrawingEngine.offsetX = 0;
+            EngineLogic.MyDrawingEngine.offsetY = 0;
             pictureBox1.Invalidate();
             MyUIEngine.FillTreeView(treeView1);
             UpdateMainFormControls();

@@ -73,9 +73,21 @@ public class MainAppSettings
 
 
 
-    [Category("General settings")]
-    [DisplayName("Auto sort tree after paste")]
-    public bool AutoSortTree { get; set; } = true;
+    [Category("Auto sorting")]
+    [DisplayName("Auto-sort tree after copy-paste")]
+    [Description("Automatically sort tree after copy-paste operation")]
+    public bool AutoSortTreeCopyPaste { get; set; } = true;
+
+    [Category("Auto sorting")]
+    [DisplayName("Auto-sort tree after adding/removing FTA item")]
+    [Description("Automatically sort tree after adding or removing FTA item")]
+    public bool AutoSortTreeAddRemove { get; set; } = true;
+   
+    [Category("Auto sorting")]
+    [DisplayName("Auto-sort tree after collapse/expand")]
+    [Description("Automatically sort tree after collapsing or expanding tree structure")]
+    public bool AutoSortTreeCollapseExpand { get; set; } = true;
+
     // Cesta k súboru – vždy vedľa exe
     private static string FilePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppSettings.xml");
 
