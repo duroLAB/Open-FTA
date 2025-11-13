@@ -7,8 +7,7 @@ namespace OpenFTA
 {
     public partial class MainForm : Form
     {
-        FTAlogic EngineLogic;
-        FTAlogic EngineLogicMCS;
+        FTAlogic EngineLogic;         
         UIEngine MyUIEngine;
        // DrawingEngine EngineLogic.MyDrawingEngine;
 
@@ -77,6 +76,8 @@ namespace OpenFTA
             if (tree.IsUserAction)
             {
                 HideSubtree(selectedItem, false);
+                if (MainAppSettings.Instance.AutoSortTreeCollapseExpand)
+                    EngineLogic.ArrangeTree();
                 pictureBox1.Invalidate();
             }
 
@@ -90,6 +91,8 @@ namespace OpenFTA
             if (tree.IsUserAction)
             {
                 HideSubtree(selectedItem, true);
+                if (MainAppSettings.Instance.AutoSortTreeCollapseExpand)
+                    EngineLogic.ArrangeTree();
                 pictureBox1.Invalidate();
             }
 
@@ -435,6 +438,10 @@ namespace OpenFTA
             SaveStateForUndo();
             EngineLogic.DeleteSelectedEvents();
             MyUIEngine.FillTreeView(treeView1);
+
+            if (MainAppSettings.Instance.AutoSortTreeAddRemove)
+                EngineLogic.ArrangeTree();
+
             pictureBox1.Invalidate();
         }
 
@@ -470,7 +477,7 @@ namespace OpenFTA
 
             EngineLogic.ArrangeTree();
 
-            EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
+           // EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -605,6 +612,10 @@ namespace OpenFTA
 
             UpdateMainFormControls();
             MyUIEngine.FillTreeView(treeView1);
+
+            if (MainAppSettings.Instance.AutoSortTreeAddRemove)
+                EngineLogic.ArrangeTree();
+
             EngineLogic.AssignLevelsToAllEvents();
             pictureBox1.Invalidate();
         }
@@ -691,20 +702,6 @@ namespace OpenFTA
                 item.ValueUnit = edit.comboBoxUnits.SelectedIndex;
             }
             item.Reference = edit.textBoxReference.Text;
-        }
-
-        private double ConvertToYears(double freq, string unit)
-        {
-            switch (unit)
-            {
-                case "h⁻¹":
-                    return freq * 24 * 365;
-                case "s⁻¹":
-                    return freq * 60 * 60 * 24 * 365;
-                case "y⁻¹":
-                default:
-                    return freq;
-            }
         }
 
         private void HideSubtree(FTAitem node, bool hide)
@@ -1100,6 +1097,8 @@ namespace OpenFTA
                         treeView1.ExpandNodeByText(selectedEvent.GuidCode.ToString());
                     }
 
+                    if (MainAppSettings.Instance.AutoSortTreeCollapseExpand)
+                        EngineLogic.ArrangeTree();
 
                 }
 
@@ -1349,6 +1348,9 @@ namespace OpenFTA
         {
             undoStack.Clear();
             redoStack.Clear();
+
+            EngineLogic = new FTAlogic();
+
             EngineLogic.FTAStructure.Clear();
             EngineLogic.SelectedEvents.Clear();
             EngineLogic.CopiedEvents.Clear();
@@ -1357,6 +1359,7 @@ namespace OpenFTA
             EngineLogic.MyDrawingEngine.offsetX = 0;
             EngineLogic.MyDrawingEngine.offsetY = 0;
             pictureBox1.Invalidate();
+            MyUIEngine = new UIEngine(EngineLogic);
             MyUIEngine.FillTreeView(treeView1);
             UpdateMainFormControls();
 

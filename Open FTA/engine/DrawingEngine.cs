@@ -360,7 +360,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         {
 
             FTAitem evt = evtPair.Value;
-            if (evt.ItemType >= 2) // Len pre Basic Event
+            if (evt.ItemType >= 2 && !evt.IsHidden) // Len pre Basic Event
             {
 
                 // Určíme polohu a rozmery udalosti

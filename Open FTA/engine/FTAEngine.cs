@@ -573,7 +573,7 @@ public class FTAlogic
 
     // public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
     // public static bool SimplificationStrategy = true; // P=f
-    public static bool SimplificationStrategyLinearOR = false; // P(A OR B) = Pa+Pb
+    public static bool SimplificationStrategyLinearOR = true; // P(A OR B) = Pa+Pb
 
     public void SumChildren(FTAitem parent, Dictionary<Guid, FTAitem> str)
     {
@@ -1270,11 +1270,18 @@ public class FTAlogic
         html.AppendLine("</head>");
         html.AppendLine("<body>");
 
+        html.AppendLine("TOPEVENTHOLDER");
+
         GenerateReport_ListOfBE(html);
 
         GenerateReport_MCS(html);
 
         GenerateReport_ImportanceMeasure(html);
+
+        SumChildren(GetItem(TopEventGuid));
+        String temp = GenerateReport_TopEvent();
+
+        html.Replace("TOPEVENTHOLDER", temp);
 
         html.AppendLine("  <script>");
         html.AppendLine("    document.addEventListener('DOMContentLoaded', function () {");
@@ -1304,6 +1311,65 @@ public class FTAlogic
 
         /* string path = " .html";
          File.WriteAllText(path, html.ToString(), Encoding.UTF8);*/
+    }
+
+    public String GenerateReport_TopEvent()
+    {
+        String html = "";
+
+        html= "    <h1>Top Event</h1>";
+
+        FTAitem MSCTop = MCSStructure.First().Value;
+        FTAitem GbG = FTAStructure.First().Value;
+
+        string tempTag = "";
+        if(GbG.Tag!=null)
+        if (GbG.Tag.Length > 0)
+            tempTag = " (" + GbG.Tag + ")";
+        html += "    <h2>"+GbG.Name+ tempTag+"</h2>";
+
+        string freqText = MSCTop.ValueType switch
+        {
+            ValueTypes.F => "f=",
+            ValueTypes.P => "P=",
+            ValueTypes.R => "R=",
+            ValueTypes.Lambda => "λ=",
+            _ => ""
+        };
+
+        freqText += (MSCTop.Value < 0.001) ? MSCTop.Value.ToString("0.0000E+0") : MSCTop.Value.ToString("F6");
+        if (MSCTop.ValueType == ValueTypes.F || MSCTop.ValueType == ValueTypes.Lambda)
+        {
+            freqText += " " + MetricUnitsList[MSCTop.ValueUnit];
+
+        }
+
+        String temp = "<h3> Minimal cut set result:"+ freqText + "</h3>";
+        html += temp;
+
+
+         
+
+        freqText = GbG.ValueType switch
+        {
+            ValueTypes.F => "f=",
+            ValueTypes.P => "P=",
+            ValueTypes.R => "R=",
+            ValueTypes.Lambda => "λ=",
+            _ => ""
+        };
+
+        freqText += (GbG.Value < 0.001) ? GbG.Value.ToString("0.0000E+0") : GbG.Value.ToString("F6");
+        if (GbG.ValueType == ValueTypes.F || GbG.ValueType == ValueTypes.Lambda)
+        {
+            freqText += " " + MetricUnitsList[GbG.ValueUnit];
+
+        }
+
+        temp = "<h3> Gate by Gate result:" + freqText + "</h3>";
+        html += temp;
+
+        return (html);
     }
 
     public void GenerateReport_ListOfBE(StringBuilder html)
