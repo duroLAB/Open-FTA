@@ -932,61 +932,7 @@ class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             (int)(a.B + (b.B - a.B) * t));
     }
 
-    public void ArrangeMainTreeHierarchically()
-    {
-        FTAitem topEvent = DrawingStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
-        if (topEvent == null)
-            return;
-
-        // Set top event position
-        topEvent.X = FTAWidth;
-        topEvent.Y = 50;
-
-        ArrangeChildren(topEvent);
-
-
-    }
-    private void ArrangeChildren(FTAitem parent)
-    {
-        int verticalSpacing = 180;
-        int gap = 20;
-
-        if (parent.Children == null || parent.Children.Count == 0)
-            return;
-
-        double allocatedWidth = ComputeSubtreeWidth(parent, gap);
-        double startX = parent.X - allocatedWidth / 2;
-        int childY = parent.Y + verticalSpacing;
-
-        double currentX = startX;
-        foreach (Guid childGuid in parent.Children)
-        {
-            if (DrawingStructure.TryGetValue(childGuid, out FTAitem child))
-            {
-                double childWidth = ComputeSubtreeWidth(child, gap);
-                child.X = (int)(currentX + childWidth / 2);
-                child.Y = childY;
-                currentX += childWidth + gap;
-                ArrangeChildren(child);
-            }
-        }
-    }
-    private double ComputeSubtreeWidth(FTAitem node, int gap)
-    {
-        if (node.Children == null || node.Children.Count == 0)
-            return Constants.EventWidth;
-
-        double totalWidth = 0;
-        foreach (Guid childGuid in node.Children)
-        {
-            if (DrawingStructure.TryGetValue(childGuid, out FTAitem child))
-            {
-                totalWidth += ComputeSubtreeWidth(child, gap) + gap;
-            }
-        }
-        totalWidth -= gap;
-        return Math.Max(totalWidth, Constants.EventWidth);
-    }
+    
     public void Mouse_DragEvent(Point mouseCoordinates)
     {
         if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)

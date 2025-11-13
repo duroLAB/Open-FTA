@@ -415,7 +415,7 @@ namespace OpenFTA
             EngineLogic.PasteCopiedEvents();
             if (MainAppSettings.Instance.AutoSortTree)
             {
-                MyDrawingEngine.ArrangeMainTreeHierarchically();
+                EngineLogic.ArrangeTree();
             }
             treeView1.ExpandAll();
             pictureBox1.Invalidate();
@@ -454,15 +454,15 @@ namespace OpenFTA
             /* EngineLogic.FTAStructure = new Dictionary<Guid, FTAitem>(EngineLogic.MCSStructure);
              EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
 
-         /*   if (EngineLogic.SelectedEvents.Count == 1)
-                MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
-            else
-                MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);*/
+            /*   if (EngineLogic.SelectedEvents.Count == 1)
+                   MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
+               else
+                   MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);*/
 
 
-            EngineLogic.ArrangeEventsAlgo1();
+            EngineLogic.ArrangeTree();
 
-            MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
+           // MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -792,10 +792,6 @@ namespace OpenFTA
 
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
-
-            MyDrawingEngine.SetStructure(EngineLogic.MCSStructure);
-
-            return;
 
             FormSettings settingsForm = new FormSettings();
 

@@ -54,6 +54,11 @@ public class MainAppSettings
     [Description("Default event vertical spacing in pixels")]
     public int EventVerticalSpacing { get; set; } = 80;
 
+    [Category("Sorting algorithm")]
+    [DisplayName("Default sorting algorithm")]
+    [Description("ALGOI - safe, fast, but not very effective, ALGOII-best results, but slower and less safe,ALGOII-left-aligned behaves the same as ALGOII, except that it aligns to the left")]
+    public SortingStrategy SortingAlgoVersion { get; set; } = (SortingStrategy)1;
+
     [Category("Computation settings")]
     [DisplayName("Base time unit")]
     public MainCompTimeUnit BaseTimeUnit { get; set; } = MainCompTimeUnit.Year;

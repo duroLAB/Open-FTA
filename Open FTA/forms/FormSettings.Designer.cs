@@ -31,8 +31,8 @@
             propertyGrid1 = new PropertyGrid();
             panel1 = new Panel();
             panel2 = new Panel();
-            buttonOK = new Button();
             buttonCancel = new Button();
+            buttonOK = new Button();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             SuspendLayout();
@@ -42,16 +42,17 @@
             propertyGrid1.Dock = DockStyle.Fill;
             propertyGrid1.Location = new Point(0, 0);
             propertyGrid1.Name = "propertyGrid1";
-            propertyGrid1.Size = new Size(541, 493);
+            propertyGrid1.Size = new Size(649, 572);
             propertyGrid1.TabIndex = 0;
+            propertyGrid1.Click += propertyGrid1_Click;
             // 
             // panel1
             // 
             panel1.Controls.Add(panel2);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(0, 455);
+            panel1.Location = new Point(0, 572);
             panel1.Name = "panel1";
-            panel1.Size = new Size(541, 38);
+            panel1.Size = new Size(649, 38);
             panel1.TabIndex = 1;
             // 
             // panel2
@@ -59,20 +60,10 @@
             panel2.Controls.Add(buttonCancel);
             panel2.Controls.Add(buttonOK);
             panel2.Dock = DockStyle.Right;
-            panel2.Location = new Point(317, 0);
+            panel2.Location = new Point(425, 0);
             panel2.Name = "panel2";
             panel2.Size = new Size(224, 38);
             panel2.TabIndex = 0;
-            // 
-            // buttonOK
-            // 
-            buttonOK.DialogResult = DialogResult.OK;
-            buttonOK.Location = new Point(137, 8);
-            buttonOK.Name = "buttonOK";
-            buttonOK.Size = new Size(75, 23);
-            buttonOK.TabIndex = 0;
-            buttonOK.Text = "Ok";
-            buttonOK.UseVisualStyleBackColor = true;
             // 
             // buttonCancel
             // 
@@ -84,13 +75,23 @@
             buttonCancel.Text = "Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
             // 
+            // buttonOK
+            // 
+            buttonOK.DialogResult = DialogResult.OK;
+            buttonOK.Location = new Point(137, 8);
+            buttonOK.Name = "buttonOK";
+            buttonOK.Size = new Size(75, 23);
+            buttonOK.TabIndex = 0;
+            buttonOK.Text = "Ok";
+            buttonOK.UseVisualStyleBackColor = true;
+            // 
             // FormSettings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(541, 493);
-            Controls.Add(panel1);
+            ClientSize = new Size(649, 610);
             Controls.Add(propertyGrid1);
+            Controls.Add(panel1);
             Name = "FormSettings";
             Text = "Application settings";
             Load += FormSettings_Load;

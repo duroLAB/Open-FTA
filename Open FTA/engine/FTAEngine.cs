@@ -27,6 +27,8 @@ public enum MainCompTimeUnit
 }
 public enum ValueTypes { F, P, R, Lambda }
 public enum Gates { NotSet, OR, AND }
+
+public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left }
 public class FTAlogic
 {
     public Dictionary<Guid, FTAitem> FTAStructure { get; set; } = new Dictionary<Guid, FTAitem>();
@@ -1667,7 +1669,6 @@ public class FTAlogic
     }
 
 
-
     List<MessageItem> ErrorMessages = new List<MessageItem>();
     public bool PerformFullTest()
     {
@@ -1761,7 +1762,18 @@ public class FTAlogic
     }
 
 
-    bool TempTreeAlignSuccess;
+    bool TempTreeAlignSuccess; bool GlobalStop; public int TemActualX;
+
+    public void ArrangeTree()
+    {
+        //ArrangeEventsAlgo1();
+        ArrangeEventsAlgo0();
+
+        if(MainAppSettings.Instance.SortingAlgoVersion==SortingStrategy.ALGOI)
+            ArrangeEventsAlgo0();
+        if(MainAppSettings.Instance.SortingAlgoVersion ==SortingStrategy.ALGOII_centered || MainAppSettings.Instance.SortingAlgoVersion==SortingStrategy.ALGOII_align_left)
+            ArrangeEventsAlgo1();
+    }
 
     public void ArrangeEventsAlgo1()
     {
@@ -1775,7 +1787,6 @@ public class FTAlogic
 
         TemActualX = 0;
         PrepareTreeForAlign(FTAStructure.Values.First(), 0);
-
 
 
         AssignLevelsToAllEvents();
@@ -1845,19 +1856,11 @@ public class FTAlogic
             FTAitem c = GetItem(itm.Children[i]);
             AddParentToMiddle(c);
 
-            if (c.X > max)
-                max = c.X;
-            if (c.X < min)
-                min = c.X;
 
-            if (i == itm.Children.Count - 1)
-                itm.X = (max - min) / 2 + min;
-
-            if (i == itm.Children.Count - 1)
+            if(MainAppSettings.Instance.SortingAlgoVersion==SortingStrategy.ALGOII_centered)
+                itm.X = GetItem(itm.Children[0]).X + (int)Math.Round((GetItem(itm.Children[itm.Children.Count - 1]).X - GetItem(itm.Children[0]).X) / 2.0, MidpointRounding.ToPositiveInfinity);
+            else
                 itm.X = GetItem(itm.Children[0]).X;
-
-            itm.X = GetItem(itm.Children[0]).X + (int)Math.Round((GetItem(itm.Children[itm.Children.Count - 1]).X - GetItem(itm.Children[0]).X) / 2.0, MidpointRounding.ToPositiveInfinity);
-
         }
 
     }
@@ -1867,7 +1870,7 @@ public class FTAlogic
         AddParentToMiddle(GetItem(TopEventGuid));
     }
 
-    bool GlobalStop;
+     
     public void MoveSubtreeToLeft(FTAitem fTAitem, int shift)
     {
 
@@ -1930,9 +1933,7 @@ public class FTAlogic
             child.X = child.X + shift;
         }
     }
-
-
-    public int TemActualX;
+           
     public void PrepareTreeForAlign(FTAitem fTAitem, int actualx)
     {
 
@@ -1950,6 +1951,61 @@ public class FTAlogic
 
     }
 
+    public void ArrangeEventsAlgo0()
+    {
+        FTAitem topEvent = FTAStructure.Values.FirstOrDefault(e => e.Parent == Guid.Empty);
+        if (topEvent == null)
+            return;
+
+        // Set top event position
+        topEvent.X = 0;
+        topEvent.Y = 50;
+
+        ArrangeChildren(topEvent);
+
+
+    }
+    private void ArrangeChildren(FTAitem parent)
+    {
+        int verticalSpacing = 180;
+        int gap = 20;
+
+        if (parent.Children == null || parent.Children.Count == 0)
+            return;
+
+        double allocatedWidth = ComputeSubtreeWidth(parent, gap);
+        double startX = parent.X - allocatedWidth / 2;
+        int childY = parent.Y + verticalSpacing;
+
+        double currentX = startX;
+        foreach (Guid childGuid in parent.Children)
+        {
+            if (FTAStructure.TryGetValue(childGuid, out FTAitem child))
+            {
+                double childWidth = ComputeSubtreeWidth(child, gap);
+                child.X = (int)(currentX + childWidth / 2);
+                child.Y = childY;
+                currentX += childWidth + gap;
+                ArrangeChildren(child);
+            }
+        }
+    }
+    private double ComputeSubtreeWidth(FTAitem node, int gap)
+    {
+        if (node.Children == null || node.Children.Count == 0)
+            return Constants.EventWidth;
+
+        double totalWidth = 0;
+        foreach (Guid childGuid in node.Children)
+        {
+            if (FTAStructure.TryGetValue(childGuid, out FTAitem child))
+            {
+                totalWidth += ComputeSubtreeWidth(child, gap) + gap;
+            }
+        }
+        totalWidth -= gap;
+        return Math.Max(totalWidth, Constants.EventWidth);
+    }
 }
 
 public static class Constants
