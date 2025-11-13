@@ -38,7 +38,7 @@ namespace Open_FTA.forms
             MaximizeBox = false;
             MinimizeBox = false;
             ShowInTaskbar = false;
-            Size = new Size(600, 400);
+            Size = new Size(800, 400);
             BackColor = Color.White;
 
             lblTitle = new Label()

@@ -5,6 +5,11 @@ using System.Text;
 using System.Text.Json;
 using static Open_FTA.forms.ErrorDialog;
 
+/// <summary>
+/// TODO: Nastavenia Linearny OR
+/// TODO: Nastavenie testovania eventov
+/// TODO: referencie vo vyslednej sprave
+/// </summary>
  
 public class MessageItem
 {
@@ -25,6 +30,13 @@ public enum MainCompTimeUnit
     Hour,
     Second
 }
+public enum GateFrequencyHandling
+{
+    Allow,
+    Disallow,
+    AllowWithWarning
+}
+
 public enum ValueTypes { F, P, R, Lambda }
 public enum Gates { NotSet, OR, AND }
 
@@ -60,6 +72,8 @@ public class FTAlogic
         { 2, 8760.0 },        // 1 hod = 1/8760 roku
         { 3, 31_536_000.0 }   // 1 sek = 1/31 536 000 roku
     };
+
+  
 
     public Dictionary<Guid, FTAitem> MCSStructure { get; private set; } = new Dictionary<Guid, FTAitem>();
     public List<FTAitem> SelectedEvents { get; set; } = new List<FTAitem>();
@@ -571,9 +585,7 @@ public class FTAlogic
     }
 
 
-    // public static int BaseTimeUnit { get; set; } = 0; // základná časová jednotka
-    // public static bool SimplificationStrategy = true; // P=f
-    public static bool SimplificationStrategyLinearOR = true; // P(A OR B) = Pa+Pb
+
 
     public void SumChildren(FTAitem parent, Dictionary<Guid, FTAitem> str)
     {
@@ -631,7 +643,7 @@ public class FTAlogic
     {
         var probs = events.Select(ConvertToProbability).ToList();
 
-        if (gate == Gates.OR && SimplificationStrategyLinearOR)
+        if (gate == Gates.OR && MainAppSettings.Instance.SimplificationStrategyLinearOR)
         {
             // lineárna aproximácia OR brány
             return probs.Sum();
@@ -658,7 +670,7 @@ public class FTAlogic
             Tsource = Tbase;
         }
 
-        if (!MainAppSettings.Instance.SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
+        if (MainAppSettings.Instance.SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
             P = e.Value;
         else
             P = e.ValueType switch
@@ -682,7 +694,7 @@ public class FTAlogic
         if (Tbase == Tsource)
             return P;
         else
-            if (!MainAppSettings.Instance.SimplificationStrategy)
+            if (MainAppSettings.Instance.SimplificationStrategy)
         {
             P = P * Tbase / Tsource;
             return (P);
@@ -698,7 +710,7 @@ public class FTAlogic
 
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
         double res = 0;
-        if (MainAppSettings.Instance.SimplificationStrategy)
+        if (!MainAppSettings.Instance.SimplificationStrategy)
         {
             // res = -Math.Log(1 - P) / Tbase;
             res = -Math.Log(1 - P);
@@ -1384,11 +1396,14 @@ public class FTAlogic
         html.AppendLine("                <th>Name</th>");
         html.AppendLine("                <th>Notes</th>");
         html.AppendLine("                <th>Metric</th>");
+        html.AppendLine("                <th>Ref.</th>");
         html.AppendLine("            </tr>");
         html.AppendLine("        </thead>");
         html.AppendLine("        <tbody>");
 
         List<FTAitem> l = GenerateListOfBasicEvents();
+
+        var bibliography = GenerateListofreferences();
 
         foreach (var Event in l)
         {
@@ -1414,7 +1429,10 @@ public class FTAlogic
             }
             // freqText = Event.Frequency.ToString();
             temp += freqText;
-            temp += "</td></tr>";
+            temp += "</td>";
+            temp += "<td>" + Event.TempReference + "</td></tr>";
+
+             
 
             html.AppendLine(temp);
 
@@ -1424,8 +1442,19 @@ public class FTAlogic
         }
 
 
+         
+
         html.AppendLine("        </tbody>");
         html.AppendLine("    </table>");
+
+        temp = "\n <h2>References</h2>";
+        temp += "<ul>";
+        foreach (var line in bibliography)
+            temp += "<li>" + line + "</li>";
+        temp += "</ul>";
+
+        html.AppendLine(temp);
+
     }
 
     public void GenerateReport_MCS(StringBuilder html)
@@ -1477,7 +1506,7 @@ public class FTAlogic
         foreach (var item in MCSStructure)
         {
             temp = "<tr><td>";
-            temp += "MSC - ";
+            temp += item.Value.Name;
             temp += "</td>";
             if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
             {
@@ -1612,6 +1641,40 @@ public class FTAlogic
         return basicEvents;
     }
     // --- From P, R, λ to  f (v 1/y) ---
+
+    public List<string> GenerateListofreferences()
+    {
+        var filteredItems = FTAStructure.Values
+    .Where(i => i.ItemType > 1 && !string.IsNullOrWhiteSpace(i.Reference))
+    .ToList();
+
+        // 1️⃣ Získanie unikátnych referencií
+        var uniqueRefs = filteredItems
+            .Select(i => i.Reference)
+            .Distinct()
+            .ToList();
+
+        // 2️⃣ Priradenie čísla (TempReference) každému FTAitem
+        var refIndex = uniqueRefs
+            .Select((refText, index) => new { refText, index })
+            .ToDictionary(x => x.refText, x => $"[{x.index + 1}]");
+
+        foreach (var item in filteredItems)
+        {
+            if (refIndex.ContainsKey(item.Reference))
+            {
+                item.TempReference = refIndex[item.Reference];
+            }
+        }
+
+        // 3️⃣ Vytvorenie číslovaného zoznamu literatúry
+        var bibliography = uniqueRefs
+            .Select((r, i) => $"[{i + 1}] {r}")
+            .ToList();
+
+        return bibliography;
+         
+    }
 
     public static double FrequencyFromProbability(double P)
     {
@@ -1752,12 +1815,21 @@ public class FTAlogic
             res = false;
         }
 
+        if(MainAppSettings.Instance.GateANDFrequencyHandling != GateFrequencyHandling.Allow)
         if (!PerformTestAND_2F())
         {
+                if(MainAppSettings.Instance.GateANDFrequencyHandling == GateFrequencyHandling.Disallow)
             res = false;
         }
 
-        if (!res) ErrorDialog.ShowMessages(ErrorMessages);
+        if (MainAppSettings.Instance.GateORFrequencyHandling != GateFrequencyHandling.Allow)
+            if (!PerformTestOR_FORP())
+            {
+                if (MainAppSettings.Instance.GateORFrequencyHandling == GateFrequencyHandling.Disallow)
+                    res = false; 
+            }
+
+        if (ErrorMessages.Count>0) ErrorDialog.ShowMessages(ErrorMessages);
 
         return (res);
     }
@@ -1798,10 +1870,68 @@ public class FTAlogic
             }
             if (item.Gate == Gates.AND && NumberOfChildrenWithFrequency >= 2)
             {
-                string txt = "Event: " + item.Name + " (" + item.Tag + ") has an AND gate with " + NumberOfChildrenWithFrequency.ToString() + " children having frequency metric (F or λ).";
-                ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
-                txt = "To fix it change metric of some children to Probability (P) or Reliability (R).";
-                ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                if (MainAppSettings.Instance.GateANDFrequencyHandling == GateFrequencyHandling.Disallow)
+                {
+                    string txt = "ERROR - Event: " + item.Name + " (" + item.Tag + ") has an AND gate with " + NumberOfChildrenWithFrequency.ToString() + " frequency events (F or λ). This configuration is not permitted based on the current settings.";
+                    ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
+                    txt = "Change one of the frequency events to a probability event. Or change the setting “AND gate with two frequency events” to “Allow” or “Allow with warning.";
+                    ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                }
+                else
+                {
+                    string txt = "WARNING - Event: " + item.Name + " (" + item.Tag + ") has an AND gate with " + NumberOfChildrenWithFrequency.ToString() + " frequency events (F or λ). This configuration may lead to incorrect probability results.";
+                    ErrorMessages.Add(new MessageItem(MessageType.Warning, txt));
+                    txt = "To improve model consistency, consider changing event types or adjusting the calculation settings";
+                    ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                }
+                res = false;
+            }
+
+
+        }
+        return (res);
+    }
+
+    private bool PerformTestOR_FORP()
+    {
+        bool res = true;
+        foreach (var item in FTAStructure.Values)
+        {
+            int NumberOfChildrenWithFrequency = 0;
+            int NumberOfChildrenWithProbability = 0;
+
+            foreach (var childGuid in item.Children)
+            {
+                if (FTAStructure.TryGetValue(childGuid, out FTAitem child))
+                {
+                    if (child.ValueType == ValueTypes.F || child.ValueType == ValueTypes.Lambda)
+                    {
+                        NumberOfChildrenWithFrequency = NumberOfChildrenWithFrequency + 1;
+                    }
+
+                    if (child.ValueType == ValueTypes.P || child.ValueType == ValueTypes.R)
+                    {
+                        NumberOfChildrenWithProbability = NumberOfChildrenWithProbability + 1;
+                    }
+                }
+            }
+            if (NumberOfChildrenWithProbability>0 && NumberOfChildrenWithFrequency > 0)
+            {
+                if (MainAppSettings.Instance.GateORFrequencyHandling == GateFrequencyHandling.Disallow)
+                {
+                    string txt = "ERROR - Event: " + item.Name + " (" + item.Tag + ") has an OR gate and contains a combination of a probability event and a frequency event. This configuration is not permitted based on the current settings.";
+                    ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
+                    txt = "Change both events to the same type (either both as probability events or both as frequency events).\r\n Or change the setting “OR gate with mixed event types” to “Allow” or “Allow with warning.”";
+                    ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                }
+                if (MainAppSettings.Instance.GateORFrequencyHandling == GateFrequencyHandling.AllowWithWarning)
+                {
+                    string txt = "WARNING - Event: " + item.Name + " (" + item.Tag + ") has an OR gate and contains a combination of a probability event and a frequency event. This configuration may lead to inconsistent or invalid probability results.";
+                    ErrorMessages.Add(new MessageItem(MessageType.Warning, txt));
+                    txt = "To improve model consistency, consider changing event types or adjusting the calculation settings";
+                    ErrorMessages.Add(new MessageItem(MessageType.Info, txt));
+                }
+
                 res = false;
             }
 

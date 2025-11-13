@@ -64,12 +64,25 @@ public class MainAppSettings
     public MainCompTimeUnit BaseTimeUnit { get; set; } = MainCompTimeUnit.Year;
 
     [Category("Computation settings")]
-    [DisplayName("Probability Computation settings")]
-    [Description("If Probability Computation settings = true: " +
-             "P(failure) = 1 − e^(−f⋅t)" +
-             " Otherwise:" +
-             "P ≈ f⋅t")]
-    public bool SimplificationStrategy { get; set; } = false;
+    [DisplayName("AND gate with two frequency events")]
+    [Description("Specifies whether an AND gate with two frequency events is allowed, disallowed, or allowed with a warning.")]
+    public GateFrequencyHandling GateANDFrequencyHandling { get; set; }
+
+    [Category("Computation settings")]
+    [DisplayName("OR gate with mixed event types")]
+    [Description("Specifies whether an OR gate containing both probability and frequency events is allowed, disallowed, or allowed with a warning.")]
+    public GateFrequencyHandling GateORFrequencyHandling { get; set; }
+
+    [Category("Computation settings")]
+    [DisplayName("Simplified probability calculation")]
+    [Description("If Simplified probability calculation is enabled: P ≈ f ⋅ t\nOtherwise: P(failure) = 1 − e^(−f ⋅ t)")]
+    public bool SimplificationStrategy { get; set; } = true;
+  
+    [Category("Computation settings")]
+    [DisplayName("Simplified OR gate")]
+    [Description("If Simplified OR gate is enabled: P(A OR B) ≈ PA + PB\nOtherwise: P(A OR B) = PA + PB − PA×PB")]
+    public bool SimplificationStrategyLinearOR { get; set; } = true;
+
 
 
 

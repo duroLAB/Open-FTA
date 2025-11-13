@@ -129,7 +129,7 @@
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new Padding(0);
             toolStrip1.RenderMode = ToolStripRenderMode.Professional;
-            toolStrip1.Size = new Size(1094, 55);
+            toolStrip1.Size = new Size(1094, 40);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -139,7 +139,7 @@
             toolStripButtonNew.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonNew.ImageTransparentColor = Color.Magenta;
             toolStripButtonNew.Name = "toolStripButtonNew";
-            toolStripButtonNew.Size = new Size(67, 52);
+            toolStripButtonNew.Size = new Size(67, 37);
             toolStripButtonNew.Text = "New";
             toolStripButtonNew.Click += toolStripButtonNew_Click;
             // 
@@ -149,7 +149,7 @@
             toolStripButtonSave.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonSave.ImageTransparentColor = Color.Magenta;
             toolStripButtonSave.Name = "toolStripButtonSave";
-            toolStripButtonSave.Size = new Size(67, 52);
+            toolStripButtonSave.Size = new Size(67, 37);
             toolStripButtonSave.Text = "Save";
             toolStripButtonSave.Click += toolStripButtonSave_Click;
             // 
@@ -159,14 +159,14 @@
             toolStripButtonLoad.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonLoad.ImageTransparentColor = Color.Magenta;
             toolStripButtonLoad.Name = "toolStripButtonLoad";
-            toolStripButtonLoad.Size = new Size(69, 52);
+            toolStripButtonLoad.Size = new Size(69, 37);
             toolStripButtonLoad.Text = "Load";
             toolStripButtonLoad.Click += toolStripButtonLoad_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(6, 55);
+            toolStripSeparator6.Size = new Size(6, 40);
             // 
             // toolStripButtonUndo
             // 
@@ -175,7 +175,7 @@
             toolStripButtonUndo.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonUndo.ImageTransparentColor = Color.Magenta;
             toolStripButtonUndo.Name = "toolStripButtonUndo";
-            toolStripButtonUndo.Size = new Size(36, 52);
+            toolStripButtonUndo.Size = new Size(36, 37);
             toolStripButtonUndo.Text = "Undo";
             toolStripButtonUndo.Click += toolStripButton1_Click;
             // 
@@ -186,14 +186,14 @@
             toolStripButtonRedo.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonRedo.ImageTransparentColor = Color.Magenta;
             toolStripButtonRedo.Name = "toolStripButtonRedo";
-            toolStripButtonRedo.Size = new Size(36, 52);
+            toolStripButtonRedo.Size = new Size(36, 37);
             toolStripButtonRedo.Text = "Redo";
             toolStripButtonRedo.Click += toolStripButton2_Click;
             // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(6, 55);
+            toolStripSeparator3.Size = new Size(6, 40);
             // 
             // toolStripDropDownButtonEvaluate
             // 
@@ -202,7 +202,7 @@
             toolStripDropDownButtonEvaluate.ImageScaling = ToolStripItemImageScaling.None;
             toolStripDropDownButtonEvaluate.ImageTransparentColor = Color.Magenta;
             toolStripDropDownButtonEvaluate.Name = "toolStripDropDownButtonEvaluate";
-            toolStripDropDownButtonEvaluate.Size = new Size(96, 52);
+            toolStripDropDownButtonEvaluate.Size = new Size(96, 37);
             toolStripDropDownButtonEvaluate.Text = "Evaluate";
             // 
             // freqvencyToolStripMenuItem
@@ -236,7 +236,7 @@
             // toolStripSeparator5
             // 
             toolStripSeparator5.Name = "toolStripSeparator5";
-            toolStripSeparator5.Size = new Size(6, 55);
+            toolStripSeparator5.Size = new Size(6, 40);
             // 
             // toolStripButtonExportImage
             // 
@@ -244,7 +244,7 @@
             toolStripButtonExportImage.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonExportImage.ImageTransparentColor = Color.Magenta;
             toolStripButtonExportImage.Name = "toolStripButtonExportImage";
-            toolStripButtonExportImage.Size = new Size(103, 52);
+            toolStripButtonExportImage.Size = new Size(103, 37);
             toolStripButtonExportImage.Text = "Save image";
             toolStripButtonExportImage.Click += toolStripButtonExportImage_Click;
             // 
@@ -254,14 +254,14 @@
             toolStripButtonrReport.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonrReport.ImageTransparentColor = Color.Magenta;
             toolStripButtonrReport.Name = "toolStripButtonrReport";
-            toolStripButtonrReport.Size = new Size(78, 52);
+            toolStripButtonrReport.Size = new Size(78, 37);
             toolStripButtonrReport.Text = "Report";
             toolStripButtonrReport.Click += toolStripButtonrReport_Click;
             // 
             // toolStripSeparator8
             // 
             toolStripSeparator8.Name = "toolStripSeparator8";
-            toolStripSeparator8.Size = new Size(6, 55);
+            toolStripSeparator8.Size = new Size(6, 40);
             // 
             // toolStripButton1
             // 
@@ -269,14 +269,14 @@
             toolStripButton1.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButton1.ImageTransparentColor = Color.Magenta;
             toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(103, 52);
+            toolStripButton1.Size = new Size(103, 37);
             toolStripButton1.Text = "DB browser";
             toolStripButton1.Click += toolStripButton1_Click_1;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(6, 55);
+            toolStripSeparator2.Size = new Size(6, 40);
             // 
             // toolStripButtonSettings
             // 
@@ -284,7 +284,7 @@
             toolStripButtonSettings.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButtonSettings.ImageTransparentColor = Color.Magenta;
             toolStripButtonSettings.Name = "toolStripButtonSettings";
-            toolStripButtonSettings.Size = new Size(88, 52);
+            toolStripButtonSettings.Size = new Size(88, 37);
             toolStripButtonSettings.Text = "Settings ";
             toolStripButtonSettings.ToolTipText = "Settings";
             toolStripButtonSettings.Click += toolStripButtonSettings_Click;
@@ -386,10 +386,10 @@
             panelMain.Controls.Add(splitter2);
             panelMain.Controls.Add(panelLeft);
             panelMain.Dock = DockStyle.Fill;
-            panelMain.Location = new Point(0, 55);
+            panelMain.Location = new Point(0, 40);
             panelMain.Margin = new Padding(4, 3, 4, 3);
             panelMain.Name = "panelMain";
-            panelMain.Size = new Size(1094, 577);
+            panelMain.Size = new Size(1094, 592);
             panelMain.TabIndex = 4;
             // 
             // panelRight
@@ -399,7 +399,7 @@
             panelRight.Location = new Point(237, 0);
             panelRight.Margin = new Padding(4, 3, 4, 3);
             panelRight.Name = "panelRight";
-            panelRight.Size = new Size(857, 577);
+            panelRight.Size = new Size(857, 592);
             panelRight.TabIndex = 2;
             // 
             // tabControl1
@@ -412,7 +412,7 @@
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(857, 577);
+            tabControl1.Size = new Size(857, 592);
             tabControl1.TabIndex = 2;
             tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
             // 
@@ -423,7 +423,7 @@
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(849, 549);
+            tabPage1.Size = new Size(849, 564);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Main Tree Structure";
             tabPage1.UseVisualStyleBackColor = true;
@@ -435,7 +435,7 @@
             pictureBox1.Location = new Point(3, 34);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(843, 512);
+            pictureBox1.Size = new Size(843, 527);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
@@ -617,7 +617,7 @@
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(849, 549);
+            tabPage2.Size = new Size(849, 564);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Minimal Cut Sets";
             tabPage2.UseVisualStyleBackColor = true;
@@ -628,7 +628,7 @@
             panel2.Dock = DockStyle.Fill;
             panel2.Location = new Point(3, 37);
             panel2.Name = "panel2";
-            panel2.Size = new Size(843, 430);
+            panel2.Size = new Size(843, 445);
             panel2.TabIndex = 5;
             // 
             // dataGridViewMCSResults
@@ -637,13 +637,13 @@
             dataGridViewMCSResults.Dock = DockStyle.Fill;
             dataGridViewMCSResults.Location = new Point(0, 0);
             dataGridViewMCSResults.Name = "dataGridViewMCSResults";
-            dataGridViewMCSResults.Size = new Size(843, 430);
+            dataGridViewMCSResults.Size = new Size(843, 445);
             dataGridViewMCSResults.TabIndex = 0;
             // 
             // splitter4
             // 
             splitter4.Dock = DockStyle.Bottom;
-            splitter4.Location = new Point(3, 467);
+            splitter4.Location = new Point(3, 482);
             splitter4.Name = "splitter4";
             splitter4.Size = new Size(843, 3);
             splitter4.TabIndex = 4;
@@ -653,7 +653,7 @@
             // 
             panel1.Controls.Add(textBoxMCSExpr);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(3, 470);
+            panel1.Location = new Point(3, 485);
             panel1.Name = "panel1";
             panel1.Size = new Size(843, 76);
             panel1.TabIndex = 3;
@@ -702,7 +702,7 @@
             tabPage3.Location = new Point(4, 24);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
-            tabPage3.Size = new Size(849, 549);
+            tabPage3.Size = new Size(849, 564);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "Importance measure";
             tabPage3.UseVisualStyleBackColor = true;
@@ -713,7 +713,7 @@
             dataGridViewImportanceMeasureResults.Dock = DockStyle.Fill;
             dataGridViewImportanceMeasureResults.Location = new Point(3, 3);
             dataGridViewImportanceMeasureResults.Name = "dataGridViewImportanceMeasureResults";
-            dataGridViewImportanceMeasureResults.Size = new Size(843, 543);
+            dataGridViewImportanceMeasureResults.Size = new Size(843, 558);
             dataGridViewImportanceMeasureResults.TabIndex = 1;
             // 
             // splitter2
@@ -721,7 +721,7 @@
             splitter2.Location = new Point(233, 0);
             splitter2.Margin = new Padding(4, 3, 4, 3);
             splitter2.Name = "splitter2";
-            splitter2.Size = new Size(4, 577);
+            splitter2.Size = new Size(4, 592);
             splitter2.TabIndex = 1;
             splitter2.TabStop = false;
             // 
@@ -731,7 +731,7 @@
             panelLeft.Location = new Point(0, 0);
             panelLeft.Margin = new Padding(4, 3, 4, 3);
             panelLeft.Name = "panelLeft";
-            panelLeft.Size = new Size(233, 577);
+            panelLeft.Size = new Size(233, 592);
             panelLeft.TabIndex = 0;
             // 
             // MainForm

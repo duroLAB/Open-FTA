@@ -57,6 +57,8 @@
 
     public string Reference { get; set; }
 
+    public string TempReference { get; set; }
+
     public RectangleF rect { get; set; }
 
     public FTAitem()

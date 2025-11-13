@@ -869,6 +869,15 @@ namespace OpenFTA
         }
         private void SaveToBMP()
         {
+            double BackupGlobalZoom = EngineLogic.MyDrawingEngine.GlobalZoom;
+            int BackupoffsetX = EngineLogic.MyDrawingEngine.offsetX;
+            int BackupoffsetY = EngineLogic.MyDrawingEngine.offsetY;
+
+            EngineLogic.MyDrawingEngine.GlobalZoom = 1;
+            EngineLogic.MyDrawingEngine.offsetX = 0;
+            EngineLogic.MyDrawingEngine.offsetY = 0;
+
+
             Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.DrawToBitmap(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
             SaveFileDialog sfd = new SaveFileDialog();
@@ -892,8 +901,14 @@ namespace OpenFTA
                         break;
                 }
 
-                bmp.Save(sfd.FileName, format);
+                //  bmp.Save(sfd.FileName, format);
                 // MessageBox.Show("Screenshot saved successfully!", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                EngineLogic.MyDrawingEngine.ExportToBMP(sfd.FileName,format);
+
+                EngineLogic.MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
+                EngineLogic.MyDrawingEngine.offsetX = BackupoffsetX;
+                EngineLogic.MyDrawingEngine.offsetY = BackupoffsetY;
+                pictureBox1.Invalidate();
             }
         }
 

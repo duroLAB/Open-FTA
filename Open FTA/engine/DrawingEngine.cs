@@ -18,6 +18,11 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     Dictionary<Guid, FTAitem> DrawingStructure = structure;
     public FTAitem TopEvent;
 
+    double minX;  
+    double maxX;  
+    double minY;  
+    double maxY;  
+
     readonly string picPath = AppContext.BaseDirectory;
 
     public void SetDimensions(int fTAWidth, int fTAHeight)
@@ -33,6 +38,11 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
     public void DrawFTA(Graphics e, FTAitem top)
     {
+         minX = double.MaxValue;
+         maxX = double.MinValue;
+         minY = double.MaxValue;
+         maxY = double.MinValue;
+
         TopEvent = top;
 
         if (TopEvent == null)
@@ -216,6 +226,11 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                 if (temp)
                 {
+                    if (evt.X < minX) minX = evt.X;
+                    if (evt.X > maxX) maxX = evt.X;
+                    if (evt.Y < minY) minY = evt.Y;
+                    if (evt.Y > maxY) maxY = evt.Y;
+
                     // Vykreslíme udalosť podľa jej typu – pomocou bitmapy, ak je to definované.
                     switch (evt.ItemType)
                     {
@@ -1134,9 +1149,38 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
 
     }
+
+    public void ExportToBMP(string Filename, ImageFormat format)
+    {
+        var bounds = GetBounds(EngineLogic.FTAStructure);
+        float margin = 10f;
+        int width = (int)(bounds.Width + 200 + 2 * margin);
+        int height = (int)(bounds.Height + 200 + 2 * margin);
+
+
+        using (var bitmap = new Bitmap(width, height))
+        using (Graphics g = Graphics.FromImage(bitmap))
+        {
+            g.Clear(Color.White);
+
+            // Posun, aby sa záporné hodnoty dostali do viditeľnej oblasti
+            g.TranslateTransform(margin - bounds.Left, margin - bounds.Top);
+
+            // Kreslenie prvej položky
+            DrawFTA(g, DrawingStructure.First().Value);
+
+         
+
+            // Uloženie do súboru, napr. PNG
+            bitmap.Save(Filename, format);
+
+
+        }
+
+    }
     RectangleF GetBounds(Dictionary<Guid, FTAitem> items)
     {
-        if (items == null || items.Count == 0)
+      /*  if (items == null || items.Count == 0)
             return RectangleF.Empty;
 
         double minX = double.MaxValue;
@@ -1151,7 +1195,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             if (fta.Y < minY) minY = fta.Y;
             if (fta.Y > maxY) maxY = fta.Y;
         }
-
+*/
         return new RectangleF(
             (float)minX,
             (float)minY,
