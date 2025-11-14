@@ -7,9 +7,9 @@ namespace OpenFTA
 {
     public partial class MainForm : Form
     {
-        FTAlogic EngineLogic;         
+        FTAlogic EngineLogic;
         UIEngine MyUIEngine;
-       // DrawingEngine EngineLogic.MyDrawingEngine;
+        // DrawingEngine EngineLogic.MyDrawingEngine;
 
         CustomTreeView treeView1;
 
@@ -18,11 +18,11 @@ namespace OpenFTA
 
         public MainForm()
         {
-             
+
             InitializeComponent();
-            EngineLogic = new FTAlogic();         
+            EngineLogic = new FTAlogic();
             MyUIEngine = new UIEngine(EngineLogic);
-           // EngineLogic.MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
+            // EngineLogic.MyDrawingEngine = new DrawingEngine(EngineLogic, EngineLogic.FTAStructure);
             /* toolStripMenuItem_ALIGN.SelectedIndexChanged += toolStripMenuItem_SelectedIndexChanged;
              pictureBox1.Dock = DockStyle.Fill;
              pictureBox1.BackColor = Color.White;
@@ -32,7 +32,7 @@ namespace OpenFTA
             Height = 800;
             this.Text = "Open FTA";
 
-
+            KeyPreview = true;  
 
             treeView1 = new CustomTreeView();
             treeView1.Parent = panelLeft;
@@ -252,7 +252,7 @@ namespace OpenFTA
             int Y = 0;
             EngineLogic.MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
             String str = "X:" + X + ", Y:" + Y + ")";
-            toolStripStatusLabelCoordinates.Text = str;          
+            toolStripStatusLabelCoordinates.Text = str;
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
@@ -428,7 +428,7 @@ namespace OpenFTA
             {
                 EngineLogic.ArrangeTree();
             }
-           // treeView1.ExpandAll();
+            // treeView1.ExpandAll();
             pictureBox1.Invalidate();
             MyUIEngine.FillTreeView(treeView1);
         }
@@ -477,7 +477,7 @@ namespace OpenFTA
 
             EngineLogic.ArrangeTree();
 
-           // EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
+            // EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -903,7 +903,7 @@ namespace OpenFTA
 
                 //  bmp.Save(sfd.FileName, format);
                 // MessageBox.Show("Screenshot saved successfully!", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                EngineLogic.MyDrawingEngine.ExportToBMP(sfd.FileName,format);
+                EngineLogic.MyDrawingEngine.ExportToBMP(sfd.FileName, format);
 
                 EngineLogic.MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
                 EngineLogic.MyDrawingEngine.offsetX = BackupoffsetX;
@@ -1385,6 +1385,29 @@ namespace OpenFTA
             FormDbViewer dbViewer = new FormDbViewer(EngineLogic);
             dbViewer.panelButtons.Visible = false;
             dbViewer.ShowDialog();
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            Point mousePos = pictureBox1.PointToClient(MousePosition);
+            if (pictureBox1.ClientRectangle.Contains(mousePos))
+            {
+                if (e.KeyCode == Keys.Delete)
+                {
+                    toolStripButtonDelete_Click(this,null);
+                    e.Handled = true;
+                }
+                else if (e.Control && e.KeyCode == Keys.C)
+                {
+                    
+                    e.Handled = true;
+                }
+                else if (e.Control && e.KeyCode == Keys.V)
+                {
+                     
+                    e.Handled = true;
+                }
+            }
         }
     }
 }

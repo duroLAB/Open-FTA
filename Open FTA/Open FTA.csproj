@@ -34,6 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="MainAppDB.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="pic\events\eventBasic.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

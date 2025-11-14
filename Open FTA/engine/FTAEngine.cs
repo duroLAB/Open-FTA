@@ -6,11 +6,13 @@ using System.Text.Json;
 using static Open_FTA.forms.ErrorDialog;
 
 /// <summary>
-/// TODO: Nastavenia Linearny OR
-/// TODO: Nastavenie testovania eventov
-/// TODO: referencie vo vyslednej sprave
+/// TODO: Copy/Paste dialog cely strom alebo len 4as5
+/// BUG: Expand/cllapse MSC struktury sposobuje pad
+/// TODO:Tla4idla na copy paste
+/// TODO:Posunut progressbar metrik
+/// TODO:umoznit yobrayovanie lubovolnej metriky
 /// </summary>
- 
+
 public class MessageItem
 {
     public MessageType Type { get; set; }

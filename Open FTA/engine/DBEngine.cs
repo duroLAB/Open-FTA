@@ -29,7 +29,7 @@ public class DBEngine
 
     private readonly string _connectionString;
 
-    private DBEngine(string dbName = "mydatabase.db")
+    private DBEngine(string dbName = "MainAppDB.db")
     {
         string exeFolder = AppContext.BaseDirectory;
         string dbPath = Path.Combine(exeFolder, dbName);

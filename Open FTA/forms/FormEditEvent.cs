@@ -1,4 +1,5 @@
-﻿using Open_FTA.forms;
+﻿using Open_FTA.engine;
+using Open_FTA.forms;
 using Open_FTA.Properties;
 using System.ComponentModel;
 using System.Data;
@@ -24,14 +25,7 @@ namespace OpenFTA
             this.Text = "New Event";
 
 
-            string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            strPICPath = System.IO.Path.GetDirectoryName(strExeFilePath);
-
-            /*comboBoxGates.DataSource = new BindingSource(EngineLogic.GatesList, null);
-            comboBoxGates.DisplayMember = "Value";
-            comboBoxGates.ValueMember = "Key";*/
-
-            // comboBoxGates.DataSource = Enum.GetValues(typeof(Gates));
+        
 
             comboBoxGates.DataSource = Enum.GetValues(typeof(Gates))
                            .Cast<Gates>()
@@ -93,17 +87,22 @@ namespace OpenFTA
             String selected_item_text = comboBoxGates.Text;
             if (selected_item_text.Length > 1)
             {
-                String Filename = "pic\\gates\\gate" + selected_item_text.Replace(" ", "") + ".png";
-                String Imagepath = System.IO.Path.Combine(strPICPath, Filename);
+               
+                Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+                pictureBox1.Image = bmp;
 
-                if (Filename.Contains("gateOr")) pictureBox1.Image = Resources.gateOr;
-                if (Filename.Contains("gateAnd")) pictureBox1.Image = Resources.gateAnd;
-                /*
-                if (File.Exists(Imagepath))
+                string t = selected_item_text.Replace(" ", "");
+                Rectangle r = new Rectangle((int)(-1.8*pictureBox1.Width)+63 , -1*pictureBox1.Height, (int)(2.9* pictureBox1.Width)+10, pictureBox1.Height);
+            
+
+                using (Graphics g = Graphics.FromImage(pictureBox1.Image))
                 {
-                    Image image1 = Image.FromFile(Imagepath);
-                    pictureBox1.Image = image1;
-                }*/
+                    if(t.Contains("AND"))
+                    BitmapDrawingEngine.Instance.DrawANDGate(g, r);
+                    if (t.Contains("OR"))
+                        BitmapDrawingEngine.Instance.DrawOrGate(g, r);
+                }
+                pictureBox1.Refresh();
             }
         }
 
@@ -112,20 +111,24 @@ namespace OpenFTA
             String selected_item_text = comboBoxEventType.Text;
             if (selected_item_text.Length > 1)
             {
-                String Filename = "pic\\events\\event" + selected_item_text.Replace(" ", "") + ".png";
-                String Imagepath = System.IO.Path.Combine(strPICPath, Filename);
-                Image image1;
-                /* if (File.Exists(Imagepath))
-                 {
-                     image1 = Image.FromFile(Imagepath);
-                     pictureBox2.Image = image1;
-                 }*/
+           
 
-                if (Filename.Contains("eventBasic")) pictureBox2.Image = Resources.eventBasic;
-                if (Filename.Contains("eventHouse")) pictureBox2.Image = Resources.eventHouse;
-                if (Filename.Contains("eventUndeveloped")) pictureBox2.Image = Resources.eventUndeveloped;
-                if (Filename.Contains("eventIntermediate")) pictureBox2.Image = Resources.eventIntermediate;
-                if (Filename.Contains("Transferin")) pictureBox2.Image = Resources.Transferin;
+                Bitmap bmp = new Bitmap(pictureBox2.Width, pictureBox2.Height);
+                pictureBox2.Image = bmp;
+
+                string t = selected_item_text.Replace(" ", "");
+                Rectangle r = new Rectangle((int)(-1.8 * pictureBox2.Width) + 33, -1 * pictureBox2.Height, (int)(3 * pictureBox2.Width) + 60, pictureBox2.Height);
+
+
+                using (Graphics g = Graphics.FromImage(pictureBox2.Image))
+                {
+
+                    if (t.Contains("Basic")) BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
+                    if (t.Contains("House")) BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
+                    if (t.Contains("Undeveloped")) BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
+
+                }
+                pictureBox2.Refresh();
             }
 
 

@@ -1,7 +1,10 @@
-﻿using Open_FTA.Properties;
+﻿using Open_FTA.engine;
+using Open_FTA.Properties;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 {
@@ -18,12 +21,12 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     Dictionary<Guid, FTAitem> DrawingStructure = structure;
     public FTAitem TopEvent;
 
-    double minX;  
-    double maxX;  
-    double minY;  
-    double maxY;  
+    double minX;
+    double maxX;
+    double minY;
+    double maxY;
 
-    readonly string picPath = AppContext.BaseDirectory;
+    
 
     public void SetDimensions(int fTAWidth, int fTAHeight)
     {
@@ -38,10 +41,10 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
     public void DrawFTA(Graphics e, FTAitem top)
     {
-         minX = double.MaxValue;
-         maxX = double.MinValue;
-         minY = double.MaxValue;
-         maxY = double.MinValue;
+        minX = double.MaxValue;
+        maxX = double.MinValue;
+        minY = double.MaxValue;
+        maxY = double.MinValue;
 
         TopEvent = top;
 
@@ -66,7 +69,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
     {
         DrawingStructure = structure;
-        TopEvent = structure.First().Value;        
+        TopEvent = structure.First().Value;
     }
 
     private void DrawBackGround(Graphics g)
@@ -237,21 +240,22 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                         case 1:
                             if (evt.Children.Count > 0)
                                 if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
-                                    DrawEventBitmap(g, r, "pic\\events\\gateTransfer.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
                             break;
-                        case 2: // Basic Event
-                                // Pre Basic Event použijeme bitmapu s miernym scalingom
-                            DrawEventBitmap(g, r, "pic\\events\\eventBasic.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                        case 2: // Basic Event                                
+                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
                             break;
                         case 3: // House Event
-                            DrawEventBitmap(g, r, "pic\\events\\eventHouse.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                                // DrawEventBitmap(g, r, "pic\\events\\eventHouse.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
                             break;
                         case 4: // Undeveloped Event 
-                            DrawEventBitmap(g, r, "pic\\events\\eventUndeveloped.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            //DrawEventBitmap(g, r, "pic\\events\\eventUndeveloped.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
+                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
                             break;
                         case 5: // Conditioning Event 
                                 // Pre Conditioning Event použijeme odlišný scaling, aby vznikol oválny tvar
-                            DrawEventBitmap(g, r, "pic\\events\\eventConditioning.png", verticalOffset: 0, scaleFactorWidth: 0.4f, scaleFactorHeight: 0.35f);
+                           
                             break;
                         case 6: // Basic Repeat Event 
                                 // Prípadne vykreslite obdĺžnik alebo inú bitmapu pre Basic Repeat Event.
@@ -389,7 +393,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 r = RealPositionToPixel(r);
 
                 double bimPercent = 100 * (evt.BIM - minBIM) / (maxBIM - minBIM);
-                String txt = $"BIM: {bimPercent:F4}";
+                string txt = $"BIM: {bimPercent:F4}";
                 DrawTurboProgressBar(g, r, (float)bimPercent, txt);
             }
         }
@@ -486,8 +490,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 if (parent.IsHidden || (DrawingStructure.ContainsKey(parent.Parent) && DrawingStructure[parent.Parent].IsHidden))
                     continue;
 
-                if(EngineLogic.HasEventHiddenChildren(parent))
-                    { continue; }   
+                if (EngineLogic.HasEventHiddenChildren(parent))
+                { continue; }
 
 
                 if (parent.Children.Count > 0)
@@ -563,38 +567,37 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                     else
                     {
-                        if(!EngineLogic.HasEventHiddenChildren(parent)) 
-                        switch (parent.Gate)
-                        {
-                            case Gates.OR: // OR Gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateOr.png", verticalOffset: 10);
-                                //DrawOrGate(g, parentRect);
-                                break;
-                            case Gates.AND: // AND Gate
-                                DrawGateBitmap(g, parentRect, "pic\\gates\\gateAnd.png", verticalOffset: 10);
-                                break;
-                            /*  case 3: // Not Gate
-                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateNot.png", verticalOffset: 10);
-                                  break;
-                              case 4: // Nand Gate
-                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateNand.png", verticalOffset: 10);
-                                  break;
-                              case 5: // Nor gate
-                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateNor.png", verticalOffset: 10);
-                                  break;
-                              case 6: // Xor gate
-                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateXor.png", verticalOffset: 10);
-                                  break;
-                              case 7: // Inhibit gate
-                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gateInhibit.png", verticalOffset: 10);
-                                  break;
-                              case 8: // Priority and gate
-                                  DrawGateBitmap(g, parentRect, "pic\\gates\\gatePriorityand.png", verticalOffset: 10);
-                                  break;*/
-                            default:
-                                break;
+                        if (!EngineLogic.HasEventHiddenChildren(parent))
+                            switch (parent.Gate)
+                            {
+                                case Gates.OR: // OR Gate
+                                    BitmapDrawingEngine.Instance.DrawOrGate(g, parentRect);
+                                    break;
+                                case Gates.AND: // AND Gate
+                                    BitmapDrawingEngine.Instance.DrawANDGate(g, parentRect);
+                                    break;
+                                /*  case 3: // Not Gate
+                                      DrawGateBitmap(g, parentRect, "pic\\gates\\gateNot.png", verticalOffset: 10);
+                                      break;
+                                  case 4: // Nand Gate
+                                      DrawGateBitmap(g, parentRect, "pic\\gates\\gateNand.png", verticalOffset: 10);
+                                      break;
+                                  case 5: // Nor gate
+                                      DrawGateBitmap(g, parentRect, "pic\\gates\\gateNor.png", verticalOffset: 10);
+                                      break;
+                                  case 6: // Xor gate
+                                      DrawGateBitmap(g, parentRect, "pic\\gates\\gateXor.png", verticalOffset: 10);
+                                      break;
+                                  case 7: // Inhibit gate
+                                      DrawGateBitmap(g, parentRect, "pic\\gates\\gateInhibit.png", verticalOffset: 10);
+                                      break;
+                                  case 8: // Priority and gate
+                                      DrawGateBitmap(g, parentRect, "pic\\gates\\gatePriorityand.png", verticalOffset: 10);
+                                      break;*/
+                                default:
+                                    break;
 
-                        }
+                            }
                     }
 
                 }
@@ -658,128 +661,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         yreal = (int)((p.Y - offsetY) / GlobalZoom);
     }
 
-    private void DrawEventBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.5f, float scaleFactorHeight = 0.5f, Pen? fallbackPen = null)
-    {
-        // Calculate the image dimensions based on the rectangle dimensions using separate scale factors.
-        int imageWidth = (int)(r.Width * scaleFactorWidth);
-        int imageHeight = (int)(r.Height * scaleFactorHeight);
-
-        // Center the image horizontally and position it below the rectangle.
-        int imageX = r.X + (r.Width - imageWidth) / 2;
-        int imageY = r.Y + r.Height + verticalOffset;
-        Rectangle imageRect = new Rectangle(imageX, imageY, imageWidth, imageHeight);
-
-
-        if (imageFilename.Contains("eventBasic"))
-        {
-            g.DrawImage(Resources.eventBasic, imageRect);
-            return;
-        }
-
-        if (imageFilename.Contains("eventHouse"))
-        {
-            g.DrawImage(Resources.eventHouse, imageRect);
-            return;
-        }
-
-        if (imageFilename.Contains("eventIntermediate"))
-        {
-            g.DrawImage(Resources.eventIntermediate, imageRect);
-            return;
-        }
-
-        if (imageFilename.Contains("eventUndeveloped"))
-        {
-            g.DrawImage(Resources.eventUndeveloped, imageRect);
-            return;
-        }
-
-        if (imageFilename.Contains("Transferin"))
-        {
-            g.DrawImage(Resources.Transferin, imageRect);
-            return;
-        }
-
-
-        if (imageFilename.Contains("gateTransfer"))
-        {
-            g.DrawImage(Resources.gateTransfer, imageRect);
-            return;
-        }
-
-
-        // Build the absolute path to the image.       
-        string imagePath = System.IO.Path.Combine(picPath, imageFilename);
-
-        if (System.IO.File.Exists(imagePath))
-        {
-            using (Bitmap bitmap = new Bitmap(imagePath))
-            {
-                g.DrawImage(bitmap, imageRect);
-            }
-        }
-        else
-        {
-            // If the image does not exist, draw a fallback red ellipse.
-            using (Brush redBrush = new SolidBrush(Color.Red))
-            {
-                g.FillEllipse(redBrush, imageRect);
-            }
-            g.DrawEllipse(fallbackPen ?? Pens.Black, imageRect);
-        }
-    }
-
-    private void DrawGateBitmap(Graphics g, Rectangle r, string imageFilename, int verticalOffset = 0, float scaleFactorWidth = 0.6f, float scaleFactorHeight = 0.5f, Pen? fallbackPen = null)
-    {
-        // Vypočítame rozmery bitmapy podľa veľkosti brány
-        int imageWidth = (int)(r.Width) / 3;
-        int imageHeight = (int)(r.Height) / 3;
-
-        // Umiestnenie bitmapy - centrovanie horizontálne, vertikálne pod bránou
-        int imageX = r.X + (r.Width - imageWidth) / 2;
-        int imageY = r.Y + r.Height + verticalOffset;
-        Rectangle imageRect = new Rectangle(imageX, imageY, imageWidth, imageHeight);
-
-
-        if (imageFilename.Contains("gateAnd"))
-        {
-            g.DrawImage(Resources.gateAnd, imageRect);
-            return;
-        }
-
-        if (imageFilename.Contains("gateOr"))
-        {
-            g.DrawImage(Resources.gateOr, imageRect);
-            return;
-        }
-
-
-        // Získanie cesty k obrázku        
-        string imagePath = System.IO.Path.Combine(picPath, imageFilename);
-
-        if (System.IO.File.Exists(imagePath))
-        {
-            using (Bitmap bitmap = new Bitmap(imagePath))
-            {
-                g.DrawImage(bitmap, imageRect);
-            }
-        }
-        else
-        {
-            // Ak sa obrázok nenájde, nakreslíme červený kríž ako fallback
-            using (Brush redBrush = new SolidBrush(Color.Red))
-            {
-                g.FillRectangle(redBrush, imageRect);
-            }
-            g.DrawRectangle(fallbackPen ?? Pens.Black, imageRect);
-        }
-
-
-        //Resources.gateAnd
-
-    }
-
-
+   
     public void SetLastDragPosition(Point p)
     {
         _lastDragPosition = p;
@@ -947,7 +829,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             (int)(a.B + (b.B - a.B) * t));
     }
 
-    
+
     public void Mouse_DragEvent(Point mouseCoordinates)
     {
         if (SelectedEventDrag && EngineLogic.SelectedEvents.Count > 0)
@@ -1105,10 +987,10 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             if ((X > evt.X) && (X < evt.X + Constants.EventWidth) &&
                 (Y > evt.Y) && (Y < evt.Y + Constants.EventHeight))
             {
-                return(true);
+                return (true);
             }
         }
-        return(false);
+        return (false);
     }
 
     public void ExportToMeta(string Filename)
@@ -1169,7 +1051,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             // Kreslenie prvej položky
             DrawFTA(g, DrawingStructure.First().Value);
 
-         
+
 
             // Uloženie do súboru, napr. PNG
             bitmap.Save(Filename, format);
@@ -1180,22 +1062,22 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     }
     RectangleF GetBounds(Dictionary<Guid, FTAitem> items)
     {
-      /*  if (items == null || items.Count == 0)
-            return RectangleF.Empty;
+        /*  if (items == null || items.Count == 0)
+              return RectangleF.Empty;
 
-        double minX = double.MaxValue;
-        double maxX = double.MinValue;
-        double minY = double.MaxValue;
-        double maxY = double.MinValue;
+          double minX = double.MaxValue;
+          double maxX = double.MinValue;
+          double minY = double.MaxValue;
+          double maxY = double.MinValue;
 
-        foreach (var fta in items.Values)
-        {
-            if (fta.X < minX) minX = fta.X;
-            if (fta.X > maxX) maxX = fta.X;
-            if (fta.Y < minY) minY = fta.Y;
-            if (fta.Y > maxY) maxY = fta.Y;
-        }
-*/
+          foreach (var fta in items.Values)
+          {
+              if (fta.X < minX) minX = fta.X;
+              if (fta.X > maxX) maxX = fta.X;
+              if (fta.Y < minY) minY = fta.Y;
+              if (fta.Y > maxY) maxY = fta.Y;
+          }
+  */
         return new RectangleF(
             (float)minX,
             (float)minY,
@@ -1204,40 +1086,9 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         );
     }
 
-    private void DrawOrGate(Graphics g, Rectangle rect)
-    {
-        g.SmoothingMode = SmoothingMode.AntiAlias;
+    
 
-        // Zmeníme rozmery – užšia a posunutá nižšie
-        int newWidth = rect.Width / 3;   // zmenšenie šírky
-        int newHeight = (int)(rect.Height / 1.3);     // výška zostáva rovnaká
-        int newX = rect.X + (rect.Width - newWidth) / 2; // vycentrované horizontálne
-        int newY = rect.Y + (int)(rect.Height * 1.1);             // posunutie nižšie
-
-        Rectangle adjustedRect = new Rectangle(newX, newY, newWidth, newHeight);
-
-        using (Pen linePen = new Pen(Color.Black, 2))
-        {
-            // Main arcs
-            g.DrawArc(linePen, adjustedRect.X, adjustedRect.Y, adjustedRect.Width, adjustedRect.Height, 0, -180);
-            g.DrawArc(linePen, adjustedRect.X, adjustedRect.Y + adjustedRect.Height / 3,
-                      adjustedRect.Width, adjustedRect.Height / 3, 0, -180);
-        }
-
-        // Optional 3D gradient fill
-        using (LinearGradientBrush brush = new LinearGradientBrush(
-            adjustedRect, Color.LightBlue, Color.DarkBlue, LinearGradientMode.ForwardDiagonal))
-        {
-            GraphicsPath path = new GraphicsPath();
-            path.AddArc(adjustedRect.X, adjustedRect.Y, adjustedRect.Width, adjustedRect.Height, 0, -180);
-            path.AddArc(adjustedRect.X, adjustedRect.Y + adjustedRect.Height / 3,
-                        adjustedRect.Width, adjustedRect.Height / 3, 0, -180);
-            g.FillPath(brush, path);
-        }
-    }
-
-
-
+   
 
 
 

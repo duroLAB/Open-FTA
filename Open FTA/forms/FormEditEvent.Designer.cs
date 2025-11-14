@@ -174,7 +174,7 @@
             pictureBox1.Location = new Point(250, 30);
             pictureBox1.Margin = new Padding(4, 3, 4, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(82, 73);
+            pictureBox1.Size = new Size(82, 82);
             pictureBox1.TabIndex = 1;
             pictureBox1.TabStop = false;
             // 
@@ -217,10 +217,11 @@
             // 
             // pictureBox2
             // 
-            pictureBox2.Location = new Point(335, 64);
+            pictureBox2.BorderStyle = BorderStyle.FixedSingle;
+            pictureBox2.Location = new Point(336, 56);
             pictureBox2.Margin = new Padding(4, 3, 4, 3);
             pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(81, 73);
+            pictureBox2.Size = new Size(80, 80);
             pictureBox2.TabIndex = 16;
             pictureBox2.TabStop = false;
             // 

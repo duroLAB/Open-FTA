@@ -748,6 +748,7 @@
             Text = "Form1";
             WindowState = FormWindowState.Maximized;
             Load += MainForm_Load;
+            KeyDown += MainForm_KeyDown;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             panelBottom.ResumeLayout(false);
