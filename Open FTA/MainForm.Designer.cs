@@ -450,7 +450,7 @@
             contextMenuStrip_Treeview.Items.AddRange(new ToolStripItem[] { toolStripMenuItem_NEWBasic, toolStripMenuItem_NEWIE, toolStripMenuItem_EDIT, toolStripMenuItem_DELETE, toolStripMenuItem_COPY, toolStripMenuItem_PASTE, toolStripSeparator9, toolStripMenuItemSELECTCHILDREN, toolStripMenuItem_SELECTALLCHILDREN, toolStripSeparator10, toolStripMenuItem_HIDEUNHIDE, toolStripMenuItem_CENTERTREE, toolStripMenuItem_ALIGN });
             contextMenuStrip_Treeview.Name = "contextMenuStrip_Treeview";
             contextMenuStrip_Treeview.RenderMode = ToolStripRenderMode.Professional;
-            contextMenuStrip_Treeview.Size = new Size(203, 303);
+            contextMenuStrip_Treeview.Size = new Size(203, 325);
             // 
             // toolStripMenuItem_NEWBasic
             // 

@@ -75,8 +75,6 @@
             }
         }
 
-
-
         private void CustomTreeView_BeforeCollapse(object sender, TreeViewCancelEventArgs e)
         {
             if (_userAction)

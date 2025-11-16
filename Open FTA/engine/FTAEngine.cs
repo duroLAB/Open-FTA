@@ -7,7 +7,6 @@ using static Open_FTA.forms.ErrorDialog;
 
 /// <summary>
 /// TODO: Copy/Paste dialog cely strom alebo len 4as5
-/// BUG: Expand/cllapse MSC struktury sposobuje pad
 /// TODO:Tla4idla na copy paste
 /// TODO:Posunut progressbar metrik
 /// TODO:umoznit yobrayovanie lubovolnej metriky
@@ -2003,7 +2002,7 @@ public class FTAlogic
         GlobalStop = false;
 
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 500; i++)
         {
             TempTreeAlignSuccess = false;
             MoveSubtreeToLeft(GetItem(TopEventGuid), 90);

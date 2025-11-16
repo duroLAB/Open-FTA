@@ -72,6 +72,10 @@ namespace OpenFTA
         private void TreeView1_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
         {
             var tree = (CustomTreeView)sender;
+
+            if (HasAncestorWithName(e.Node, "Minimal cut sets")) return;
+
+
             var selectedItem = EngineLogic.GetItem(e.Node.Name);
             if (tree.IsUserAction)
             {
@@ -86,7 +90,11 @@ namespace OpenFTA
 
         private void TreeView1_BeforeCollapse(object? sender, TreeViewCancelEventArgs e)
         {
+            
             var tree = (CustomTreeView)sender;
+
+            if (HasAncestorWithName(e.Node, "Minimal cut sets")) return;
+
             var selectedItem = EngineLogic.GetItem(e.Node.Name);
             if (tree.IsUserAction)
             {
@@ -96,6 +104,22 @@ namespace OpenFTA
                 pictureBox1.Invalidate();
             }
 
+        }
+
+        bool HasAncestorWithName(TreeNode node, string name)
+        {
+            if (node == null) return(false);
+            TreeNode current = node.Parent;
+
+            while (current != null)
+            {
+                if (current.Text == name)
+                    return true;
+
+                current = current.Parent;
+            }
+
+            return false;
         }
 
         public void LoadAppSettings()
@@ -418,11 +442,12 @@ namespace OpenFTA
         private void toolStripButtonCopy_Click(object sender, EventArgs e)
         {
             EngineLogic.CopySelectedEvents();
-            MyUIEngine.FillTreeView(treeView1);
+           // MyUIEngine.FillTreeView(treeView1);
         }
 
         private void toolStripButtonPaste_Click(object sender, EventArgs e)
         {
+            SaveStateForUndo();
             EngineLogic.PasteCopiedEvents();
             if (MainAppSettings.Instance.AutoSortTreeCopyPaste)
             {
@@ -482,12 +507,15 @@ namespace OpenFTA
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
+            
             Undo();
+            UpdateMainFormControls();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             Redo();
+            UpdateMainFormControls();
         }
         private void toolStripMenuItem_NEW_Click(object sender, EventArgs e)
         {
@@ -706,6 +734,7 @@ namespace OpenFTA
 
         private void HideSubtree(FTAitem node, bool hide)
         {
+            if(node==null) return;
             foreach (var childGuid in node.Children)
             {
                 if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
@@ -1395,17 +1424,30 @@ namespace OpenFTA
                 if (e.KeyCode == Keys.Delete)
                 {
                     toolStripButtonDelete_Click(this,null);
-                    e.Handled = true;
+                   // e.Handled = true;
                 }
                 else if (e.Control && e.KeyCode == Keys.C)
                 {
-                    
-                    e.Handled = true;
+                    toolStripButtonCopy_Click(this, e);
+                    //e.Handled = true;
                 }
                 else if (e.Control && e.KeyCode == Keys.V)
                 {
-                     
-                    e.Handled = true;
+                    toolStripButtonPaste_Click(this, e); 
+                   // e.Handled = true;
+                }
+                else if (e.Control && e.KeyCode == Keys.A)
+                {
+                    toolStripMenuItem_SELECTALLCHILDREN_Click(this, e);
+                    // e.Handled = true;
+                }
+                else if (e.Control && e.KeyCode == Keys.Z)
+                {
+                    Undo();
+                }
+                else if (e.Control && e.KeyCode == Keys.Y)
+                {
+                    Redo();
                 }
             }
         }

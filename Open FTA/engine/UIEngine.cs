@@ -128,7 +128,6 @@
 
     }
 
-
     public void MakeTabControlModern(TabControl tabControl)
     {
         // Ak je vnorený TabControl (napr. v inej TabPage), nechaj ho klasický
