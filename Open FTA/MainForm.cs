@@ -1,10 +1,21 @@
 ﻿using Open_FTA.forms;
+using Open_FTA.Properties;
 using System.Data;
 using System.Drawing.Imaging;
+using System.Reflection.Metadata;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace OpenFTA
 {
+  
+
+    public enum ExportType
+    {
+        Bitmap,
+        Vector
+    }
+
     public partial class MainForm : Form
     {
         FTAlogic EngineLogic;
@@ -441,6 +452,11 @@ namespace OpenFTA
 
         private void toolStripButtonCopy_Click(object sender, EventArgs e)
         {
+            /*ExportDialogForm d = new ExportDialogForm();
+            d.Text = "Copy Options";*/
+                
+
+
             EngineLogic.CopySelectedEvents();
            // MyUIEngine.FillTreeView(treeView1);
         }
@@ -837,20 +853,70 @@ namespace OpenFTA
 
         private void toolStripButtonExportImage_Click(object sender, EventArgs e)
         {
+
+
+          /*  var dialog = new OptionsDialog<ExportType>(
+            "Export Options",
+            new List<OptionItem<ExportType>>
+            {
+        new OptionItem<ExportType>
+        {
+
+            Title = "Bitmap",
+            Description = "Raster image (.bmp/.png). Best for pixel graphics.",
+            Icon = Resources.Copy_24,
+            Value = ExportType.Bitmap
+        },
+        new OptionItem<ExportType>
+        {
+            Title = "Vector",
+            Description = "Vector image (.emf/.wmf). Great for scaling.",
+            Icon = Resources.Add_BE_24,
+            Value = ExportType.Vector
+        }
+            }
+        );
+
+
+            dialog.ShowDialog();*/
+             
             try
             {
-                using (var dlg = new ExportDialogForm())
+                using (
+                       var dialog = new OptionsDialog<ExportType>(
+            "Export Options",
+            new List<OptionItem<ExportType>>
+            {
+        new OptionItem<ExportType>
+        {
+
+            Title = "Bitmap",
+            Description = "Raster image (.bmp/.png). Best for pixel graphics.",
+            Icon = Resources.Copy_24,
+            Value = ExportType.Bitmap
+        },
+        new OptionItem<ExportType>
+        {
+            Title = "Vector",
+            Description = "Vector image (.emf/.wmf). Great for scaling.",
+            Icon = Resources.Add_BE_24,
+            Value = ExportType.Vector
+        }
+            }
+        )
+
+                    )
                 {
-                    if (dlg.ShowDialog() == DialogResult.OK)
+                    if (dialog.ShowDialog() == DialogResult.OK)
                     {
-                        switch (dlg.SelectedOption)
+                        switch (dialog.SelectedValue)
                         {
-                            case ExportDialogForm.ExportOption.Bitmap:
+                            case ExportType.Bitmap:
                                 SaveToBMP();
                                 break;
-                            case ExportDialogForm.ExportOption.Metafile:
+                            case  ExportType.Vector:
                                 SaveToVector();
-                                break;
+                                break; 
                         }
                     }
                 }
@@ -861,9 +927,8 @@ namespace OpenFTA
                 "An unknown error occurred while creating the image.\n\nDetails: " + ex.Message,
                 "Error",
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
-            }
+                MessageBoxIcon.Error);
+            } 
         }
 
         private void SaveToVector()
@@ -910,7 +975,7 @@ namespace OpenFTA
             Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.DrawToBitmap(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Bitmap Image|*.bmp";
+            sfd.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Choice1 Image|*.bmp";
             sfd.Title = "Save Screenshot";
             sfd.FileName = "FaultTreeimg.png";
 

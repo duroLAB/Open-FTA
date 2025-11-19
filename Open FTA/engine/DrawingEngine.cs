@@ -356,7 +356,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         //}
     }
 
-    private void DrawProgressBars(Graphics g)
+    private void DrawProgressBarsOLD(Graphics g)
     {
         double minBIM = 0;
         double maxBIM = 0;
@@ -400,6 +400,68 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
 
     }
+
+    private void DrawProgressBars(Graphics g)
+    {
+        if (MainAppSettings.Instance.DisplayedMetric == DisplayMetricType.None)
+            return;
+
+
+        Func<FTAitem, double> selector = MainAppSettings.Instance.DisplayedMetric switch
+        {
+            DisplayMetricType.BIM => (i) => i.BIM,
+            DisplayMetricType.CIM => (i) => i.CIM,
+            DisplayMetricType.RAW => (i) => i.RAW,
+            DisplayMetricType.RRW => (i) => i.RRW,
+            DisplayMetricType.FV => (i) => i.FV,
+            _ => (i) => 0
+        };
+
+        // 2️⃣ Získame zoznam hodnôt metriky
+        var metricValues = DrawingStructure.Values
+            .Select(selector)
+            .Where(v => v != 0)
+            .ToList();
+
+        if (!metricValues.Any())
+            return;
+
+        double min = metricValues.Min();
+        double max = metricValues.Max();
+
+        if (max == 0 || min == max)
+            return;
+
+        // 3️⃣ Prejdeme udalosti
+        foreach (var evtPair in DrawingStructure)
+        {
+            FTAitem evt = evtPair.Value;
+
+            if (evt.ItemType >= 2 && !evt.IsHidden)
+            {
+                double value = selector(evt); // použitie funkcie
+
+                if (value == 0)
+                    continue;
+
+                double percent = 100 * (value - min) / (max - min);
+
+                Rectangle r = new Rectangle
+                {
+                    X = evt.X,
+                    Y = evt.Y + (int)(Constants.EventHeight + 0.3 * Constants.EventHeight),
+                    Width = Constants.EventWidth,
+                    Height = (int)(Constants.EventHeight / 6)
+                };
+                r = RealPositionToPixel(r);
+
+                string txt = $"{MainAppSettings.Instance.DisplayedMetric}: {percent:F4}";
+                DrawTurboProgressBar(g, r, (float)percent, txt);
+            }
+        }
+    }
+
+
 
     static string SplitStringToLines(string text)
     {

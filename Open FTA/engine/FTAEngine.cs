@@ -7,7 +7,6 @@ using static Open_FTA.forms.ErrorDialog;
 
 /// <summary>
 /// TODO: Copy/Paste dialog cely strom alebo len 4as5
-/// TODO:Tla4idla na copy paste
 /// TODO:Posunut progressbar metrik
 /// TODO:umoznit yobrayovanie lubovolnej metriky
 /// </summary>
@@ -42,6 +41,8 @@ public enum ValueTypes { F, P, R, Lambda }
 public enum Gates { NotSet, OR, AND }
 
 public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left }
+
+public enum DisplayMetricType { None, BIM, CIM, RAW, RRW, FV}
 public class FTAlogic
 {
     public DrawingEngine MyDrawingEngine;
@@ -585,9 +586,6 @@ public class FTAlogic
 
     }
 
-
-
-
     public void SumChildren(FTAitem parent, Dictionary<Guid, FTAitem> str)
     {
         bool AllProbabilities = true;
@@ -958,6 +956,7 @@ public class FTAlogic
 
         ftaEvent.Value = pEventNormal;
 
+        ftaEvent.CIM = cim;
         return cim;
     }
 
@@ -980,6 +979,7 @@ public class FTAlogic
             return double.PositiveInfinity;
 
         double raw = topProbWhenFails / topProbNormal;
+        ftaEvent.RAW = raw;
         return raw;
     }
 
@@ -1004,6 +1004,7 @@ public class FTAlogic
             return double.PositiveInfinity;
 
         double rrw = topProbNormal / topProbWhenWorks;
+        ftaEvent.RRW = rrw; 
         return rrw;
     }
 
@@ -1027,6 +1028,7 @@ public class FTAlogic
             return double.PositiveInfinity;
 
         double fv = (topProbNormal - topProbWhenWorks) / topProbNormal;
+        ftaEvent.FV = fv;
         return fv;
     }
 

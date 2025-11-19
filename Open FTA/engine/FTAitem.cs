@@ -54,6 +54,10 @@
     public double LowerBoundFrequency { get; set; }
     public double UpperBoundFrequency { get; set; }
     public double BIM { get; set; }
+    public double CIM { get; set; }
+    public double RAW { get; set; }
+    public double RRW { get; set; }
+    public double FV { get; set; }
 
     public string Reference { get; set; }
 
