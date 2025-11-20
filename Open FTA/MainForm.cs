@@ -1,7 +1,11 @@
-﻿using Open_FTA.forms;
+﻿using Open_FTA;
+using Open_FTA.forms;
 using Open_FTA.Properties;
 using System.Data;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Reflection.Metadata;
 using System.Runtime.Serialization;
 using System.Text;
@@ -26,6 +30,17 @@ namespace OpenFTA
 
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
         private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
+
+        private Panel titleBar;
+        private Button btnClose, btnMax, btnMin;
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HTCAPTION = 0x2;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
         public MainForm()
         {
@@ -66,6 +81,12 @@ namespace OpenFTA
 
             UpdateMainFormControls();
 
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.DoubleBuffered = true;
+            CreateCustomTitleBar();
+
+
+            ApplyModernStyleToToolStrip(toolStrip1);
 
             //MyDBEngine.InsertDefaultReferences();
             //  bool res =  DBEngine.Instance.InsertReliability(Guid.NewGuid().ToString(), "Pipings,D<75mm,Leakage", 5.7E-10, 2);
@@ -78,6 +99,148 @@ namespace OpenFTA
              inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy 2", "Vydavateľ 2", "Autorasda, Autorasda", 2025);*/
 
 
+        }
+
+        private void ApplyModernStyleToToolStrip(ToolStrip ts)
+        {
+            ts.Renderer = new ModernToolStripRenderer();
+            ts.GripStyle = ToolStripGripStyle.Hidden;
+            ts.BackColor = Color.FromArgb(245, 245, 245);
+            ts.ImageScalingSize = new Size(24, 24);
+            ts.Height = 56;
+            ts.Font = new Font("Segoe UI", 9f);
+
+            foreach (ToolStripItem item in ts.Items)
+            {
+                if (item is ToolStripButton btn)
+                {
+                    btn.TextImageRelation = TextImageRelation.ImageAboveText;
+                    btn.Font = new Font("Segoe UI", 9f);
+                    btn.ForeColor = Color.FromArgb(30, 30, 30);
+                    btn.Padding = new Padding(4, 2, 4, 2);
+                    btn.Margin = new Padding(2, 0, 2, 0);
+                    btn.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+                }
+                else if (item is ToolStripDropDownButton ddb)
+                {
+                    ddb.TextImageRelation = TextImageRelation.ImageAboveText;
+                    ddb.Font = new Font("Segoe UI", 9f);
+                    ddb.ForeColor = Color.FromArgb(30, 30, 30);
+                    ddb.Padding = new Padding(4, 2, 4, 2);
+                    ddb.Margin = new Padding(2, 0, 2, 0);
+                    ddb.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+                }
+            }
+        }
+
+
+        private void toolStrip1_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.DrawLine(
+                new Pen(Color.FromArgb(200, 200, 200), 1),
+                0,
+                toolStrip1.Height - 1,
+                toolStrip1.Width,
+                toolStrip1.Height - 1
+            );
+        }
+        private void CreateCustomTitleBar()
+        {
+            // PANEL
+            titleBar = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 40,
+                BackColor = Color.FromArgb(245, 245, 245)
+            };
+            this.Controls.Add(titleBar);
+
+            Icon ico = Resources.Main;
+            // LOGO
+            PictureBox logo = new PictureBox
+            {
+                 
+                Image = ico.ToBitmap(), // sem dáš svoju ikonku
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Size = new Size(28, 28),
+                Location = new Point(10, 6)
+            };
+            titleBar.Controls.Add(logo);
+
+            // NÁZOV
+            Label title = new Label
+            {
+                Text = "Open FTA",
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(45, 10)
+            };
+            titleBar.Controls.Add(title);
+
+            // TLAČIDLÁ
+            btnClose = CreateTitleButton("X");
+            btnMax = CreateTitleButton("▢");
+            btnMin = CreateTitleButton("–");
+
+            // Rozmiestnenie
+            int right = this.Width;
+            btnClose.Left = right - 45;
+            btnMax.Left = right - 90;
+            btnMin.Left = right - 135;
+
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnMax.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnMin.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
+            titleBar.Controls.Add(btnClose);
+            titleBar.Controls.Add(btnMax);
+            titleBar.Controls.Add(btnMin);
+
+            // Eventy
+            btnClose.Click += (s, e) => this.Close();
+            btnMax.Click += (s, e) =>
+            {
+                WindowState = WindowState == FormWindowState.Maximized ?
+                              FormWindowState.Normal :
+                              FormWindowState.Maximized;
+            };
+            btnMin.Click += (s, e) => this.WindowState = FormWindowState.Minimized;
+
+            // Povolenie ťahania okna
+            titleBar.MouseDown += TitleBar_MouseDown;
+        }
+
+        private Button CreateTitleButton(string text)
+        {
+            Button b = new Button
+            {
+                Text = text,
+                Width = 45,
+                Height = 40,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black,
+                Font = new Font("Segoe UI", 10, FontStyle.Regular)
+            };
+
+            b.FlatAppearance.BorderSize = 0;
+
+            b.MouseEnter += (s, e) =>
+                b.BackColor = Color.FromArgb(230, 230, 230);
+
+            b.MouseLeave += (s, e) =>
+                b.BackColor = Color.Transparent;
+
+            return b;
+        }
+
+        private void TitleBar_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            }
         }
 
         private void TreeView1_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
@@ -270,7 +433,7 @@ namespace OpenFTA
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
 
-
+            bool InvEVN = false;
 
             if (EngineLogic.MyDrawingEngine.SelectedEventDrag || EngineLogic.MyDrawingEngine.IsDraggingTree)
             {
@@ -278,16 +441,26 @@ namespace OpenFTA
                 pictureBox1.Invalidate();
             }
             else
-            if (EngineLogic.MyDrawingEngine.Mouse_OnEvevt(e.Location))
+            if (EngineLogic.MyDrawingEngine.Mouse_OnEvevt(e.Location, out InvEVN))
+            {
+                if(InvEVN)
+                    pictureBox1.Invalidate();
                 Cursor = Cursors.Hand;
+
+            }
             else
+            {
+                if (InvEVN)
+                    pictureBox1.Invalidate();
                 Cursor = Cursors.Default;
+            }
 
             int X = 0;
             int Y = 0;
             EngineLogic.MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
             String str = "X:" + X + ", Y:" + Y + ")";
             toolStripStatusLabelCoordinates.Text = str;
+
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {

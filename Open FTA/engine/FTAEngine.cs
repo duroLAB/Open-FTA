@@ -7,8 +7,8 @@ using static Open_FTA.forms.ErrorDialog;
 
 /// <summary>
 /// TODO: Copy/Paste dialog cely strom alebo len 4as5
-/// TODO:Posunut progressbar metrik
-/// TODO:umoznit yobrayovanie lubovolnej metriky
+/// BUG: po vytvoreni reportu prestane fungovat oyna4ovanie MCS
+
 /// </summary>
 
 public class MessageItem

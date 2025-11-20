@@ -21,6 +21,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     Dictionary<Guid, FTAitem> DrawingStructure = structure;
     public FTAitem TopEvent;
 
+    private FTAitem HoveredItem = null;
+
     double minX;
     double maxX;
     double minY;
@@ -125,7 +127,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
         DrawEvent(g, top);
     }
-    private void DrawEvent(Graphics g, FTAitem evt)
+    private void DrawEventOLD(Graphics g, FTAitem evt)
     {
         // using (Pen selPen = new Pen(Color.Blue))
         using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
@@ -356,50 +358,334 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         //}
     }
 
-    private void DrawProgressBarsOLD(Graphics g)
+    private void DrawEvent(Graphics g, FTAitem evt)
     {
-        double minBIM = 0;
-        double maxBIM = 0;
 
-        if (DrawingStructure.Values.Any(i => i.BIM != 0))
-        {
-            minBIM = DrawingStructure.Values.Where(i => i.BIM != 0).Min(i => i.BIM);
-            maxBIM = DrawingStructure.Values.Where(i => i.BIM != 0).Max(i => i.BIM);
-
-        }
-        else
-        {
-            return;
-        }
-
-        if (maxBIM == 0 || minBIM == maxBIM)
+        if (evt.IsHidden)
             return;
 
-        foreach (var evtPair in DrawingStructure)
+         
+            using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
         {
-
-            FTAitem evt = evtPair.Value;
-            if (evt.ItemType >= 2 && !evt.IsHidden) // Len pre Basic Event
+            Rectangle r = new Rectangle
             {
+                X = evt.X,
+                Y = evt.Y,
+                Width = Constants.EventWidth,
+                Height = Constants.EventHeight
+            };
+            r = RealPositionToPixel(r);
 
-                // Určíme polohu a rozmery udalosti
-                Rectangle r = new Rectangle
-                {
-                    X = evt.X,
-                    Y = evt.Y + (int)(Constants.EventHeight + 0.45 * Constants.EventHeight),
-                    Width = Constants.EventWidth,
-                    Height = (int)(Constants.EventHeight / 6)
-                };
-                r = RealPositionToPixel(r);
+           
 
-                double bimPercent = 100 * (evt.BIM - minBIM) / (maxBIM - minBIM);
-                string txt = $"BIM: {bimPercent:F4}";
-                DrawTurboProgressBar(g, r, (float)bimPercent, txt);
+            // ---- SELECTION COLORS ----
+         /*   if (evt.IsSelected)
+            {
+                selPen.Color = Color.Red;
+                selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+            }*/
+
+            
+
+            // Highlight logic preserved
+            string searchGuid = evt.Tag;
+            bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
+            if (exists)
+            {
+                selPen.Color = Color.Green;
+                selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+
+                Rectangle headerRect = new Rectangle(r.X + r.Width / 2 + 2, r.Y - 18, r.Width / 2 - 5, 20);
+                DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS, 16, 8);
             }
+
+            // ---- DRAW MODERN SHADOW ----
+            if (!evt.IsSelected)
+                DrawShadowRounded(g, r, 12);
+                        
+            if (!evt.IsSelected)
+                Draw3DGradientBackground(g, r, 12);
+
+            // ---- BORDER (rounded) ----
+            using (GraphicsPath border = GetRoundedRectangle(r, 12))
+                g.DrawPath(selPen, border);
+
+            // ---- ORIGINAL ICON DRAWING ----
+            switch (evt.ItemType)
+            {
+                case 1:
+                    if (evt.Children.Count > 0)
+                        if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
+                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
+                    break;
+                case 2:
+                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
+                    break;
+                case 3:
+                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
+                    break;
+                case 4:
+                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
+                    break;
+            }
+
+
+            bool isHover = (HoveredItem == evt);
+
+            if (isHover)
+            {
+                DrawHoverEffect(g, r, 12);
+            }
+
+
+            if (evt.IsSelected)
+            {
+                //  DrawSelectedEffect(g, r, 12);
+                //DrawNeonSelection(g, r, 12);
+                //DrawPressedSelection(g, r, 12);
+                DrawPressedSelectionv2(g, r, 12);
+            }
+
+
+            // ---- TEXT LAYOUT (unchanged) ----
+            int topRowHeight = r.Height / 6;
+            int bottomRowHeight = r.Height / 6;
+            int middleHeight = r.Height - topRowHeight - bottomRowHeight;
+
+            Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
+            Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
+            Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
+
+            // Separator lines — softened color for modern UI
+            using (Pen softPen = new Pen(Color.FromArgb(120, selPen.Color), 1))
+            {
+                g.DrawLine(softPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
+                g.DrawLine(softPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
+            }
+
+            // ----- TAG -----
+            string tagText = evt.Tag;
+            Font tagFont = FindFittingFont(g, tagText, topRect);
+            TextRenderer.DrawText(g, tagText, tagFont, topRect,
+                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            // ----- NAME -----
+            string nameText = SplitStringToLines(evt.Name);
+            Font nameFont = FindFittingFont(g, nameText, middleRect);
+            TextRenderer.DrawText(g, nameText, nameFont, middleRect,
+                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            // ----- FREQUENCY -----
+            string freqText = GetFrequencyText(evt);
+            Font freqFont = FindFittingFont(g, freqText, bottomRect);
+            TextRenderer.DrawText(g, freqText, freqFont, bottomRect,
+                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            
+        }
+    }
+
+    private void DrawPressedSelection(Graphics g, Rectangle r, int radius)
+    {
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (LinearGradientBrush brush = new LinearGradientBrush(
+            r,
+            Color.FromArgb(255, 240, 160, 160),
+            Color.FromArgb(255, 200, 60, 60),
+            LinearGradientMode.Vertical
+        ))
+        {
+            g.FillPath(brush, path);
         }
 
-
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen p = new Pen(Color.DarkRed, 2))
+        {
+            g.DrawPath(p, path);
+        }
     }
+
+    private void DrawPressedSelectionv2(Graphics g, Rectangle r, int radius)
+    {
+        // Jemné zosvetlené pozadie
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (LinearGradientBrush brush = new LinearGradientBrush(
+            r,
+            Color.FromArgb(40, 255, 120, 120),   // svetlá transparentná červená
+            Color.FromArgb(10, 200, 60, 60),     // tmavšia šeď s červeným tónom
+            LinearGradientMode.Vertical))
+        {
+            g.FillPath(brush, path);
+        }
+
+        // Jemný vnútorný biely highlight (moderné UI)
+        Rectangle inner = Rectangle.Inflate(r, -1, -1);
+        using (GraphicsPath path = GetRoundedRectangle(inner, radius - 1))
+        using (Pen lightPen = new Pen(Color.FromArgb(80, 255, 255, 255), 1))
+        {
+            g.DrawPath(lightPen, path);
+        }
+
+        // Jemný vonkajší červený rám
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen border = new Pen(Color.FromArgb(180, 220, 50, 50), 2))
+        {
+            g.DrawPath(border, path);
+        }
+    }
+
+    private void DrawNeonSelection(Graphics g, Rectangle r, int radius)
+    {
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen p = new Pen(Color.FromArgb(255, 255, 50, 50), 3))
+        {
+            p.LineJoin = LineJoin.Round;
+            g.DrawPath(p, path);
+        }
+
+        // jemná neónová žiara
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen glow = new Pen(Color.FromArgb(70, 255, 70, 70), 7))
+        {
+            glow.LineJoin = LineJoin.Round;
+            g.DrawPath(glow, path);
+        }
+    }
+
+
+    private void DrawSelectedEffect(Graphics g, Rectangle r, int radius)
+    {
+        // Outer glow
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (PathGradientBrush glow = new PathGradientBrush(path))
+        {
+            glow.CenterColor = Color.FromArgb(120, 255, 80, 80);          // červený glow
+            glow.SurroundColors = new[] { Color.FromArgb(0, 255, 80, 80) };
+
+            g.FillPath(glow, path);
+        }
+
+        // Inner white highlight (jemný)
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen inner = new Pen(Color.FromArgb(140, 255, 255, 255), 1))
+        {
+            g.DrawPath(inner, path);
+        }
+
+        // Strong outer border
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen outer = new Pen(Color.FromArgb(200, 255, 40, 40), 2))
+        {
+            g.DrawPath(outer, path);
+        }
+    }
+
+    private string GetFrequencyText(FTAitem evt)
+    {
+        // Ak nemá item definovaný typ hodnoty, nič nevykreslíme
+        if (evt.ItemType < 0)
+            return "";
+
+        // Urči prefix podľa typu hodnoty
+        string prefix = evt.ValueType switch
+        {
+            ValueTypes.F => "f=",
+            ValueTypes.P => "P=",
+            ValueTypes.R => "R=",
+            ValueTypes.Lambda => "λ=",
+            _ => ""
+        };
+
+        // Formát hodnoty (E-notation pre malé čísla)
+        string formattedValue = (evt.Value < 0.001)
+            ? evt.Value.ToString("0.0000E+0")
+            : evt.Value.ToString("F6");
+
+        // Jednotky iba pre f a λ
+        string unit = "";
+        if (evt.ValueType == ValueTypes.F || evt.ValueType == ValueTypes.Lambda)
+        {
+            if (evt.ValueUnit >= 0 && evt.ValueUnit < EngineLogic.MetricUnitsList.Count)
+                unit = " " + EngineLogic.MetricUnitsList[evt.ValueUnit];
+        }
+
+        return prefix + formattedValue + unit;
+    }
+
+    private void DrawHoverEffect(Graphics g, Rectangle r, int radius)
+    {
+
+        // glow
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (PathGradientBrush glow = new PathGradientBrush(path))
+        {
+            glow.CenterColor = Color.FromArgb(90, 80, 140, 255);      // modrastý glow
+            glow.SurroundColors = new[] { Color.FromArgb(0, 80, 140, 255) };
+            g.FillPath(glow, path);
+        }
+
+        // jemné zosvetlenie pozadia
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (SolidBrush brush = new SolidBrush(Color.FromArgb(40, Color.White)))
+        {
+            g.FillPath(brush, path);
+        }
+
+        // zvýraznený vonkajší rám
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (Pen p = new Pen(Color.FromArgb(130, 80, 140, 255), 2))
+        {
+            g.DrawPath(p, path);
+        }
+    }
+
+
+    private void DrawShadowRounded(Graphics g, Rectangle r, int radius)
+    {
+        
+
+        Rectangle shadow = new Rectangle(r.X + 4, r.Y + 4, r.Width, r.Height);
+
+        using (GraphicsPath path = GetRoundedRectangle(shadow, radius))
+        using (PathGradientBrush brush = new PathGradientBrush(path))
+        {
+            brush.CenterColor = Color.FromArgb(50, 0, 0, 0);
+            brush.SurroundColors = new[] { Color.FromArgb(0, 0, 0, 0) };
+            g.FillPath(brush, path);
+        }
+    }
+
+    private void Draw3DGradientBackground(Graphics g, Rectangle r, int radius)
+    {
+ 
+
+        using (GraphicsPath path = GetRoundedRectangle(r, radius))
+        using (LinearGradientBrush b = new LinearGradientBrush(
+            r,
+            Color.White,
+            Color.FromArgb(225, 225, 225),
+            LinearGradientMode.Vertical))
+        {
+            g.FillPath(b, path);
+        }
+    }
+
+    private GraphicsPath GetRoundedRectangle(Rectangle r, int radius)
+    {
+        GraphicsPath path = new GraphicsPath();
+        int d = radius * 2;
+
+        path.AddArc(r.X, r.Y, d, d, 180, 90);
+        path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+        path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+        path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+
+        path.CloseFigure();
+        return path;
+    }
+
+
+
 
     private void DrawProgressBars(Graphics g)
     {
@@ -686,7 +972,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return true;
     }
 
-    private GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)//Methode for rounding corners of events
+    private GraphicsPath GetRoundedRectangleOLD(Rectangle bounds, int radius)//Methode for rounding corners of events
     {
         GraphicsPath path = new GraphicsPath();
         int diameter = radius * 2;
@@ -1034,11 +1320,14 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
-    public bool Mouse_OnEvevt(Point mouseCoordinates)
+    public bool Mouse_OnEvevt(Point mouseCoordinates,out bool Inv)
     {
+        Inv = false;
         int X = 0;
         int Y = 0;
         PixelToRealPosition(mouseCoordinates, ref X, ref Y);
+        FTAitem old = HoveredItem;
+        HoveredItem = null;
 
         FTAitem? clickedEvent = null;
         foreach (var evt in DrawingStructure.Values)
@@ -1049,10 +1338,18 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             if ((X > evt.X) && (X < evt.X + Constants.EventWidth) &&
                 (Y > evt.Y) && (Y < evt.Y + Constants.EventHeight))
             {
-                return (true);
+                HoveredItem = evt;
+                if (old != HoveredItem)
+                    Inv = true;
+               return (true);
             }
         }
+
+        HoveredItem = null;
+        Inv = true;
         return (false);
+
+        
     }
 
     public void ExportToMeta(string Filename)

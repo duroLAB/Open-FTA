@@ -61,7 +61,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap AbsolutePosition {
             get {
@@ -71,7 +71,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap AbsolutePosition_24 {
             get {
@@ -81,7 +81,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Add_BE_16 {
             get {
@@ -91,7 +91,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Add_BE_24 {
             get {
@@ -101,7 +101,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap AddDataItem {
             get {
@@ -111,7 +111,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap AddIEv2 {
             get {
@@ -121,7 +121,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap AddIEv2_16 {
             get {
@@ -131,7 +131,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap CalculatorMethod {
             get {
@@ -141,7 +141,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Copy_16 {
             get {
@@ -151,7 +151,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Copy_24 {
             get {
@@ -161,7 +161,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Database32 {
             get {
@@ -171,7 +171,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap DeleteDatabase24 {
             get {
@@ -181,7 +181,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap DeleteEvent {
             get {
@@ -191,7 +191,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap DeleteEvent16 {
             get {
@@ -201,7 +201,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Edit {
             get {
@@ -211,7 +211,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Edit16 {
             get {
@@ -221,7 +221,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap ExportToWord {
             get {
@@ -231,7 +231,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap HTMLFile {
             get {
@@ -241,7 +241,17 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Main {
+            get {
+                object obj = ResourceManager.GetObject("Main", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap NewDocument {
             get {
@@ -251,7 +261,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap OpenFile {
             get {
@@ -261,7 +271,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Paste_16 {
             get {
@@ -271,7 +281,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Paste_24 {
             get {
@@ -281,7 +291,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap PrintDocument {
             get {
@@ -291,7 +301,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Report {
             get {
@@ -301,7 +311,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Save {
             get {
@@ -311,7 +321,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap SelectAllChildren_16 {
             get {
@@ -321,7 +331,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap SelectChildren_16 {
             get {
@@ -331,7 +341,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Settings {
             get {
@@ -341,7 +351,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap SortByType {
             get {
@@ -351,7 +361,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap SortByType_24 {
             get {
@@ -361,7 +371,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap splash {
             get {
@@ -371,7 +381,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap StatusError_18_18 {
             get {
@@ -381,7 +391,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap StatusInformation_18_18 {
             get {
@@ -391,7 +401,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap StatusWarning_18_18 {
             get {
@@ -401,7 +411,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap StepBackward {
             get {
@@ -411,7 +421,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap StepForward {
             get {
@@ -421,7 +431,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap TakeSnapshot {
             get {
@@ -431,17 +441,7 @@ namespace Open_FTA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
-        /// </summary>
-        internal static System.Drawing.Bitmap Transferin {
-            get {
-                object obj = ResourceManager.GetObject("Transferin", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Choice1.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap UpdateDatabase24 {
             get {
