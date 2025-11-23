@@ -1,4 +1,6 @@
-﻿class UIEngine
+﻿using System.Drawing.Drawing2D;
+
+class UIEngine
 {
     FTAlogic EngineLogic;
     public UIEngine(FTAlogic f)
@@ -255,7 +257,48 @@
         };
     }
 
+    private Font headerFont = new Font("Segoe UI", 10, FontStyle.Bold);
+    Color textColor = Color.FromArgb(30, 60, 120); // tmavomodrá
+    public void CreateHeaderPanel(Panel p,String title)
+    {
+        // Panel nad TreeView
+        Panel headerPanel = new Panel();
+        headerPanel.Dock = DockStyle.Top;
+        headerPanel.Height = 20; // výška záhlavia
+        headerPanel.BackColor = Color.FromArgb(45, 45, 48); // tmavý moderný odtieň
+        p.Controls.Add(headerPanel);
+        headerPanel.SendToBack();
 
+        // Label pre text
+        /*   Label headerLabel = new Label();
+           headerLabel.Text = "Tree Structure";
+           headerLabel.ForeColor = Color.White;
+           headerLabel.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+           headerLabel.AutoSize = true;
+           headerLabel.Location = new Point(10, (headerPanel.Height - headerLabel.Height) / 2);
+           headerPanel.Controls.Add(headerLabel);*/
+
+        headerPanel.Paint += (s, e) =>
+        {
+            // gradient tmavomodrého pozadia
+            using (LinearGradientBrush brush = new LinearGradientBrush(
+                headerPanel.ClientRectangle,
+                Color.FromArgb(20, 40, 90),   // tmavomodrá - začiatok
+                Color.FromArgb(40, 70, 140),  // tmavomodrá - koniec
+                LinearGradientMode.Horizontal))
+            {
+                e.Graphics.FillRectangle(brush, headerPanel.ClientRectangle);
+            }
+
+            // text
+            string text = title;
+            float x = 10;
+            float y = (headerPanel.Height - headerFont.Height) / 2;
+
+            e.Graphics.DrawString(text, headerFont, Brushes.White, x, y);
+        };
+
+    }
 
 
 }

@@ -45,6 +45,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Examples\DronExample.fta">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Examples\DronExample_Exact.fta">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Examples\GChPQRA.fta">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Examples\KHR.fta">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Examples\MinimalCutSetExample.fta">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MainAppDB.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

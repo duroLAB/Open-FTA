@@ -109,12 +109,12 @@
             toolStripButton1.Text = "Add";
             toolStripButton1.Click += toolStripButton1_Click;
             // 
-            // toolStripButton2
+            // toolStripButtonSelectWorkingDirectory
             // 
             toolStripButton2.Image = Properties.Resources.UpdateDatabase24;
             toolStripButton2.ImageScaling = ToolStripItemImageScaling.None;
             toolStripButton2.ImageTransparentColor = Color.Magenta;
-            toolStripButton2.Name = "toolStripButton2";
+            toolStripButton2.Name = "toolStripButtonSelectWorkingDirectory";
             toolStripButton2.Size = new Size(55, 28);
             toolStripButton2.Text = "Edit";
             toolStripButton2.Click += toolStripButton2_Click;

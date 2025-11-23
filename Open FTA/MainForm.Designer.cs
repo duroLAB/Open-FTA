@@ -57,6 +57,8 @@
             toolStripButtonDelete = new ToolStripButton();
             panelBottom = new Panel();
             statusStrip1 = new StatusStrip();
+            toolStripStatusLabelWorkingDir = new ToolStripStatusLabel();
+            toolStripStatusLabelFileName = new ToolStripStatusLabel();
             toolStripStatusLabelCoordinates = new ToolStripStatusLabel();
             splitter1 = new Splitter();
             panelMain = new Panel();
@@ -97,6 +99,13 @@
             dataGridViewImportanceMeasureResults = new DataGridView();
             splitter2 = new Splitter();
             panelLeft = new Panel();
+            panelLeft_Bottom = new Panel();
+            listView1 = new ListView();
+            toolStripDir = new ToolStrip();
+            toolStripButtonSelectWorkingDirectory = new ToolStripButton();
+            toolStripButtonCreateWorkingDirectory = new ToolStripButton();
+            splitter5 = new Splitter();
+            panelLeft_Top = new Panel();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -114,6 +123,9 @@
             toolStrip3.SuspendLayout();
             tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewImportanceMeasureResults).BeginInit();
+            panelLeft.SuspendLayout();
+            panelLeft_Bottom.SuspendLayout();
+            toolStripDir.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
@@ -357,12 +369,24 @@
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelCoordinates });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelWorkingDir, toolStripStatusLabelFileName, toolStripStatusLabelCoordinates });
             statusStrip1.Location = new Point(0, 7);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1094, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabelWorkingDir
+            // 
+            toolStripStatusLabelWorkingDir.Name = "toolStripStatusLabelWorkingDir";
+            toolStripStatusLabelWorkingDir.Size = new Size(172, 17);
+            toolStripStatusLabelWorkingDir.Text = "toolStripStatusLabelWorkingDir";
+            // 
+            // toolStripStatusLabelFileName
+            // 
+            toolStripStatusLabelFileName.Name = "toolStripStatusLabelFileName";
+            toolStripStatusLabelFileName.Size = new Size(162, 17);
+            toolStripStatusLabelFileName.Text = "toolStripStatusLabelFileName";
             // 
             // toolStripStatusLabelCoordinates
             // 
@@ -450,7 +474,7 @@
             contextMenuStrip_Treeview.Items.AddRange(new ToolStripItem[] { toolStripMenuItem_NEWBasic, toolStripMenuItem_NEWIE, toolStripMenuItem_EDIT, toolStripMenuItem_DELETE, toolStripMenuItem_COPY, toolStripMenuItem_PASTE, toolStripSeparator9, toolStripMenuItemSELECTCHILDREN, toolStripMenuItem_SELECTALLCHILDREN, toolStripSeparator10, toolStripMenuItem_HIDEUNHIDE, toolStripMenuItem_CENTERTREE, toolStripMenuItem_ALIGN });
             contextMenuStrip_Treeview.Name = "contextMenuStrip_Treeview";
             contextMenuStrip_Treeview.RenderMode = ToolStripRenderMode.Professional;
-            contextMenuStrip_Treeview.Size = new Size(203, 325);
+            contextMenuStrip_Treeview.Size = new Size(203, 303);
             // 
             // toolStripMenuItem_NEWBasic
             // 
@@ -727,12 +751,81 @@
             // 
             // panelLeft
             // 
+            panelLeft.Controls.Add(panelLeft_Bottom);
+            panelLeft.Controls.Add(splitter5);
+            panelLeft.Controls.Add(panelLeft_Top);
             panelLeft.Dock = DockStyle.Left;
             panelLeft.Location = new Point(0, 0);
             panelLeft.Margin = new Padding(4, 3, 4, 3);
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(233, 592);
             panelLeft.TabIndex = 0;
+            // 
+            // panelLeft_Bottom
+            // 
+            panelLeft_Bottom.Controls.Add(listView1);
+            panelLeft_Bottom.Controls.Add(toolStripDir);
+            panelLeft_Bottom.Dock = DockStyle.Fill;
+            panelLeft_Bottom.Location = new Point(0, 497);
+            panelLeft_Bottom.Name = "panelLeft_Bottom";
+            panelLeft_Bottom.Size = new Size(233, 95);
+            panelLeft_Bottom.TabIndex = 2;
+            // 
+            // listView1
+            // 
+            listView1.Dock = DockStyle.Fill;
+            listView1.Location = new Point(0, 25);
+            listView1.Name = "listView1";
+            listView1.Size = new Size(233, 70);
+            listView1.TabIndex = 1;
+            listView1.UseCompatibleStateImageBehavior = false;
+            listView1.DoubleClick += listView1_DoubleClick;
+            // 
+            // toolStripDir
+            // 
+            toolStripDir.Items.AddRange(new ToolStripItem[] { toolStripButtonSelectWorkingDirectory, toolStripButtonCreateWorkingDirectory });
+            toolStripDir.Location = new Point(0, 0);
+            toolStripDir.Name = "toolStripDir";
+            toolStripDir.Size = new Size(233, 25);
+            toolStripDir.TabIndex = 0;
+            toolStripDir.Text = "toolStripDir";
+            // 
+            // toolStripButtonSelectWorkingDirectory
+            // 
+            toolStripButtonSelectWorkingDirectory.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonSelectWorkingDirectory.Image = Open_FTA.Properties.Resources.OpenFolder;
+            toolStripButtonSelectWorkingDirectory.ImageTransparentColor = Color.Magenta;
+            toolStripButtonSelectWorkingDirectory.Name = "toolStripButtonSelectWorkingDirectory";
+            toolStripButtonSelectWorkingDirectory.Size = new Size(23, 22);
+            toolStripButtonSelectWorkingDirectory.Text = "toolStripButtonSelectWorkingDirectory";
+            toolStripButtonSelectWorkingDirectory.Click += toolStripButtonSelectWorkingDirectory_Click;
+            // 
+            // toolStripButtonCreateWorkingDirectory
+            // 
+            toolStripButtonCreateWorkingDirectory.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonCreateWorkingDirectory.Image = Open_FTA.Properties.Resources.NewFolder;
+            toolStripButtonCreateWorkingDirectory.ImageTransparentColor = Color.Magenta;
+            toolStripButtonCreateWorkingDirectory.Name = "toolStripButtonCreateWorkingDirectory";
+            toolStripButtonCreateWorkingDirectory.Size = new Size(23, 22);
+            toolStripButtonCreateWorkingDirectory.Text = "toolStripButtonCreateWorkingDirectory";
+            toolStripButtonCreateWorkingDirectory.Click += toolStripButtonCreateWorkingDirectory_Click;
+            // 
+            // splitter5
+            // 
+            splitter5.Dock = DockStyle.Top;
+            splitter5.Location = new Point(0, 494);
+            splitter5.Name = "splitter5";
+            splitter5.Size = new Size(233, 3);
+            splitter5.TabIndex = 1;
+            splitter5.TabStop = false;
+            // 
+            // panelLeft_Top
+            // 
+            panelLeft_Top.Dock = DockStyle.Top;
+            panelLeft_Top.Location = new Point(0, 0);
+            panelLeft_Top.Name = "panelLeft_Top";
+            panelLeft_Top.Size = new Size(233, 494);
+            panelLeft_Top.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -774,6 +867,11 @@
             toolStrip3.PerformLayout();
             tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridViewImportanceMeasureResults).EndInit();
+            panelLeft.ResumeLayout(false);
+            panelLeft_Bottom.ResumeLayout(false);
+            panelLeft_Bottom.PerformLayout();
+            toolStripDir.ResumeLayout(false);
+            toolStripDir.PerformLayout();
             ResumeLayout(false);
 
         }
@@ -847,6 +945,15 @@
         private DataGridView dataGridViewImportanceMeasureResults;
         private ToolStripButton toolStripButton1;
         private ToolStripSeparator toolStripSeparator2;
+        private Panel panelLeft_Top;
+        private Panel panelLeft_Bottom;
+        private Splitter splitter5;
+        private ToolStrip toolStripDir;
+        private ListView listView1;
+        private ToolStripButton toolStripButtonSelectWorkingDirectory;
+        private ToolStripButton toolStripButtonCreateWorkingDirectory;
+        private ToolStripStatusLabel toolStripStatusLabelWorkingDir;
+        private ToolStripStatusLabel toolStripStatusLabelFileName;
     }
 }
 

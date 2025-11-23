@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace OpenFTA
@@ -25,6 +26,8 @@ namespace OpenFTA
         FTAlogic EngineLogic;
         UIEngine MyUIEngine;
         // DrawingEngine EngineLogic.MyDrawingEngine;
+        String WorkingDirectory = "";
+        String WorkingFileName = "";
 
         CustomTreeView treeView1;
 
@@ -44,6 +47,7 @@ namespace OpenFTA
 
         public MainForm()
         {
+            this.Icon = Resources.Main;
 
             InitializeComponent();
             EngineLogic = new FTAlogic();
@@ -58,15 +62,21 @@ namespace OpenFTA
             Height = 800;
             this.Text = "Open FTA";
 
-            KeyPreview = true;  
+            KeyPreview = true;
 
             treeView1 = new CustomTreeView();
-            treeView1.Parent = panelLeft;
+            //treeView1.Parent = panelLeft;
+            treeView1.Parent = panelLeft_Top;
             treeView1.Dock = DockStyle.Fill;
-            panelLeft.Controls.Add(treeView1);
+            // panelLeft.Controls.Add(treeView1);
+            panelLeft_Top.Controls.Add(treeView1);
             treeView1.AfterSelect += treeView1_AfterSelect;
             treeView1.BeforeCollapse += TreeView1_BeforeCollapse;
             treeView1.BeforeExpand += TreeView1_BeforeExpand;
+
+            MyUIEngine.CreateHeaderPanel(panelLeft_Top, "Tree Structure");
+
+            MyUIEngine.CreateHeaderPanel(panelLeft_Bottom, "Working Directory");
 
 
 
@@ -79,27 +89,115 @@ namespace OpenFTA
             tabControl1.DrawItem += TabControl1_DrawItem;
 
 
-            UpdateMainFormControls();
+            
 
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.DoubleBuffered = true;
-            CreateCustomTitleBar();
+            /* this.FormBorderStyle = FormBorderStyle.None;
+             this.DoubleBuffered = true;
+             CreateCustomTitleBar();
 
 
-            ApplyModernStyleToToolStrip(toolStrip1);
+             ApplyModernStyleToToolStrip(toolStrip1);
 
-            //MyDBEngine.InsertDefaultReferences();
-            //  bool res =  DBEngine.Instance.InsertReliability(Guid.NewGuid().ToString(), "Pipings,D<75mm,Leakage", 5.7E-10, 2);
-            /*  DBEngine.Instance.InitializeDatabase();
-                DBEngine.Instance.SeedData();*/
+            */
+            /* treeView1.DrawMode = TreeViewDrawMode.OwnerDrawAll;
+             treeView1.HideSelection = false;
+             treeView1.FullRowSelect = true;
+             treeView1.ItemHeight = 24;
+             treeView1.DrawNode += TreeView1_DrawNode;*/
 
-            /* string refId = Guid.NewGuid().ToString();
-             bool inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy", "Vydavateľ", "Autor1, Autor2", 2025);
-             refId = Guid.NewGuid().ToString();
-             inserted = DBEngine.Instance.InsertReference(refId, "Názov knihy 2", "Vydavateľ 2", "Autorasda, Autorasda", 2025);*/
+            // Nastavenie ListView
+            listView1.View = View.Details;
+            listView1.FullRowSelect = true;
+            listView1.HideSelection = false;
+            // listView1.OwnerDraw = true;
 
+            // Jeden stĺpec = názov súboru
+            listView1.Columns.Clear();
+            listView1.Columns.Add("Name", listView1.Width - 100); // automaticky roztiahne
+            listView1.Columns.Add("Created", 100);
+
+
+            // Eventy
+            // listView1.DrawColumnHeader += (s, e) => { e.DrawDefault = true; };
+            // listView1.DrawItem += ListView1_DrawItem;
+            // listView1.DrawSubItem += ListView1_DrawSubItem;
+
+            listView1.Resize += (s, e) =>
+            {
+                int columnWidth = listView1.ClientSize.Width / listView1.Columns.Count;
+                foreach (ColumnHeader column in listView1.Columns)
+                    column.Width = columnWidth;
+            };
+
+            if (WorkingDirectory.Length < 1)
+            {
+                string exePath = Application.StartupPath;
+                string examplesPath = Path.Combine(exePath, "Examples");
+
+                if (Directory.Exists(examplesPath))
+                {
+                    WorkingDirectory = examplesPath;
+                    LoadFiles(examplesPath);
+                }
+                else
+                {
+                    WorkingDirectory = exePath;
+                }
+            }
+
+
+                UpdateMainFormControls();
 
         }
+
+        private void ListView1_DrawItem(object sender, DrawListViewItemEventArgs e)
+        {
+            Color back = e.Item.Selected ? Color.FromArgb(180, 210, 250) : Color.White;
+            bool hovered = (e.State & ListViewItemStates.Hot) != 0;
+            if (hovered && !e.Item.Selected) back = Color.FromArgb(230, 230, 230);
+
+            e.Graphics.FillRectangle(new SolidBrush(back), e.Bounds);
+        }
+
+        private void ListView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            Color textColor = Color.Black;
+
+            TextRenderer.DrawText(
+                e.Graphics,
+                e.SubItem.Text,
+                e.Item.Font ?? new Font("Segoe UI", 9),
+                e.Bounds,
+                textColor,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
+            );
+        }
+
+
+
+
+
+
+        private void TreeView1_DrawNode(object sender, DrawTreeNodeEventArgs e)
+        {
+            e.DrawDefault = true; // TreeView nakreslí text a odsadenie
+
+            if (e.Node.Nodes.Count > 0)
+            {
+                int size = 8;
+                int x = e.Bounds.Left - 10; // offset pred text
+                int y = e.Bounds.Top + (e.Bounds.Height - size) / 2;
+                Point[] tri;
+
+                if (e.Node.IsExpanded)
+                    tri = new Point[] { new Point(x, y), new Point(x + size / 2, y + size), new Point(x + size, y) }; // ▼
+                else
+                    tri = new Point[] { new Point(x, y), new Point(x, y + size), new Point(x + size, y + size / 2) }; // ►
+
+                e.Graphics.FillPolygon(Brushes.Black, tri);
+            }
+        }
+
 
         private void ApplyModernStyleToToolStrip(ToolStrip ts)
         {
@@ -159,7 +257,7 @@ namespace OpenFTA
             // LOGO
             PictureBox logo = new PictureBox
             {
-                 
+
                 Image = ico.ToBitmap(), // sem dáš svoju ikonku
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Size = new Size(28, 28),
@@ -264,7 +362,7 @@ namespace OpenFTA
 
         private void TreeView1_BeforeCollapse(object? sender, TreeViewCancelEventArgs e)
         {
-            
+
             var tree = (CustomTreeView)sender;
 
             if (HasAncestorWithName(e.Node, "Minimal cut sets")) return;
@@ -282,7 +380,7 @@ namespace OpenFTA
 
         bool HasAncestorWithName(TreeNode node, string name)
         {
-            if (node == null) return(false);
+            if (node == null) return (false);
             TreeNode current = node.Parent;
 
             while (current != null)
@@ -443,7 +541,7 @@ namespace OpenFTA
             else
             if (EngineLogic.MyDrawingEngine.Mouse_OnEvevt(e.Location, out InvEVN))
             {
-                if(InvEVN)
+                if (InvEVN)
                     pictureBox1.Invalidate();
                 Cursor = Cursors.Hand;
 
@@ -455,11 +553,12 @@ namespace OpenFTA
                 Cursor = Cursors.Default;
             }
 
-            int X = 0;
-            int Y = 0;
-            EngineLogic.MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
-            String str = "X:" + X + ", Y:" + Y + ")";
-            toolStripStatusLabelCoordinates.Text = str;
+            /* int X = 0;
+             int Y = 0;
+             EngineLogic.MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
+             String str = "X:" + X + ", Y:" + Y + ")";
+             toolStripStatusLabelCoordinates.Text = str;*/
+            toolStripStatusLabelCoordinates.Text = "";
 
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
@@ -514,6 +613,10 @@ namespace OpenFTA
             sfd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
             sfd.Title = "Save FTAStructure";
             sfd.FileName = "ftastructure.fta";
+            if(WorkingDirectory.Length>0)
+                sfd.InitialDirectory = WorkingDirectory;
+            if(WorkingFileName.Length > 0)
+                sfd.FileName = Path.GetFileName(WorkingFileName);
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
@@ -545,81 +648,50 @@ namespace OpenFTA
             ofd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
             ofd.Title = "Open FTAStructure";
 
-            /*
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(List<FTAitem>));
-                    List<FTAitem> loadedList;
-                    using (FileStream fs = new FileStream(ofd.FileName, FileMode.Open))
-                    {
-                        loadedList = (List<FTAitem>)serializer.Deserialize(fs);
-                    }
-
-                    EngineLogic.FTAStructure.Clear();
-                    foreach (FTAitem item in loadedList)
-                    {
-                       
-                            item.LowerBoundFrequency = 0;
-                        
-                            item.UpperBoundFrequency = 0;
-                        
-                        EngineLogic.FTAStructure[item.GuidCode] = item;
-                    }
-
-                    FTAitem topEvent = loadedList.FirstOrDefault(x => x.Parent == Guid.Empty);
-                    if (topEvent != null)
-                    {
-                        EngineLogic.TopEventGuid = topEvent.GuidCode;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Top event not found in loaded data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-
-                    EngineLogic.FindAllChilren();
-                    EngineLogic.AssignLevelsToAllEvents();
-                    MyUIEngine.FillTreeView(treeView1);
-                    pictureBox1.Invalidate();
-
-                    // MessageBox.Show("FTAStructure loaded successfully.", "Load", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error loading FTAStructure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }*/
+            ofd.InitialDirectory = WorkingDirectory;
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
-                    SaveTreeClass loadedData = SaveTreeClass.LoadFromFile(ofd.FileName);
+                LoadFile(ofd.FileName);
+            }
+        }
 
-                    EngineLogic.MyDrawingEngine.GlobalZoom = loadedData.Zoom;
-                    EngineLogic.MyDrawingEngine.offsetX = (int)loadedData.OffsetX;
-                    EngineLogic.MyDrawingEngine.offsetY = (int)loadedData.OffsetY;
-                    EngineLogic.FTAStructure.Clear();
-                    EngineLogic.FTAStructure = loadedData.FtaStructure;
+        private bool LoadFile(String fullpath)
+        {
+            try
+            {
+                SaveTreeClass loadedData = SaveTreeClass.LoadFromFile(fullpath);
 
-
-
-                    FTAitem root = EngineLogic.FTAStructure.Values.FirstOrDefault(item => item.Parent == Guid.Empty);
-
-                    EngineLogic.TopEventGuid = root.GuidCode;
-                    EngineLogic.FindAllChilren();
-                    EngineLogic.AssignLevelsToAllEvents();
-                    MyUIEngine.FillTreeView(treeView1);
-                    EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
-                    pictureBox1.Invalidate();
+                EngineLogic.MyDrawingEngine.GlobalZoom = loadedData.Zoom;
+                EngineLogic.MyDrawingEngine.offsetX = (int)loadedData.OffsetX;
+                EngineLogic.MyDrawingEngine.offsetY = (int)loadedData.OffsetY;
+                EngineLogic.FTAStructure.Clear();
+                EngineLogic.FTAStructure = loadedData.FtaStructure;
 
 
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error loading FTAStructure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+
+                FTAitem root = EngineLogic.FTAStructure.Values.FirstOrDefault(item => item.Parent == Guid.Empty);
+
+                EngineLogic.TopEventGuid = root.GuidCode;
+                EngineLogic.FindAllChilren();
+                EngineLogic.AssignLevelsToAllEvents();
+                MyUIEngine.FillTreeView(treeView1);
+                EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
+                pictureBox1.Invalidate();
+
+                WorkingFileName = fullpath;
+                WorkingDirectory = Path.GetDirectoryName(fullpath);
+
+
+                UpdateMainFormControls();
+                return (true);
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading FTAStructure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return (false);
             }
         }
 
@@ -627,11 +699,11 @@ namespace OpenFTA
         {
             /*ExportDialogForm d = new ExportDialogForm();
             d.Text = "Copy Options";*/
-                
+
 
 
             EngineLogic.CopySelectedEvents();
-           // MyUIEngine.FillTreeView(treeView1);
+            // MyUIEngine.FillTreeView(treeView1);
         }
 
         private void toolStripButtonPaste_Click(object sender, EventArgs e)
@@ -683,20 +755,21 @@ namespace OpenFTA
             /* EngineLogic.FTAStructure = new Dictionary<Guid, FTAitem>(EngineLogic.MCSStructure);
              EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
 
-            /*   if (EngineLogic.SelectedEvents.Count == 1)
-                   EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
-               else
-                   EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);*/
+            if (EngineLogic.SelectedEvents.Count == 1)
+                EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
+            else
+                EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
+
+
 
 
             EngineLogic.ArrangeTree();
-
             // EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure); 
             pictureBox1.Invalidate();
         }
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
-            
+
             Undo();
             UpdateMainFormControls();
         }
@@ -923,7 +996,7 @@ namespace OpenFTA
 
         private void HideSubtree(FTAitem node, bool hide)
         {
-            if(node==null) return;
+            if (node == null) return;
             foreach (var childGuid in node.Children)
             {
                 if (EngineLogic.FTAStructure.TryGetValue(childGuid, out FTAitem child))
@@ -1028,31 +1101,31 @@ namespace OpenFTA
         {
 
 
-          /*  var dialog = new OptionsDialog<ExportType>(
-            "Export Options",
-            new List<OptionItem<ExportType>>
-            {
-        new OptionItem<ExportType>
-        {
+            /*  var dialog = new OptionsDialog<ExportType>(
+              "Export Options",
+              new List<OptionItem<ExportType>>
+              {
+          new OptionItem<ExportType>
+          {
 
-            Title = "Bitmap",
-            Description = "Raster image (.bmp/.png). Best for pixel graphics.",
-            Icon = Resources.Copy_24,
-            Value = ExportType.Bitmap
-        },
-        new OptionItem<ExportType>
-        {
-            Title = "Vector",
-            Description = "Vector image (.emf/.wmf). Great for scaling.",
-            Icon = Resources.Add_BE_24,
-            Value = ExportType.Vector
-        }
-            }
-        );
+              Title = "Bitmap",
+              Description = "Raster image (.bmp/.png). Best for pixel graphics.",
+              Icon = Resources.Copy_24,
+              Value = ExportType.Bitmap
+          },
+          new OptionItem<ExportType>
+          {
+              Title = "Vector",
+              Description = "Vector image (.emf/.wmf). Great for scaling.",
+              Icon = Resources.Add_BE_24,
+              Value = ExportType.Vector
+          }
+              }
+          );
 
 
-            dialog.ShowDialog();*/
-             
+              dialog.ShowDialog();*/
+
             try
             {
                 using (
@@ -1087,9 +1160,9 @@ namespace OpenFTA
                             case ExportType.Bitmap:
                                 SaveToBMP();
                                 break;
-                            case  ExportType.Vector:
+                            case ExportType.Vector:
                                 SaveToVector();
-                                break; 
+                                break;
                         }
                     }
                 }
@@ -1101,7 +1174,7 @@ namespace OpenFTA
                 "Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
-            } 
+            }
         }
 
         private void SaveToVector()
@@ -1225,6 +1298,18 @@ namespace OpenFTA
                 toolStripButtonRedo.Enabled = true;
             else
                 toolStripButtonRedo.Enabled = false;
+
+
+            toolStripStatusLabelFileName.Text = " |  File name: " + Path.GetFileName(WorkingFileName);
+            toolStripStatusLabelWorkingDir.Text = " Working directory: " + WorkingDirectory;
+
+
+            if (WorkingFileName.Length > 0)
+            {
+                Text = "Open FTA - " + Path.GetFileName(WorkingFileName);
+            }
+            else
+                Text = "Open FTA - (unsaved)";
         }
 
         private void UpdateMainFormControls_EventsAreSelected()
@@ -1643,6 +1728,9 @@ namespace OpenFTA
             pictureBox1.Invalidate();
             MyUIEngine = new UIEngine(EngineLogic);
             MyUIEngine.FillTreeView(treeView1);
+
+            WorkingFileName = "";
+
             UpdateMainFormControls();
 
         }
@@ -1661,8 +1749,8 @@ namespace OpenFTA
             {
                 if (e.KeyCode == Keys.Delete)
                 {
-                    toolStripButtonDelete_Click(this,null);
-                   // e.Handled = true;
+                    toolStripButtonDelete_Click(this, null);
+                    // e.Handled = true;
                 }
                 else if (e.Control && e.KeyCode == Keys.C)
                 {
@@ -1671,8 +1759,8 @@ namespace OpenFTA
                 }
                 else if (e.Control && e.KeyCode == Keys.V)
                 {
-                    toolStripButtonPaste_Click(this, e); 
-                   // e.Handled = true;
+                    toolStripButtonPaste_Click(this, e);
+                    // e.Handled = true;
                 }
                 else if (e.Control && e.KeyCode == Keys.A)
                 {
@@ -1688,6 +1776,85 @@ namespace OpenFTA
                     Redo();
                 }
             }
+        }
+
+        private void toolStripButtonSelectWorkingDirectory_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Select project directory";
+                dialog.ShowNewFolderButton = true; // povoliť vytváranie nového adresára
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    WorkingDirectory = dialog.SelectedPath;
+                    LoadFiles(WorkingDirectory);
+                }
+            }
+        }
+        private void LoadFiles(string folder)
+        {
+            listView1.Items.Clear();
+            foreach (string file in Directory.GetFiles(folder))
+            {
+                FileInfo fi = new FileInfo(file);
+
+                if (fi.Extension != ".fta")
+                    continue;
+
+                var item = new ListViewItem(fi.Name);
+                //item.SubItems.Add((fi.Length / 1024) + " KB");
+                item.SubItems.Add((fi.CreationTime.ToShortDateString()));
+                listView1.Items.Add(item);
+            }
+        }
+
+        private void toolStripButtonCreateWorkingDirectory_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Select parent folder";
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    string parentPath = dialog.SelectedPath;
+
+                    // Požiadať používateľa o názov nového adresára
+                    string newFolderName = Microsoft.VisualBasic.Interaction.InputBox(
+                        "Enter name of the new folder:", "New Folder", "MyNewFolder");
+
+                    if (!string.IsNullOrWhiteSpace(newFolderName))
+                    {
+                        string newFolderPath = Path.Combine(parentPath, newFolderName);
+
+                        if (!Directory.Exists(newFolderPath))
+                        {
+                            Directory.CreateDirectory(newFolderPath);
+                            WorkingDirectory = newFolderPath;
+                            LoadFiles(WorkingDirectory);
+                            MessageBox.Show("Created project folder: " + newFolderPath);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Folder already exists");
+                        }
+                    }
+                }
+            }
+        }
+
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 0)
+                return;
+
+            ListViewItem item = listView1.SelectedItems[0];
+            string fileName = item.Text; // názov súboru
+            
+            string fullPath = Path.Combine(WorkingDirectory, fileName);
+            if (File.Exists(fullPath))
+            {
+                LoadFile(fullPath);
+            }                   
         }
     }
 }

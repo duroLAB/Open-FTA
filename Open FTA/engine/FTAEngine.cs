@@ -1977,7 +1977,6 @@ public class FTAlogic
         if (MainAppSettings.Instance.SortingAlgoVersion == SortingStrategy.ALGOII_centered || MainAppSettings.Instance.SortingAlgoVersion == SortingStrategy.ALGOII_align_left)
         {
             ArrangeEventsAlgo1();
-
             MyDrawingEngine.SetStructure(FTAStructure);
         }
 
