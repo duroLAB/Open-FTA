@@ -462,6 +462,11 @@ namespace OpenFTA
 
 
                 FTAitem root = EngineLogic.FTAStructure.Values.FirstOrDefault(item => item.Parent == Guid.Empty);
+                if (root == null)
+                {
+                    root = EngineLogic.FTAStructure.Values.First();
+                    root.Parent = Guid.Empty;
+                }
 
                 EngineLogic.TopEventGuid = root.GuidCode;
                 EngineLogic.FindAllChilren();
