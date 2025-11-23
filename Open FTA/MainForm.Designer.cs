@@ -95,6 +95,7 @@
             splitter3 = new Splitter();
             toolStrip3 = new ToolStrip();
             toolStripButtonExportToCSV = new ToolStripButton();
+            toolStripButtonRunAnalysis = new ToolStripButton();
             tabPage3 = new TabPage();
             dataGridViewImportanceMeasureResults = new DataGridView();
             splitter2 = new Splitter();
@@ -703,7 +704,7 @@
             // 
             // toolStrip3
             // 
-            toolStrip3.Items.AddRange(new ToolStripItem[] { toolStripButtonExportToCSV });
+            toolStrip3.Items.AddRange(new ToolStripItem[] { toolStripButtonExportToCSV, toolStripButtonRunAnalysis });
             toolStrip3.Location = new Point(3, 3);
             toolStrip3.Name = "toolStrip3";
             toolStrip3.Size = new Size(843, 31);
@@ -719,6 +720,15 @@
             toolStripButtonExportToCSV.Size = new Size(107, 28);
             toolStripButtonExportToCSV.Text = "Export to CSV";
             toolStripButtonExportToCSV.Click += toolStripButtonExportToCSV_Click;
+            // 
+            // toolStripButtonRunAnalysis
+            // 
+            toolStripButtonRunAnalysis.Image = Open_FTA.Properties.Resources.RunAnalysis;
+            toolStripButtonRunAnalysis.ImageTransparentColor = Color.Magenta;
+            toolStripButtonRunAnalysis.Name = "toolStripButtonRunAnalysis";
+            toolStripButtonRunAnalysis.Size = new Size(94, 28);
+            toolStripButtonRunAnalysis.Text = "Run Analysis";
+            toolStripButtonRunAnalysis.Click += toolStripButtonRunAnalysis_Click;
             // 
             // tabPage3
             // 
@@ -954,6 +964,7 @@
         private ToolStripButton toolStripButtonCreateWorkingDirectory;
         private ToolStripStatusLabel toolStripStatusLabelWorkingDir;
         private ToolStripStatusLabel toolStripStatusLabelFileName;
+        private ToolStripButton toolStripButtonRunAnalysis;
     }
 }
 

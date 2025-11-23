@@ -34,16 +34,7 @@ namespace OpenFTA
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
         private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
 
-        private Panel titleBar;
-        private Button btnClose, btnMax, btnMin;
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int HTCAPTION = 0x2;
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
-
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
         public MainForm()
         {
@@ -89,21 +80,9 @@ namespace OpenFTA
             tabControl1.DrawItem += TabControl1_DrawItem;
 
 
-            
-
-            /* this.FormBorderStyle = FormBorderStyle.None;
-             this.DoubleBuffered = true;
-             CreateCustomTitleBar();
 
 
-             ApplyModernStyleToToolStrip(toolStrip1);
 
-            */
-            /* treeView1.DrawMode = TreeViewDrawMode.OwnerDrawAll;
-             treeView1.HideSelection = false;
-             treeView1.FullRowSelect = true;
-             treeView1.ItemHeight = 24;
-             treeView1.DrawNode += TreeView1_DrawNode;*/
 
             // Nastavenie ListView
             listView1.View = View.Details;
@@ -117,10 +96,6 @@ namespace OpenFTA
             listView1.Columns.Add("Created", 100);
 
 
-            // Eventy
-            // listView1.DrawColumnHeader += (s, e) => { e.DrawDefault = true; };
-            // listView1.DrawItem += ListView1_DrawItem;
-            // listView1.DrawSubItem += ListView1_DrawSubItem;
 
             listView1.Resize += (s, e) =>
             {
@@ -146,200 +121,16 @@ namespace OpenFTA
             }
 
 
-                UpdateMainFormControls();
+            UpdateMainFormControls();
 
         }
 
-        private void ListView1_DrawItem(object sender, DrawListViewItemEventArgs e)
-        {
-            Color back = e.Item.Selected ? Color.FromArgb(180, 210, 250) : Color.White;
-            bool hovered = (e.State & ListViewItemStates.Hot) != 0;
-            if (hovered && !e.Item.Selected) back = Color.FromArgb(230, 230, 230);
-
-            e.Graphics.FillRectangle(new SolidBrush(back), e.Bounds);
-        }
-
-        private void ListView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
-        {
-            Color textColor = Color.Black;
-
-            TextRenderer.DrawText(
-                e.Graphics,
-                e.SubItem.Text,
-                e.Item.Font ?? new Font("Segoe UI", 9),
-                e.Bounds,
-                textColor,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
-            );
-        }
 
 
 
 
 
 
-        private void TreeView1_DrawNode(object sender, DrawTreeNodeEventArgs e)
-        {
-            e.DrawDefault = true; // TreeView nakreslí text a odsadenie
-
-            if (e.Node.Nodes.Count > 0)
-            {
-                int size = 8;
-                int x = e.Bounds.Left - 10; // offset pred text
-                int y = e.Bounds.Top + (e.Bounds.Height - size) / 2;
-                Point[] tri;
-
-                if (e.Node.IsExpanded)
-                    tri = new Point[] { new Point(x, y), new Point(x + size / 2, y + size), new Point(x + size, y) }; // ▼
-                else
-                    tri = new Point[] { new Point(x, y), new Point(x, y + size), new Point(x + size, y + size / 2) }; // ►
-
-                e.Graphics.FillPolygon(Brushes.Black, tri);
-            }
-        }
-
-
-        private void ApplyModernStyleToToolStrip(ToolStrip ts)
-        {
-            ts.Renderer = new ModernToolStripRenderer();
-            ts.GripStyle = ToolStripGripStyle.Hidden;
-            ts.BackColor = Color.FromArgb(245, 245, 245);
-            ts.ImageScalingSize = new Size(24, 24);
-            ts.Height = 56;
-            ts.Font = new Font("Segoe UI", 9f);
-
-            foreach (ToolStripItem item in ts.Items)
-            {
-                if (item is ToolStripButton btn)
-                {
-                    btn.TextImageRelation = TextImageRelation.ImageAboveText;
-                    btn.Font = new Font("Segoe UI", 9f);
-                    btn.ForeColor = Color.FromArgb(30, 30, 30);
-                    btn.Padding = new Padding(4, 2, 4, 2);
-                    btn.Margin = new Padding(2, 0, 2, 0);
-                    btn.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
-                }
-                else if (item is ToolStripDropDownButton ddb)
-                {
-                    ddb.TextImageRelation = TextImageRelation.ImageAboveText;
-                    ddb.Font = new Font("Segoe UI", 9f);
-                    ddb.ForeColor = Color.FromArgb(30, 30, 30);
-                    ddb.Padding = new Padding(4, 2, 4, 2);
-                    ddb.Margin = new Padding(2, 0, 2, 0);
-                    ddb.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
-                }
-            }
-        }
-
-
-        private void toolStrip1_Paint(object sender, PaintEventArgs e)
-        {
-            e.Graphics.DrawLine(
-                new Pen(Color.FromArgb(200, 200, 200), 1),
-                0,
-                toolStrip1.Height - 1,
-                toolStrip1.Width,
-                toolStrip1.Height - 1
-            );
-        }
-        private void CreateCustomTitleBar()
-        {
-            // PANEL
-            titleBar = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 40,
-                BackColor = Color.FromArgb(245, 245, 245)
-            };
-            this.Controls.Add(titleBar);
-
-            Icon ico = Resources.Main;
-            // LOGO
-            PictureBox logo = new PictureBox
-            {
-
-                Image = ico.ToBitmap(), // sem dáš svoju ikonku
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Size = new Size(28, 28),
-                Location = new Point(10, 6)
-            };
-            titleBar.Controls.Add(logo);
-
-            // NÁZOV
-            Label title = new Label
-            {
-                Text = "Open FTA",
-                Font = new Font("Segoe UI", 11, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(45, 10)
-            };
-            titleBar.Controls.Add(title);
-
-            // TLAČIDLÁ
-            btnClose = CreateTitleButton("X");
-            btnMax = CreateTitleButton("▢");
-            btnMin = CreateTitleButton("–");
-
-            // Rozmiestnenie
-            int right = this.Width;
-            btnClose.Left = right - 45;
-            btnMax.Left = right - 90;
-            btnMin.Left = right - 135;
-
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnMax.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnMin.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-
-            titleBar.Controls.Add(btnClose);
-            titleBar.Controls.Add(btnMax);
-            titleBar.Controls.Add(btnMin);
-
-            // Eventy
-            btnClose.Click += (s, e) => this.Close();
-            btnMax.Click += (s, e) =>
-            {
-                WindowState = WindowState == FormWindowState.Maximized ?
-                              FormWindowState.Normal :
-                              FormWindowState.Maximized;
-            };
-            btnMin.Click += (s, e) => this.WindowState = FormWindowState.Minimized;
-
-            // Povolenie ťahania okna
-            titleBar.MouseDown += TitleBar_MouseDown;
-        }
-
-        private Button CreateTitleButton(string text)
-        {
-            Button b = new Button
-            {
-                Text = text,
-                Width = 45,
-                Height = 40,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.Transparent,
-                ForeColor = Color.Black,
-                Font = new Font("Segoe UI", 10, FontStyle.Regular)
-            };
-
-            b.FlatAppearance.BorderSize = 0;
-
-            b.MouseEnter += (s, e) =>
-                b.BackColor = Color.FromArgb(230, 230, 230);
-
-            b.MouseLeave += (s, e) =>
-                b.BackColor = Color.Transparent;
-
-            return b;
-        }
-
-        private void TitleBar_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                ReleaseCapture();
-                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-            }
-        }
 
         private void TreeView1_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
         {
@@ -613,9 +404,9 @@ namespace OpenFTA
             sfd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
             sfd.Title = "Save FTAStructure";
             sfd.FileName = "ftastructure.fta";
-            if(WorkingDirectory.Length>0)
+            if (WorkingDirectory.Length > 0)
                 sfd.InitialDirectory = WorkingDirectory;
-            if(WorkingFileName.Length > 0)
+            if (WorkingFileName.Length > 0)
                 sfd.FileName = Path.GetFileName(WorkingFileName);
 
             if (sfd.ShowDialog() == DialogResult.OK)
@@ -1632,6 +1423,7 @@ namespace OpenFTA
             if (tabControl1.SelectedTab == tabPage2)
             {
                 SaveGridToCsv(dataGridViewMCSResults);
+
             }
             else if (tabControl1.SelectedTab == tabPage3)
             {
@@ -1849,12 +1641,26 @@ namespace OpenFTA
 
             ListViewItem item = listView1.SelectedItems[0];
             string fileName = item.Text; // názov súboru
-            
+
             string fullPath = Path.Combine(WorkingDirectory, fileName);
             if (File.Exists(fullPath))
             {
                 LoadFile(fullPath);
-            }                   
+            }
+        }
+
+        private void toolStripButtonRunAnalysis_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab == tabPage2)
+            {
+                
+                minimalCutSetToolStripMenuItem_Click(this, e);
+
+            }
+            else if (tabControl1.SelectedTab == tabPage3)
+            {
+                importanceMeasureToolStripMenuItem_Click(this, e);
+            }
         }
     }
 }
