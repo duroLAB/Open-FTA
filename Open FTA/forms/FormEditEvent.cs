@@ -189,19 +189,19 @@ namespace OpenFTA
         private void textBoxTag_TextChanged(object sender, EventArgs e)
         {
             {
-                // Skontrolujeme, či text obsahuje medzeru
-                if (textBoxTag.Text.Contains(" "))
+                
+              /*  if (textBoxTag.Text.Contains(" "))
                 {
-                    // Nastavíme chybovú správu na ErrorProvider
+                   
                     errorProvider1.SetError(textBoxTag, "TAG must be a single word; no spaces allowed.");
                     button1.Enabled = false;
 
                 }
                 else
                 {
-                    // Vymažeme chybovú správu
+                    button1.Enabled = true;
                     errorProvider1.SetError(textBoxTag, "");
-                }
+                }*/
             }
         }
 
@@ -394,7 +394,7 @@ namespace OpenFTA
 
             if (Convert.ToInt32(comboBoxEventType.SelectedValue) == 1)
             {
-                errorProvider1.SetError(textBoxFrequency, "");
+                errorProvider1.SetError(textBoxFrequency, "");                
             }
 
 
@@ -403,8 +403,25 @@ namespace OpenFTA
                 bool temp = Validatefrequency();
                 if (temp == false) res = false;
 
+            }
+
+            if (textBoxTag.Text.Contains(" "))
+            {
+
+                errorProvider1.SetError(textBoxTag, "TAG must be a single word; no spaces allowed.");
+                textBoxTag.BackColor = Color.MistyRose;
+                res = false;
 
             }
+            else
+            {
+                textBoxTag.BackColor = Color.White;
+                errorProvider1.SetError(textBoxTag, "");
+            }
+
+
+            
+
             return (res);
         }
 
