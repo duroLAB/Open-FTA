@@ -1,4 +1,6 @@
-﻿namespace OpenFTA
+﻿using Open_FTA.forms;
+
+namespace OpenFTA
 {
     internal static class Program
     {
@@ -12,10 +14,11 @@
             ApplicationConfiguration.Initialize();
             var mainForm = new MainForm();
 
-            /* var screen = Screen.FromControl(mainForm);
+             var screen = Screen.FromControl(mainForm);
 
+            
 
-             using (var splash = new SplashScreen(screen))
+            using (var splash = new SplashScreen(screen))
              {
                  splash.Show();
                  splash.Refresh();
@@ -26,7 +29,7 @@
                      Application.DoEvents();
                      System.Threading.Thread.Sleep(20);
                  }
-             }*/
+             } 
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
