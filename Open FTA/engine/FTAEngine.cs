@@ -1528,7 +1528,24 @@ public class FTAlogic
                 }
                 temp = temp.Remove(temp.Length - 2);
                 temp += "</td><td>";
-                temp += item.Value.Value.ToString();
+                //temp += item.Value.Value.ToString();
+
+                string freqText = item.Value.ValueType switch
+                {
+                    ValueTypes.F => "f=",
+                    ValueTypes.P => "P=",
+                    ValueTypes.R => "R=",
+                    ValueTypes.Lambda => "λ=",
+                    _ => ""
+                };
+                freqText += (item.Value.Value < 0.001) ? item.Value.Value.ToString("0.0000E+0") : item.Value.Value.ToString("F6");
+                if (item.Value.ValueType == ValueTypes.F || item.Value.ValueType == ValueTypes.Lambda)
+                {
+                    freqText += " " + MetricUnitsList[item.Value.ValueUnit];
+
+                }
+
+                temp += freqText;
                 temp += "</td></tr>";
                 html.AppendLine(temp);
             }

@@ -209,7 +209,8 @@ namespace OpenFTA
             bool bottomTabs = (tab.Alignment == TabAlignment.Bottom);
 
             // farby
-            Color backColor = selected ? Color.FromArgb(45, 120, 230) : Color.FromArgb(240, 240, 240);
+           // Color backColor = selected ? Color.FromArgb(45, 120, 230) : Color.FromArgb(240, 240, 240);
+            Color backColor = selected ? Color.FromArgb(33, 150, 243) : Color.FromArgb(240, 240, 240);
             Color textColor = selected ? Color.White : Color.Black;
 
             // vyplnenie pozadia tab-u
@@ -871,15 +872,45 @@ namespace OpenFTA
         {
             if (!EngineLogic.PerformFullTest())
                 return;
-
-            String vysledok;
+ 
             var TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
             EngineLogic.ComputeTree();
-            pictureBox1.Invalidate();
-            vysledok = "Top Event Failure Probability is= " + TopEvent.Frequency.ToString("0.000E0") + "\n" + " [1/h]";
-            MessageBox.Show(vysledok, "The calculation completed succesfully");
+
+            /* vysledok = "Top Event Failure Probability is= " + TopEvent.Frequency.ToString("0.000E0") + "\n" + " [1/h]";
+             MessageBox.Show(vysledok, "The calculation completed succesfully");*/
+
+            /* var notify = new NotifyIcon();
+             notify.Visible = true;
+             notify.Icon = SystemIcons.Information;
+             notify.BalloonTipTitle = "Výsledok výpočtu";
+             notify.BalloonTipText = "Minimal Cut Sets found: 12";
+             notify.ShowBalloonTip(3000);*/
+
+
+             
+
+            string freqText = TopEvent.ValueType switch
+            {
+                ValueTypes.F => "f=",
+                ValueTypes.P => "P=",
+                ValueTypes.R => "R=",
+                ValueTypes.Lambda => "λ=",
+                _ => ""
+            };
+            freqText += (TopEvent.Value < 0.001) ? TopEvent.Value.ToString("0.0000E+0") : TopEvent.Value.ToString("F6");
+            if (TopEvent.ValueType == ValueTypes.F || TopEvent.ValueType == ValueTypes.Lambda)
+            {
+                freqText += " " + EngineLogic.MetricUnitsList[TopEvent.ValueUnit];
+
+            }
+
+            freqText += "\nAlgorithm: gate-by-gate";
+
+            Image icon = Resources.Main.ToBitmap();
+            ResultDialog.ShowResult("The calculation completed succesfully", "Top Event Failure Probability is " + freqText, icon);
 
             pictureBox1.Invalidate();
+
         }
 
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
@@ -1658,7 +1689,7 @@ namespace OpenFTA
         {
             if (tabControl1.SelectedTab == tabPage2)
             {
-                
+
                 minimalCutSetToolStripMenuItem_Click(this, e);
 
             }
@@ -1666,6 +1697,11 @@ namespace OpenFTA
             {
                 importanceMeasureToolStripMenuItem_Click(this, e);
             }
+        }
+
+        private void toolStripDropDownButtonEvaluate_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

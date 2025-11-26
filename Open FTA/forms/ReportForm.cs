@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Open_FTA.Properties;
+using System.Text;
 
 namespace Open_FTA.forms
 {
@@ -9,6 +10,7 @@ namespace Open_FTA.forms
         public ReportForm()
         {
             InitializeComponent();
+            this.Icon = Resources.Main;
             this.Load += Form1_Load;
         }
 

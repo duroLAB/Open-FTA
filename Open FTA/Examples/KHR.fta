@@ -2,7 +2,7 @@
   "BuildVersion": "1.0.1.0",
   "FtaStructure": {
     "72175d82-e43e-4cba-bc03-2b844cbacbcb": {
-      "Name": "Top Event",
+      "Name": "Vonkaj\u0161\u00ED po\u017Eiar okolo cisterny s\u00A0CL2",
       "Description": "",
       "GuidCode": "72175d82-e43e-4cba-bc03-2b844cbacbcb",
       "Parent": "00000000-0000-0000-0000-000000000000",
@@ -58,7 +58,7 @@
       }
     },
     "ef559221-0aaa-4ed6-b50b-e38bfdd5f6c0": {
-      "Name": "New - IE1",
+      "Name": "Vonkaj\u0161\u00ED po\u017Eiar okolo cisterny s\u00A0Cl2",
       "Description": "",
       "GuidCode": "ef559221-0aaa-4ed6-b50b-e38bfdd5f6c0",
       "Parent": "72175d82-e43e-4cba-bc03-2b844cbacbcb",
@@ -114,8 +114,8 @@
       }
     },
     "43f9c333-d856-41b7-8519-03b7915ebd8c": {
-      "Name": "New - BE1",
-      "Description": "",
+      "Name": "Pravdepodobnos\u0165 otvorenia poistn\u00E9ho ventilu",
+      "Description": "Pravdepodobnos\u0165 \u017Ee vonk. po\u017Eiar zapr\u00ED\u010Din\u00ED otvorenie poistn\u00E9ho ventilu",
       "GuidCode": "43f9c333-d856-41b7-8519-03b7915ebd8c",
       "Parent": "72175d82-e43e-4cba-bc03-2b844cbacbcb",
       "ItemType": 2,
@@ -129,8 +129,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": 240,
-      "Y": 220,
+      "X": 319,
+      "Y": 222,
       "level": 1,
       "ItemState": false,
       "IsHidden": false,
@@ -147,28 +147,28 @@
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": 230,
-          "Y": 220
+          "X": 309,
+          "Y": 222
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": 230,
-        "Y": 220,
+        "X": 309,
+        "Y": 222,
         "Width": 160,
         "Height": 90,
-        "Left": 230,
-        "Top": 220,
-        "Right": 390,
-        "Bottom": 310,
+        "Left": 309,
+        "Top": 222,
+        "Right": 469,
+        "Bottom": 312,
         "IsEmpty": false
       }
     },
     "339ca524-4f34-49ea-a024-98f210b63397": {
-      "Name": "New - BE2",
-      "Description": "",
+      "Name": "Pravdepodobnos\u0165     zap\u00E1lenia",
+      "Description": "(odhad)",
       "GuidCode": "339ca524-4f34-49ea-a024-98f210b63397",
       "Parent": "ef559221-0aaa-4ed6-b50b-e38bfdd5f6c0",
       "ItemType": 2,
@@ -187,7 +187,7 @@
       "level": 2,
       "ItemState": false,
       "IsHidden": false,
-      "IsSelected": true,
+      "IsSelected": false,
       "LowerBoundFrequency": 0,
       "UpperBoundFrequency": 0,
       "BIM": 6.000000000000001E-06,
@@ -220,7 +220,7 @@
       }
     },
     "7d5e5c6c-8d20-4806-931b-a4d43ff1d29b": {
-      "Name": "New - IE2",
+      "Name": "Hor\u013Eav\u00E1 kvapalina sa rozliala bl\u00EDzko cisterny s\u00A0Cl2",
       "Description": "",
       "GuidCode": "7d5e5c6c-8d20-4806-931b-a4d43ff1d29b",
       "Parent": "ef559221-0aaa-4ed6-b50b-e38bfdd5f6c0",
@@ -238,7 +238,7 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": 160,
+      "X": 230,
       "Y": 390,
       "level": 2,
       "ItemState": false,
@@ -256,7 +256,7 @@
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": 150,
+          "X": 220,
           "Y": 390
         },
         "Size": {
@@ -264,20 +264,20 @@
           "Width": 160,
           "Height": 90
         },
-        "X": 150,
+        "X": 220,
         "Y": 390,
         "Width": 160,
         "Height": 90,
-        "Left": 150,
+        "Left": 220,
         "Top": 390,
-        "Right": 310,
+        "Right": 380,
         "Bottom": 480,
         "IsEmpty": false
       }
     },
     "caec3f44-47bc-4f31-8051-1742b75a7ca6": {
-      "Name": "New - IE3",
-      "Description": null,
+      "Name": "Hor\u013Eav\u00E1 kvapalina sa roz\u0161iruje k\u00A0cisterne s Cl2",
+      "Description": "",
       "GuidCode": "caec3f44-47bc-4f31-8051-1742b75a7ca6",
       "Parent": "7d5e5c6c-8d20-4806-931b-a4d43ff1d29b",
       "ItemType": 1,
@@ -294,8 +294,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": -61,
-      "Y": 560,
+      "X": 107,
+      "Y": 557,
       "level": 3,
       "ItemState": false,
       "IsHidden": false,
@@ -307,33 +307,33 @@
       "RAW": 0,
       "RRW": 0,
       "FV": 0,
-      "Reference": null,
+      "Reference": "",
       "TempReference": null,
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": -71,
-          "Y": 560
+          "X": 97,
+          "Y": 557
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": -71,
-        "Y": 560,
+        "X": 97,
+        "Y": 557,
         "Width": 160,
         "Height": 90,
-        "Left": -71,
-        "Top": 560,
-        "Right": 89,
-        "Bottom": 650,
+        "Left": 97,
+        "Top": 557,
+        "Right": 257,
+        "Bottom": 647,
         "IsEmpty": false
       }
     },
     "5b4299ed-b84f-494a-9f09-267c175db0a9": {
-      "Name": "New - IE4",
-      "Description": null,
+      "Name": "Oper\u00E1tor neovplyvn\u00ED rozliatie hor\u013Eavej kvapalivy ",
+      "Description": "",
       "GuidCode": "5b4299ed-b84f-494a-9f09-267c175db0a9",
       "Parent": "7d5e5c6c-8d20-4806-931b-a4d43ff1d29b",
       "ItemType": 1,
@@ -350,8 +350,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": 380,
-      "Y": 560,
+      "X": 420,
+      "Y": 554,
       "level": 3,
       "ItemState": false,
       "IsHidden": false,
@@ -363,27 +363,27 @@
       "RAW": 0,
       "RRW": 0,
       "FV": 0,
-      "Reference": null,
+      "Reference": "",
       "TempReference": null,
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": 370,
-          "Y": 560
+          "X": 410,
+          "Y": 554
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": 370,
-        "Y": 560,
+        "X": 410,
+        "Y": 554,
         "Width": 160,
         "Height": 90,
-        "Left": 370,
-        "Top": 560,
-        "Right": 530,
-        "Bottom": 650,
+        "Left": 410,
+        "Top": 554,
+        "Right": 570,
+        "Bottom": 644,
         "IsEmpty": false
       }
     },
@@ -403,8 +403,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": -141,
-      "Y": 730,
+      "X": 27,
+      "Y": 727,
       "level": 4,
       "ItemState": false,
       "IsHidden": false,
@@ -421,22 +421,22 @@
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": -151,
-          "Y": 730
+          "X": 17,
+          "Y": 727
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": -151,
-        "Y": 730,
+        "X": 17,
+        "Y": 727,
         "Width": 160,
         "Height": 90,
-        "Left": -151,
-        "Top": 730,
-        "Right": 9,
-        "Bottom": 820,
+        "Left": 17,
+        "Top": 727,
+        "Right": 177,
+        "Bottom": 817,
         "IsEmpty": false
       }
     },
@@ -456,8 +456,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": 19,
-      "Y": 730,
+      "X": 187,
+      "Y": 727,
       "level": 4,
       "ItemState": false,
       "IsHidden": false,
@@ -474,22 +474,22 @@
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": 9,
-          "Y": 730
+          "X": 177,
+          "Y": 727
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": 9,
-        "Y": 730,
+        "X": 177,
+        "Y": 727,
         "Width": 160,
         "Height": 90,
-        "Left": 9,
-        "Top": 730,
-        "Right": 169,
-        "Bottom": 820,
+        "Left": 177,
+        "Top": 727,
+        "Right": 337,
+        "Bottom": 817,
         "IsEmpty": false
       }
     },
@@ -509,8 +509,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": 300,
-      "Y": 730,
+      "X": 349,
+      "Y": 724,
       "level": 4,
       "ItemState": false,
       "IsHidden": false,
@@ -527,22 +527,22 @@
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": 290,
-          "Y": 730
+          "X": 339,
+          "Y": 724
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": 290,
-        "Y": 730,
+        "X": 339,
+        "Y": 724,
         "Width": 160,
         "Height": 90,
-        "Left": 290,
-        "Top": 730,
-        "Right": 450,
-        "Bottom": 820,
+        "Left": 339,
+        "Top": 724,
+        "Right": 499,
+        "Bottom": 814,
         "IsEmpty": false
       }
     },
@@ -562,8 +562,8 @@
       "Level": 0,
       "X1": 0,
       "Y1": 0,
-      "X": 460,
-      "Y": 730,
+      "X": 509,
+      "Y": 724,
       "level": 4,
       "ItemState": false,
       "IsHidden": false,
@@ -580,22 +580,22 @@
       "rect": {
         "Location": {
           "IsEmpty": false,
-          "X": 450,
-          "Y": 730
+          "X": 499,
+          "Y": 724
         },
         "Size": {
           "IsEmpty": false,
           "Width": 160,
           "Height": 90
         },
-        "X": 450,
-        "Y": 730,
+        "X": 499,
+        "Y": 724,
         "Width": 160,
         "Height": 90,
-        "Left": 450,
-        "Top": 730,
-        "Right": 610,
-        "Bottom": 820,
+        "Left": 499,
+        "Top": 724,
+        "Right": 659,
+        "Bottom": 814,
         "IsEmpty": false
       }
     }
@@ -603,6 +603,6 @@
   "Zoom": 0.9892388333440001,
   "X": 0,
   "Y": 0,
-  "OffsetX": 755,
-  "OffsetY": -19
+  "OffsetX": 619,
+  "OffsetY": -26
 }

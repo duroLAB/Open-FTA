@@ -1,4 +1,5 @@
 ﻿using Open_FTA.engine;
+using Open_FTA.Properties;
 using System.Data;
 
 namespace Open_FTA.forms
@@ -11,7 +12,7 @@ namespace Open_FTA.forms
         public FormDbViewer(FTAlogic EngineLogic)
         {
             InitializeComponent();
-
+            this.Icon = Resources.Main;
             u = new UIEngine(EngineLogic);
             u.MakeTabControlModern(tabControlMain);
             //            u.SetupModernGrid(dataGridView1);

@@ -7,6 +7,7 @@ namespace Open_FTA.forms
     {
         public ErrorDialog()
         {
+            this.Icon = Resources.Main;
             InitializeComponent();
         }
 

@@ -107,6 +107,8 @@
             toolStripButtonCreateWorkingDirectory = new ToolStripButton();
             splitter5 = new Splitter();
             panelLeft_Top = new Panel();
+            toolStripSeparator7 = new ToolStripSeparator();
+            toolStripButtonRunTopEventFreq = new ToolStripButton();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -217,6 +219,7 @@
             toolStripDropDownButtonEvaluate.Name = "toolStripDropDownButtonEvaluate";
             toolStripDropDownButtonEvaluate.Size = new Size(96, 37);
             toolStripDropDownButtonEvaluate.Text = "Evaluate";
+            toolStripDropDownButtonEvaluate.Click += toolStripDropDownButtonEvaluate_Click;
             // 
             // freqvencyToolStripMenuItem
             // 
@@ -259,6 +262,7 @@
             toolStripButtonExportImage.Name = "toolStripButtonExportImage";
             toolStripButtonExportImage.Size = new Size(103, 37);
             toolStripButtonExportImage.Text = "Save image";
+            toolStripButtonExportImage.ToolTipText = "Export image of the tree structure";
             toolStripButtonExportImage.Click += toolStripButtonExportImage_Click;
             // 
             // toolStripButtonrReport
@@ -269,6 +273,7 @@
             toolStripButtonrReport.Name = "toolStripButtonrReport";
             toolStripButtonrReport.Size = new Size(78, 37);
             toolStripButtonrReport.Text = "Report";
+            toolStripButtonrReport.ToolTipText = "Generate Report";
             toolStripButtonrReport.Click += toolStripButtonrReport_Click;
             // 
             // toolStripSeparator8
@@ -583,7 +588,7 @@
             // 
             // toolStrip2
             // 
-            toolStrip2.Items.AddRange(new ToolStripItem[] { toolStripButtonAddBasicEvent, toolStripButtonAddIntermediateEvent, toolStripButtonDelete, toolStripButtonEdit, toolStripSeparator1, toolStripButtonCopy, toolStripButtonPaste, toolStripSeparator4, toolStripButtonCenter, toolStripButtonSort });
+            toolStrip2.Items.AddRange(new ToolStripItem[] { toolStripButtonAddBasicEvent, toolStripButtonAddIntermediateEvent, toolStripButtonDelete, toolStripButtonEdit, toolStripSeparator1, toolStripButtonCopy, toolStripButtonPaste, toolStripSeparator4, toolStripButtonCenter, toolStripButtonSort, toolStripSeparator7, toolStripButtonRunTopEventFreq });
             toolStrip2.Location = new Point(3, 3);
             toolStrip2.Name = "toolStrip2";
             toolStrip2.Size = new Size(843, 31);
@@ -807,7 +812,7 @@
             toolStripButtonSelectWorkingDirectory.ImageTransparentColor = Color.Magenta;
             toolStripButtonSelectWorkingDirectory.Name = "toolStripButtonSelectWorkingDirectory";
             toolStripButtonSelectWorkingDirectory.Size = new Size(23, 22);
-            toolStripButtonSelectWorkingDirectory.Text = "toolStripButtonSelectWorkingDirectory";
+            toolStripButtonSelectWorkingDirectory.Text = "Open the project directory";
             toolStripButtonSelectWorkingDirectory.Click += toolStripButtonSelectWorkingDirectory_Click;
             // 
             // toolStripButtonCreateWorkingDirectory
@@ -817,7 +822,7 @@
             toolStripButtonCreateWorkingDirectory.ImageTransparentColor = Color.Magenta;
             toolStripButtonCreateWorkingDirectory.Name = "toolStripButtonCreateWorkingDirectory";
             toolStripButtonCreateWorkingDirectory.Size = new Size(23, 22);
-            toolStripButtonCreateWorkingDirectory.Text = "toolStripButtonCreateWorkingDirectory";
+            toolStripButtonCreateWorkingDirectory.Text = "Create a new project directory";
             toolStripButtonCreateWorkingDirectory.Click += toolStripButtonCreateWorkingDirectory_Click;
             // 
             // splitter5
@@ -836,6 +841,20 @@
             panelLeft_Top.Name = "panelLeft_Top";
             panelLeft_Top.Size = new Size(233, 494);
             panelLeft_Top.TabIndex = 0;
+            // 
+            // toolStripSeparator7
+            // 
+            toolStripSeparator7.Name = "toolStripSeparator7";
+            toolStripSeparator7.Size = new Size(6, 31);
+            // 
+            // toolStripButtonRunTopEventFreq
+            // 
+            toolStripButtonRunTopEventFreq.Image = Open_FTA.Properties.Resources.RunAnalysis;
+            toolStripButtonRunTopEventFreq.ImageTransparentColor = Color.Magenta;
+            toolStripButtonRunTopEventFreq.Name = "toolStripButtonRunTopEventFreq";
+            toolStripButtonRunTopEventFreq.Size = new Size(92, 28);
+            toolStripButtonRunTopEventFreq.Text = "Run analysis";
+            toolStripButtonRunTopEventFreq.Click += freqvencyToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -965,6 +984,8 @@
         private ToolStripStatusLabel toolStripStatusLabelWorkingDir;
         private ToolStripStatusLabel toolStripStatusLabelFileName;
         private ToolStripButton toolStripButtonRunAnalysis;
+        private ToolStripSeparator toolStripSeparator7;
+        private ToolStripButton toolStripButtonRunTopEventFreq;
     }
 }
 

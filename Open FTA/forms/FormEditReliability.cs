@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Open_FTA.Properties;
+using System.Data;
 
 namespace Open_FTA.forms
 {
@@ -7,6 +8,8 @@ namespace Open_FTA.forms
         public FormEditReliability()
         {
             InitializeComponent();
+            this.Icon = Resources.Main;
+
             var data = DBEngine.Instance.MetricUnitsList;
 
             comboBoxMetricUnits.DataSource = new BindingSource(data, null);

@@ -18,6 +18,7 @@ namespace OpenFTA
         public FormEditEvent(FTAlogic EngineLogic)
         {
             InitializeComponent();
+            this.Icon = Resources.Main;
             Width = 450;
             Height = 550;
 

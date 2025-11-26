@@ -1,10 +1,13 @@
-﻿namespace Open_FTA.forms
+﻿using Open_FTA.Properties;
+
+namespace Open_FTA.forms
 {
     public partial class FormSettings : Form
     {
         public FormSettings()
         {
             InitializeComponent();
+            this.Icon = Resources.Main;
         }
 
         private void FormSettings_Load(object sender, EventArgs e)

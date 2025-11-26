@@ -374,7 +374,7 @@
             tabPageMain2.Padding = new Padding(3);
             tabPageMain2.Size = new Size(820, 599);
             tabPageMain2.TabIndex = 1;
-            tabPageMain2.Text = "Basic Event Settings";
+            tabPageMain2.Text = "Reference";
             tabPageMain2.UseVisualStyleBackColor = true;
             // 
             // groupBoxReference

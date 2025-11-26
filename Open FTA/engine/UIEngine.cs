@@ -261,11 +261,12 @@ class UIEngine
     Color textColor = Color.FromArgb(30, 60, 120); // tmavomodrá
     public void CreateHeaderPanel(Panel p,String title)
     {
-        // Panel nad TreeView
+      
         Panel headerPanel = new Panel();
         headerPanel.Dock = DockStyle.Top;
-        headerPanel.Height = 20; // výška záhlavia
-        headerPanel.BackColor = Color.FromArgb(45, 45, 48); // tmavý moderný odtieň
+        headerPanel.Height = 20;
+        //  headerPanel.BackColor = Color.FromArgb(45, 45, 48); // tmavý moderný odtieň
+        headerPanel.BackColor = Color.FromArgb(33, 150, 243); // Material Blue
         p.Controls.Add(headerPanel);
         headerPanel.SendToBack();
 
@@ -283,9 +284,11 @@ class UIEngine
             // gradient tmavomodrého pozadia
             using (LinearGradientBrush brush = new LinearGradientBrush(
                 headerPanel.ClientRectangle,
-                Color.FromArgb(20, 40, 90),   // tmavomodrá - začiatok
-                Color.FromArgb(40, 70, 140),  // tmavomodrá - koniec
-                LinearGradientMode.Horizontal))
+                // Color.FromArgb(20, 40, 90),   // tmavomodrá - začiatok
+                //Color.FromArgb(40, 70, 140),  // tmavomodrá - koniec
+            Color.FromArgb(33, 150, 243),
+            Color.FromArgb(13, 130, 223),
+            LinearGradientMode.Horizontal))
             {
                 e.Graphics.FillRectangle(brush, headerPanel.ClientRectangle);
             }
