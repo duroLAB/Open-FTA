@@ -59,13 +59,13 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
         DrawLinesAndGates(e);
         DrawProgressBars(e);
-
+        /*
         if (EngineLogic.IsAnyItemOverlapping())
         {
             Rectangle headerRect = new Rectangle(0, 30, 300, 25);
             string t = "Warning: Some items are overlapping!";
             DrawMCSHeader(e, headerRect, t, 25, 10);
-        }
+        }*/
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing

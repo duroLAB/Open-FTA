@@ -209,7 +209,7 @@ namespace OpenFTA
             bool bottomTabs = (tab.Alignment == TabAlignment.Bottom);
 
             // farby
-           // Color backColor = selected ? Color.FromArgb(45, 120, 230) : Color.FromArgb(240, 240, 240);
+            // Color backColor = selected ? Color.FromArgb(45, 120, 230) : Color.FromArgb(240, 240, 240);
             Color backColor = selected ? Color.FromArgb(33, 150, 243) : Color.FromArgb(240, 240, 240);
             Color textColor = selected ? Color.White : Color.Black;
 
@@ -421,9 +421,11 @@ namespace OpenFTA
                         OffsetX = EngineLogic.MyDrawingEngine.offsetX,
                         OffsetY = EngineLogic.MyDrawingEngine.offsetY,
                         FtaStructure = EngineLogic.FTAStructure
+                        //FtaStructure = EngineLogic.MCSStructure
                     };
 
                     saveData.SaveToFile(sfd.FileName);
+
 
                     MessageBox.Show("Structure saved successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -872,7 +874,7 @@ namespace OpenFTA
         {
             if (!EngineLogic.PerformFullTest())
                 return;
- 
+
             var TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
             EngineLogic.ComputeTree();
 
@@ -887,7 +889,7 @@ namespace OpenFTA
              notify.ShowBalloonTip(3000);*/
 
 
-             
+
 
             string freqText = TopEvent.ValueType switch
             {
@@ -1702,6 +1704,12 @@ namespace OpenFTA
         private void toolStripDropDownButtonEvaluate_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void toolStripButtonHelp_Click(object sender, EventArgs e)
+        {
+            FormHelp helpForm = new FormHelp();
+            helpForm.Show();
         }
     }
 }

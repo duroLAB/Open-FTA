@@ -86,6 +86,8 @@
             toolStripButtonEdit = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
             toolStripSeparator4 = new ToolStripSeparator();
+            toolStripSeparator7 = new ToolStripSeparator();
+            toolStripButtonRunTopEventFreq = new ToolStripButton();
             tabPage2 = new TabPage();
             panel2 = new Panel();
             dataGridViewMCSResults = new DataGridView();
@@ -107,8 +109,8 @@
             toolStripButtonCreateWorkingDirectory = new ToolStripButton();
             splitter5 = new Splitter();
             panelLeft_Top = new Panel();
-            toolStripSeparator7 = new ToolStripSeparator();
-            toolStripButtonRunTopEventFreq = new ToolStripButton();
+            toolStripSeparator11 = new ToolStripSeparator();
+            toolStripButtonHelp = new ToolStripButton();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -138,7 +140,7 @@
             toolStrip1.CanOverflow = false;
             toolStrip1.GripMargin = new Padding(0);
             toolStrip1.ImageScalingSize = new Size(20, 20);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButtonNew, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator6, toolStripButtonUndo, toolStripButtonRedo, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripButtonrReport, toolStripSeparator8, toolStripButton1, toolStripSeparator2, toolStripButtonSettings });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButtonNew, toolStripButtonSave, toolStripButtonLoad, toolStripSeparator6, toolStripButtonUndo, toolStripButtonRedo, toolStripSeparator3, toolStripDropDownButtonEvaluate, toolStripSeparator5, toolStripButtonExportImage, toolStripButtonrReport, toolStripSeparator8, toolStripButton1, toolStripSeparator2, toolStripButtonSettings, toolStripSeparator11, toolStripButtonHelp });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
@@ -637,6 +639,20 @@
             toolStripSeparator4.Name = "toolStripSeparator4";
             toolStripSeparator4.Size = new Size(6, 31);
             // 
+            // toolStripSeparator7
+            // 
+            toolStripSeparator7.Name = "toolStripSeparator7";
+            toolStripSeparator7.Size = new Size(6, 31);
+            // 
+            // toolStripButtonRunTopEventFreq
+            // 
+            toolStripButtonRunTopEventFreq.Image = Open_FTA.Properties.Resources.RunAnalysis;
+            toolStripButtonRunTopEventFreq.ImageTransparentColor = Color.Magenta;
+            toolStripButtonRunTopEventFreq.Name = "toolStripButtonRunTopEventFreq";
+            toolStripButtonRunTopEventFreq.Size = new Size(92, 28);
+            toolStripButtonRunTopEventFreq.Text = "Run analysis";
+            toolStripButtonRunTopEventFreq.Click += freqvencyToolStripMenuItem_Click;
+            // 
             // tabPage2
             // 
             tabPage2.Controls.Add(panel2);
@@ -842,19 +858,20 @@
             panelLeft_Top.Size = new Size(233, 494);
             panelLeft_Top.TabIndex = 0;
             // 
-            // toolStripSeparator7
+            // toolStripSeparator11
             // 
-            toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new Size(6, 31);
+            toolStripSeparator11.Name = "toolStripSeparator11";
+            toolStripSeparator11.Size = new Size(6, 40);
             // 
-            // toolStripButtonRunTopEventFreq
+            // toolStripButtonHelp
             // 
-            toolStripButtonRunTopEventFreq.Image = Open_FTA.Properties.Resources.RunAnalysis;
-            toolStripButtonRunTopEventFreq.ImageTransparentColor = Color.Magenta;
-            toolStripButtonRunTopEventFreq.Name = "toolStripButtonRunTopEventFreq";
-            toolStripButtonRunTopEventFreq.Size = new Size(92, 28);
-            toolStripButtonRunTopEventFreq.Text = "Run analysis";
-            toolStripButtonRunTopEventFreq.Click += freqvencyToolStripMenuItem_Click;
+            toolStripButtonHelp.Image = Open_FTA.Properties.Resources.HelpTableOfContents;
+            toolStripButtonHelp.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonHelp.ImageTransparentColor = Color.Magenta;
+            toolStripButtonHelp.Name = "toolStripButtonHelp";
+            toolStripButtonHelp.Size = new Size(68, 37);
+            toolStripButtonHelp.Text = "Help";
+            toolStripButtonHelp.Click += toolStripButtonHelp_Click;
             // 
             // MainForm
             // 
@@ -986,6 +1003,8 @@
         private ToolStripButton toolStripButtonRunAnalysis;
         private ToolStripSeparator toolStripSeparator7;
         private ToolStripButton toolStripButtonRunTopEventFreq;
+        private ToolStripSeparator toolStripSeparator11;
+        private ToolStripButton toolStripButtonHelp;
     }
 }
 
