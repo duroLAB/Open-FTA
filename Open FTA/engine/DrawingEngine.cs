@@ -466,22 +466,40 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             // ----- TAG -----
             string tagText = evt.Tag;
             Font tagFont = FindFittingFont(g, tagText, topRect);
-            TextRenderer.DrawText(g, tagText, tagFont, topRect,
-                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+          /*  TextRenderer.DrawText(g, tagText, tagFont, topRect,
+                                   Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);   */                    
+
+            // ----- NAME -----
+            /* string nameText = SplitStringToLines(evt.Name);
+            Font nameFont = FindFittingFont(g, nameText, middleRect);
+           TextRenderer.DrawText(g, nameText, nameFont, middleRect,
+                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
+
+            // ----- FREQUENCY -----
+            /* string freqText = GetFrequencyText(evt);
+            Font freqFont = FindFittingFont(g, freqText, bottomRect);
+           TextRenderer.DrawText(g, freqText, freqFont, bottomRect,
+                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
+
+            StringFormat sf = new StringFormat();
+            sf.Alignment = StringAlignment.Center;
+            sf.LineAlignment = StringAlignment.Center;
+
+            g.DrawString(tagText, tagFont, Brushes.Black, topRect, sf);
 
             // ----- NAME -----
             string nameText = SplitStringToLines(evt.Name);
             Font nameFont = FindFittingFont(g, nameText, middleRect);
-            TextRenderer.DrawText(g, nameText, nameFont, middleRect,
-                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+            g.DrawString(nameText, nameFont, Brushes.Black, middleRect, sf);
 
             // ----- FREQUENCY -----
             string freqText = GetFrequencyText(evt);
             Font freqFont = FindFittingFont(g, freqText, bottomRect);
-            TextRenderer.DrawText(g, freqText, freqFont, bottomRect,
-                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 
-            
+            g.DrawString(freqText, freqFont, Brushes.Black, bottomRect, sf);
+
+
         }
     }
 
@@ -1392,12 +1410,16 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     }
 
     public void ExportToBMP(string Filename, ImageFormat format)
-    {
+    { 
         var bounds = GetBounds(EngineLogic.FTAStructure);
-        float margin = 10f;
+       /* float margin = 10f;
         int width = (int)(bounds.Width + 200 + 2 * margin);
-        int height = (int)(bounds.Height + 200 + 2 * margin);
+        int height = (int)(bounds.Height + 200 + 2 * margin);*/
 
+
+        float margin = 0f;
+        int width = (int)(bounds.Width + 0 + 2 * margin);
+        int height = (int)(bounds.Height + 0 + 2 * margin);
 
         using (var bitmap = new Bitmap(width, height))
         using (Graphics g = Graphics.FromImage(bitmap))
@@ -1421,7 +1443,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     }
     RectangleF GetBounds(Dictionary<Guid, FTAitem> items)
     {
-        /*  if (items == null || items.Count == 0)
+           if (items == null || items.Count == 0)
               return RectangleF.Empty;
 
           double minX = double.MaxValue;
@@ -1429,20 +1451,20 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
           double minY = double.MaxValue;
           double maxY = double.MinValue;
 
-          foreach (var fta in items.Values)
+    /*      foreach (var fta in items.Values)
           {
               if (fta.X < minX) minX = fta.X;
               if (fta.X > maxX) maxX = fta.X;
               if (fta.Y < minY) minY = fta.Y;
               if (fta.Y > maxY) maxY = fta.Y;
           }
-  */
+   
         return new RectangleF(
             (float)minX,
             (float)minY,
             (float)(maxX - minX),
             (float)(maxY - minY)
-        );
+        );*/
     }
 
     
