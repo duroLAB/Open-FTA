@@ -1298,7 +1298,7 @@ public class FTAlogic
 
         html.Replace("TOPEVENTHOLDER", temp);
 
-          html.AppendLine("  <script>");
+        /*  html.AppendLine("  <script>");
           html.AppendLine("    document.addEventListener('DOMContentLoaded', function () {");
           html.AppendLine("      const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;");
           html.AppendLine("      const comparer = (idx, asc) => (a, b) => {");
@@ -1318,7 +1318,44 @@ public class FTAlogic
           html.AppendLine("        });");
           html.AppendLine("      });");
           html.AppendLine("    });");
-          html.AppendLine("  </script>");
+          html.AppendLine("  </script>");*/
+        html.AppendLine("  <script>");
+        html.AppendLine("    document.addEventListener('DOMContentLoaded', function () {");
+        html.AppendLine("      const getCellValue = (tr, idx) => {");
+        html.AppendLine("        let v = tr.children[idx].innerText || tr.children[idx].textContent;");
+        html.AppendLine("        if (!v) return NaN;");
+        html.AppendLine("        v = v.trim();");
+        html.AppendLine("        v = v.replace(/,/g, ''); // odstranenie tisicoviek");
+        html.AppendLine("        const match = v.match(/[-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?/);");
+        html.AppendLine("        if (match) return parseFloat(match[0]);");
+        html.AppendLine("        return v;");
+        html.AppendLine("      };");
+        html.AppendLine("");
+        html.AppendLine("      const comparer = (idx, asc) => (a, b) => {");
+        html.AppendLine("        const v1 = getCellValue(a, idx);");
+        html.AppendLine("        const v2 = getCellValue(b, idx);");
+        html.AppendLine("        if (typeof v1 === 'number' && typeof v2 === 'number') {");
+        html.AppendLine("          return asc ? v1 - v2 : v2 - v1;");
+        html.AppendLine("        } else {");
+        html.AppendLine("          return asc ? ('' + v1).localeCompare(v2) : ('' + v2).localeCompare(v1);");
+        html.AppendLine("        };");
+        html.AppendLine("      };");
+        html.AppendLine("");
+        html.AppendLine("      document.querySelectorAll('table.sortable th').forEach(th => {");
+        html.AppendLine("        th.addEventListener('click', () => {");
+        html.AppendLine("          const table = th.closest('table');");
+        html.AppendLine("          const tbody = table.tBodies[0];");
+        html.AppendLine("          const rows = Array.from(tbody.rows);");
+        html.AppendLine("          const idx = Array.from(th.parentNode.children).indexOf(th);");
+        html.AppendLine("          const asc = !(th.asc);");
+        html.AppendLine("          th.asc = asc;");
+        html.AppendLine("          rows.sort(comparer(idx, asc));");
+        html.AppendLine("          rows.forEach(row => tbody.appendChild(row));");
+        html.AppendLine("        });");
+        html.AppendLine("      });");
+        html.AppendLine("    });");
+        html.AppendLine("  </script>;");
+
 
 
 
