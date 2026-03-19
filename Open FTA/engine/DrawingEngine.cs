@@ -55,7 +55,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
         DrawBackGround(e);
         //DrawEvents(e,EngineLogic.GetItem(EngineLogic.TopEventGuid));
-        DrawEvents(e, TopEvent);
+        DrawEvents(e, TopEvent,true);
+        
 
         DrawLinesAndGates(e);
         DrawProgressBars(e);
@@ -119,13 +120,14 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
-    private void DrawEvents(Graphics g, FTAitem top)
+    private void DrawEvents(Graphics g, FTAitem top, bool isTopEvent)
     {
         for (int i = 0; i < top.Children.Count; i++)
         {
-            DrawEvents(g, EngineLogic.GetItem(top.Children[i]));
+            DrawEvents(g, EngineLogic.GetItem(top.Children[i]), false);
         }
-        DrawEvent(g, top);
+
+        DrawEvent(g, top, isTopEvent);
     }
     private void DrawEventOLD(Graphics g, FTAitem evt)
     {
@@ -358,7 +360,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         //}
     }
 
-    private void DrawEvent(Graphics g, FTAitem evt)
+    private void DrawEvent(Graphics g, FTAitem evt, bool isTopEvent)
     {
 
         if (evt.IsHidden)
@@ -450,11 +452,25 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     //DrawPressedSelection(g, r, 12);
                     DrawPressedSelectionv2(g, r, 12);
                 }
+                bool TempHideFrequency = false;
 
+                if(FrequencyDisplayMode.alwaysHidden == MainAppSettings.Instance.FrequencyDisplayMode || FrequencyDisplayMode.topEventsOnly == MainAppSettings.Instance.FrequencyDisplayMode)
+                TempHideFrequency = true;
+           
+                if (isTopEvent && FrequencyDisplayMode.topEventsOnly == MainAppSettings.Instance.FrequencyDisplayMode)
+                {
+                    TempHideFrequency = false;
+                }
 
-                // ---- TEXT LAYOUT (unchanged) ----
-                int topRowHeight = r.Height / 6;
+            // ---- TEXT LAYOUT (unchanged) ----
+            int topRowHeight = r.Height / 6;
                 int bottomRowHeight = r.Height / 6;
+
+                if(TempHideFrequency)
+                {
+                    bottomRowHeight = 0;
+                }
+
                 int middleHeight = r.Height - topRowHeight - bottomRowHeight;
 
                 Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
@@ -465,6 +481,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 using (Pen softPen = new Pen(Color.FromArgb(120, selPen.Color), 1))
                 {
                     g.DrawLine(softPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
+                if (!TempHideFrequency)
                     g.DrawLine(softPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
                 }
 
@@ -505,7 +522,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 // ----- FREQUENCY -----
                 string freqText = GetFrequencyText(evt);
                 Font freqFont = FindFittingFont(g, freqText, bottomRect);
-
+                if(!TempHideFrequency)
                 g.DrawString(freqText, freqFont, Brushes.Black, bottomRect, sf);
 
 

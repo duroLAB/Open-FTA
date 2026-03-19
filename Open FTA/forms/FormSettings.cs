@@ -22,5 +22,10 @@ namespace Open_FTA.forms
         {
 
         }
+
+        private void buttonOK_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

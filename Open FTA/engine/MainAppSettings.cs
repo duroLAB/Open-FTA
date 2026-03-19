@@ -60,6 +60,12 @@ public class MainAppSettings
     [Description("Metric displayed in the tree")]
     public DisplayMetricType DisplayedMetric { get; set; } = DisplayMetricType.BIM;
 
+    [Category("Display settings")]
+    [DisplayName("Show event frequency")]
+    [Description("Controls how event frequency is displayed: only for top events, for all events, or hidden")]
+    public FrequencyDisplayMode FrequencyDisplayMode { get; set; } = FrequencyDisplayMode.alwaysHidden;
+
+
     [Category("Sorting algorithm")]
     [DisplayName("Default sorting algorithm")]
     [Description("ALGOI - safe, fast, but not very effective, ALGOII-best results, but slower and less safe,ALGOII-left-aligned behaves the same as ALGOII, except that it aligns to the left")]

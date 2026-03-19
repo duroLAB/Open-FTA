@@ -84,6 +84,7 @@
             buttonOK.TabIndex = 0;
             buttonOK.Text = "Ok";
             buttonOK.UseVisualStyleBackColor = true;
+            buttonOK.Click += buttonOK_Click;
             // 
             // FormSettings
             // 

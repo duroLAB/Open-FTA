@@ -39,10 +39,10 @@ public enum GateFrequencyHandling
 
 public enum ValueTypes { F, P, R, Lambda }
 public enum Gates { NotSet, OR, AND }
-
 public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left }
-
 public enum DisplayMetricType { None, BIM, CIM, RAW, RRW, FV}
+
+public enum FrequencyDisplayMode { topEventsOnly, allEvents, alwaysHidden }
 public class FTAlogic
 {
     public DrawingEngine MyDrawingEngine;
