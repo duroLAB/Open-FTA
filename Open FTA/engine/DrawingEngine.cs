@@ -364,143 +364,152 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         if (evt.IsHidden)
             return;
 
-         
+        double TempConstant = 1;
+       /* if (evt.Name.Length > 30)
+            TempConstant = 1.2;
+        else
+            TempConstant = 1;*/
+
             using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
-        {
-            Rectangle r = new Rectangle
             {
-                X = evt.X,
-                Y = evt.Y,
-                Width = Constants.EventWidth,
-                Height = Constants.EventHeight
-            };
-            r = RealPositionToPixel(r);
+                Rectangle r = new Rectangle
+                {
+                    X = evt.X,
+                    Y = evt.Y,
+                    Width = (int)(Constants.EventWidth * TempConstant),
+                    Height = Constants.EventHeight
+                };
+                r = RealPositionToPixel(r);
 
-           
 
-            // ---- SELECTION COLORS ----
-         /*   if (evt.IsSelected)
-            {
-                selPen.Color = Color.Red;
-                selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-            }*/
 
-            
+                // ---- SELECTION COLORS ----
+                /*   if (evt.IsSelected)
+                   {
+                       selPen.Color = Color.Red;
+                       selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+                   }*/
 
-            // Highlight logic preserved
-            string searchGuid = evt.Tag;
-            bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
-            if (exists)
-            {
-                selPen.Color = Color.Green;
-                selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
 
-                Rectangle headerRect = new Rectangle(r.X + r.Width / 2 + 2, r.Y - 18, r.Width / 2 - 5, 20);
-                DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS, 16, 8);
+
+                // Highlight logic preserved
+                string searchGuid = evt.Tag;
+                bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
+                if (exists)
+                {
+                    selPen.Color = Color.Green;
+                    selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
+
+                    Rectangle headerRect = new Rectangle(r.X + r.Width / 2 + 2, r.Y - 18, r.Width / 2 - 5, 20);
+                    DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS, 16, 8);
+                }
+
+                // ---- DRAW MODERN SHADOW ----
+                if (!evt.IsSelected)
+                    DrawShadowRounded(g, r, 12);
+
+                if (!evt.IsSelected)
+                    Draw3DGradientBackground(g, r, 12);
+
+                // ---- BORDER (rounded) ----
+                using (GraphicsPath border = GetRoundedRectangle(r, 12))
+                    g.DrawPath(selPen, border);
+
+                // ---- ORIGINAL ICON DRAWING ----
+                switch (evt.ItemType)
+                {
+                    case 1:
+                        if (evt.Children.Count > 0)
+                            if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
+                                BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
+                        break;
+                    case 2:
+                        BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
+                        break;
+                    case 3:
+                        BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
+                        break;
+                    case 4:
+                        BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
+                        break;
+                }
+
+
+                bool isHover = (HoveredItem == evt);
+
+                if (isHover)
+                {
+                    DrawHoverEffect(g, r, 12);
+                }
+
+
+                if (evt.IsSelected)
+                {
+                    //  DrawSelectedEffect(g, r, 12);
+                    //DrawNeonSelection(g, r, 12);
+                    //DrawPressedSelection(g, r, 12);
+                    DrawPressedSelectionv2(g, r, 12);
+                }
+
+
+                // ---- TEXT LAYOUT (unchanged) ----
+                int topRowHeight = r.Height / 6;
+                int bottomRowHeight = r.Height / 6;
+                int middleHeight = r.Height - topRowHeight - bottomRowHeight;
+
+                Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
+                Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
+                Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
+
+                // Separator lines — softened color for modern UI
+                using (Pen softPen = new Pen(Color.FromArgb(120, selPen.Color), 1))
+                {
+                    g.DrawLine(softPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
+                    g.DrawLine(softPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
+                }
+
+                // ----- TAG -----
+                string tagText = evt.Tag;
+                Font tagFont = FindFittingFont(g, tagText, topRect);
+                /*  TextRenderer.DrawText(g, tagText, tagFont, topRect,
+                                         Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);   */
+
+                // ----- NAME -----
+                /* string nameText = SplitStringToLines(evt.Name);
+                Font nameFont = FindFittingFont(g, nameText, middleRect);
+               TextRenderer.DrawText(g, nameText, nameFont, middleRect,
+                                      Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
+
+                // ----- FREQUENCY -----
+                /* string freqText = GetFrequencyText(evt);
+                Font freqFont = FindFittingFont(g, freqText, bottomRect);
+               TextRenderer.DrawText(g, freqText, freqFont, bottomRect,
+                                      Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
+
+                StringFormat sf = new StringFormat();
+                sf.Alignment = StringAlignment.Center;
+                sf.LineAlignment = StringAlignment.Center;
+
+                g.DrawString(tagText, tagFont, Brushes.Black, topRect, sf);
+
+                // ----- NAME -----
+                //    string nameText = SplitStringToLines(evt.Name);
+                string nameText = (evt.Name);
+
+                float maxFontSize = middleRect.Height * 0.15f; // 15% z výšky
+
+                Font nameFont = FindFittingFont(g, nameText, middleRect, maxFontSize);
+
+                g.DrawString(nameText, nameFont, Brushes.Black, middleRect, sf);
+
+                // ----- FREQUENCY -----
+                string freqText = GetFrequencyText(evt);
+                Font freqFont = FindFittingFont(g, freqText, bottomRect);
+
+                g.DrawString(freqText, freqFont, Brushes.Black, bottomRect, sf);
+
+
             }
-
-            // ---- DRAW MODERN SHADOW ----
-            if (!evt.IsSelected)
-                DrawShadowRounded(g, r, 12);
-                        
-            if (!evt.IsSelected)
-                Draw3DGradientBackground(g, r, 12);
-
-            // ---- BORDER (rounded) ----
-            using (GraphicsPath border = GetRoundedRectangle(r, 12))
-                g.DrawPath(selPen, border);
-
-            // ---- ORIGINAL ICON DRAWING ----
-            switch (evt.ItemType)
-            {
-                case 1:
-                    if (evt.Children.Count > 0)
-                        if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
-                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
-                    break;
-                case 2:
-                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
-                    break;
-                case 3:
-                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
-                    break;
-                case 4:
-                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
-                    break;
-            }
-
-
-            bool isHover = (HoveredItem == evt);
-
-            if (isHover)
-            {
-                DrawHoverEffect(g, r, 12);
-            }
-
-
-            if (evt.IsSelected)
-            {
-                //  DrawSelectedEffect(g, r, 12);
-                //DrawNeonSelection(g, r, 12);
-                //DrawPressedSelection(g, r, 12);
-                DrawPressedSelectionv2(g, r, 12);
-            }
-
-
-            // ---- TEXT LAYOUT (unchanged) ----
-            int topRowHeight = r.Height / 6;
-            int bottomRowHeight = r.Height / 6;
-            int middleHeight = r.Height - topRowHeight - bottomRowHeight;
-
-            Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
-            Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
-            Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
-
-            // Separator lines — softened color for modern UI
-            using (Pen softPen = new Pen(Color.FromArgb(120, selPen.Color), 1))
-            {
-                g.DrawLine(softPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
-                g.DrawLine(softPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
-            }
-
-            // ----- TAG -----
-            string tagText = evt.Tag;
-            Font tagFont = FindFittingFont(g, tagText, topRect);
-          /*  TextRenderer.DrawText(g, tagText, tagFont, topRect,
-                                   Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);   */                    
-
-            // ----- NAME -----
-            /* string nameText = SplitStringToLines(evt.Name);
-            Font nameFont = FindFittingFont(g, nameText, middleRect);
-           TextRenderer.DrawText(g, nameText, nameFont, middleRect,
-                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
-
-            // ----- FREQUENCY -----
-            /* string freqText = GetFrequencyText(evt);
-            Font freqFont = FindFittingFont(g, freqText, bottomRect);
-           TextRenderer.DrawText(g, freqText, freqFont, bottomRect,
-                                  Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
-
-            StringFormat sf = new StringFormat();
-            sf.Alignment = StringAlignment.Center;
-            sf.LineAlignment = StringAlignment.Center;
-
-            g.DrawString(tagText, tagFont, Brushes.Black, topRect, sf);
-
-            // ----- NAME -----
-            string nameText = SplitStringToLines(evt.Name);
-            Font nameFont = FindFittingFont(g, nameText, middleRect);
-
-            g.DrawString(nameText, nameFont, Brushes.Black, middleRect, sf);
-
-            // ----- FREQUENCY -----
-            string freqText = GetFrequencyText(evt);
-            Font freqFont = FindFittingFont(g, freqText, bottomRect);
-
-            g.DrawString(freqText, freqFont, Brushes.Black, bottomRect, sf);
-
-
-        }
     }
 
     private void DrawPressedSelection(Graphics g, Rectangle r, int radius)
@@ -569,7 +578,6 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             g.DrawPath(glow, path);
         }
     }
-
 
     private void DrawSelectedEffect(Graphics g, Rectangle r, int radius)
     {
@@ -701,10 +709,6 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         path.CloseFigure();
         return path;
     }
-
-
-
-
     private void DrawProgressBars(Graphics g)
     {
         if (MainAppSettings.Instance.DisplayedMetric == DisplayMetricType.None)
@@ -765,8 +769,6 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
-
-
     static string SplitStringToLines(string text)
     {
         if (text.Contains('|'))
@@ -821,10 +823,13 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return sb.ToString();
     }
 
-    private Font FindFittingFont(Graphics g, string text, Rectangle rect)// Methode for fitting text into to event visual borders
+    private Font FindFittingFontOLD(Graphics g, string text, Rectangle rect)// Methode for fitting text into to event visual borders
     {
-        float maxFontSize = 10f;
-        float minFontSize = 6f;
+      /*  float maxFontSize = 10f;
+        float minFontSize = 6f;*/
+
+        float maxFontSize = 100f;
+        float minFontSize = 1f;
         Font font;
 
         for (float fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 0.5f)
@@ -841,6 +846,57 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             font.Dispose();
         }
         return new Font("Arial", minFontSize);
+    }
+
+    private Font FindFittingFont(Graphics g, string text, Rectangle rect, float maxFontSize = 100f, float minFontSize = 1f)
+    {
+        if (text == null) text = " ";
+            
+        // --- prepare text (support for | as manual line break) ---
+        string preparedText = text.Contains("|")
+            ? string.Join("\n", text.Split('|').Select(t => t.Trim()))
+            : text;
+
+        // --- string format (center + word wrap) ---
+        StringFormat sf = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+            Trimming = StringTrimming.Word
+        };
+
+        // enable word wrap
+        sf.FormatFlags &= ~StringFormatFlags.NoWrap;
+
+        float low = minFontSize;
+        float high = maxFontSize;
+
+        Font bestFont = new Font("Arial", minFontSize);
+
+        while (high - low > 0.5f) // precision
+        {
+            float mid = (low + high) / 2f;
+
+            using (Font testFont = new Font("Arial", mid))
+            {
+                SizeF size = g.MeasureString(preparedText, testFont, rect.Width, sf);
+
+                if (size.Height <= rect.Height)
+                {
+                    // fits → try bigger
+                    bestFont.Dispose();
+                    bestFont = (Font)testFont.Clone();
+                    low = mid;
+                }
+                else
+                {
+                    // too big → go smaller
+                    high = mid;
+                }
+            }
+        }
+
+        return bestFont;
     }
 
     private void DrawLinesAndGates(Graphics g)
@@ -1451,20 +1507,20 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
           double minY = double.MaxValue;
           double maxY = double.MinValue;
 
-    /*      foreach (var fta in items.Values)
+           foreach (var fta in items.Values)
           {
               if (fta.X < minX) minX = fta.X;
               if (fta.X > maxX) maxX = fta.X;
               if (fta.Y < minY) minY = fta.Y;
               if (fta.Y > maxY) maxY = fta.Y;
           }
-   
+    
         return new RectangleF(
             (float)minX,
             (float)minY,
             (float)(maxX - minX),
             (float)(maxY - minY)
-        );*/
+        );
     }
 
     
