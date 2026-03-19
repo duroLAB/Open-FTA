@@ -1298,27 +1298,29 @@ public class FTAlogic
 
         html.Replace("TOPEVENTHOLDER", temp);
 
-        html.AppendLine("  <script>");
-        html.AppendLine("    document.addEventListener('DOMContentLoaded', function () {");
-        html.AppendLine("      const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;");
-        html.AppendLine("      const comparer = (idx, asc) => (a, b) => {");
-        html.AppendLine("        const v1 = getCellValue(asc ? a : b, idx);");
-        html.AppendLine("        const v2 = getCellValue(asc ? b : a, idx);");
-        html.AppendLine("        const f1 = parseFloat(v1), f2 = parseFloat(v2);");
-        html.AppendLine("        return (!isNaN(f1) && !isNaN(f2)) ? f1 - f2 : v1.localeCompare(v2);");
-        html.AppendLine("      };");
-        html.AppendLine("      document.querySelectorAll('table.sortable th').forEach(th => {");
-        html.AppendLine("        th.addEventListener('click', () => {");
-        html.AppendLine("          const table = th.closest('table');");
-        html.AppendLine("          const tbody = table.tBodies[0];");
-        html.AppendLine("          const rows = Array.from(tbody.rows);");
-        html.AppendLine("          const idx = Array.from(th.parentNode.children).indexOf(th);");
-        html.AppendLine("          rows.sort(comparer(idx, th.asc = !th.asc));");
-        html.AppendLine("          rows.forEach(row => tbody.appendChild(row));");
-        html.AppendLine("        });");
-        html.AppendLine("      });");
-        html.AppendLine("    });");
-        html.AppendLine("  </script>");
+          html.AppendLine("  <script>");
+          html.AppendLine("    document.addEventListener('DOMContentLoaded', function () {");
+          html.AppendLine("      const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;");
+          html.AppendLine("      const comparer = (idx, asc) => (a, b) => {");
+          html.AppendLine("        const v1 = getCellValue(asc ? a : b, idx);");
+          html.AppendLine("        const v2 = getCellValue(asc ? b : a, idx);");
+          html.AppendLine("        const f1 = parseFloat(v1), f2 = parseFloat(v2);");
+          html.AppendLine("        return (!isNaN(f1) && !isNaN(f2)) ? f1 - f2 : v1.localeCompare(v2);");
+          html.AppendLine("      };");
+          html.AppendLine("      document.querySelectorAll('table.sortable th').forEach(th => {");
+          html.AppendLine("        th.addEventListener('click', () => {");
+          html.AppendLine("          const table = th.closest('table');");
+          html.AppendLine("          const tbody = table.tBodies[0];");
+          html.AppendLine("          const rows = Array.from(tbody.rows);");
+          html.AppendLine("          const idx = Array.from(th.parentNode.children).indexOf(th);");
+          html.AppendLine("          rows.sort(comparer(idx, th.asc = !th.asc));");
+          html.AppendLine("          rows.forEach(row => tbody.appendChild(row));");
+          html.AppendLine("        });");
+          html.AppendLine("      });");
+          html.AppendLine("    });");
+          html.AppendLine("  </script>");
+
+
 
         html.AppendLine("</body>");
         html.AppendLine("</html>");
@@ -1476,7 +1478,7 @@ public class FTAlogic
         html.AppendLine("                <th>Name</th>");
         html.AppendLine("               <th>Events</th>");
         html.AppendLine("                <th>Metric</th>");
-        /*   html.AppendLine("                <th>Metric</th>");*/
+         html.AppendLine("                <th>MCS Contribution</th>"); 
         html.AppendLine("            </tr>");
         html.AppendLine("        </thead>");
         html.AppendLine("        <tbody>");
@@ -1505,6 +1507,9 @@ public class FTAlogic
             if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
         }
         SumChildren(TopEvent, MCSStructure);
+
+        double TopEventFreq = TopEvent.Value;
+        
 
         foreach (var item in MCSStructure)
         {
@@ -1546,7 +1551,16 @@ public class FTAlogic
                 }
 
                 temp += freqText;
-                temp += "</td></tr>";
+                temp += "</td>";
+
+                double MCSEffect = 0;
+                String MCSEffectString;
+                MCSEffect = item.Value.Value / TopEventFreq * 100;
+                MCSEffectString = (MCSEffect < 0.00001) ? MCSEffect.ToString("0.000E+0") : MCSEffect.ToString("F4");
+
+                temp += "<td>" + MCSEffectString + " %</td>";
+
+                temp += "</tr>";
                 html.AppendLine(temp);
             }
         }

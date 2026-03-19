@@ -916,6 +916,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return bestFont;
     }
 
+    
+
     private void DrawLinesAndGates(Graphics g)
     {
 

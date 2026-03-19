@@ -1327,9 +1327,16 @@ namespace OpenFTA
             {
                 if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
             }
+           
 
             EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);
+
+            double TopEventFreq = 0;
+            if (TopEvent != null)
+                TopEventFreq = TopEvent.Value;
+
             List<FTAitem> l = EngineLogic.GenerateListOfBasicEvents();
+
 
             dataGridViewMCSResults.Rows.Clear();
             dataGridViewMCSResults.Columns.Clear();
@@ -1338,6 +1345,7 @@ namespace OpenFTA
                 dataGridViewMCSResults.Columns.Add(item.Tag, item.Tag);
             }
             dataGridViewMCSResults.Columns.Add("Frequency", "Frequency");
+            dataGridViewMCSResults.Columns.Add("MCSEffect", "MCSEffect");
 
             int rowIndex = 0;
             int MaxColums = 0;
@@ -1350,13 +1358,20 @@ namespace OpenFTA
                     dataGridViewMCSResults.Rows.Add(item.Value.Name);
                     dataGridViewMCSResults.Rows[rowIndex].Cells[1].Value = item.Value.Value;
 
+                    double MCSEffect = 0;
+                    String MCSEffectString;
+                    MCSEffect = item.Value.Value / TopEventFreq * 100;
+                    MCSEffectString = (MCSEffect < 0.001) ? MCSEffect.ToString("0.000E+0") : MCSEffect.ToString("F2");
+                    // dataGridViewMCSResults.Rows[rowIndex].Cells[2].Value = MCSEffectString;
+                    dataGridViewMCSResults.Rows[rowIndex].Cells[2].Value = MCSEffect;
+
                     for (int i = 0; i < item.Value.Children.Count; i++)
                     {
-                        if (i + 3 > dataGridViewMCSResults.ColumnCount)
+                        if (i + 4 > dataGridViewMCSResults.ColumnCount)
                             dataGridViewMCSResults.Columns.Add("", "");
 
                         FTAitem fTAitem = EngineLogic.GetItem(item.Value.Children[i], EngineLogic.MCSStructure);
-                        dataGridViewMCSResults.Rows[rowIndex].Cells[i + 2].Value = fTAitem.Name;
+                        dataGridViewMCSResults.Rows[rowIndex].Cells[i + 3].Value = fTAitem.Name;
 
 
 
@@ -1368,20 +1383,26 @@ namespace OpenFTA
                     rowIndex += 1;
                 }
             }
-            MaxColums += 3; // plus frequency and name columns
+            MaxColums += 4; // plus frequency and name columns
             for (int i = dataGridViewMCSResults.Columns.Count - 1; i >= MaxColums; i--)
             {
                 dataGridViewMCSResults.Columns.RemoveAt(i);
 
             }
-            dataGridViewMCSResults.ColumnHeadersVisible = false;
+           // dataGridViewMCSResults.ColumnHeadersVisible = false;
             dataGridViewMCSResults.RowHeadersVisible = false;
 
+            dataGridViewMCSResults.Columns[0].HeaderText = "Name";
+            dataGridViewMCSResults.Columns[1].HeaderText = "Frequency";
+            dataGridViewMCSResults.Columns[2].HeaderText = "Contribution (%)";           
+            for(int i=3;i<dataGridViewMCSResults.Columns.Count;i++)
+            dataGridViewMCSResults.Columns[i].HeaderText = "Component " + (i-2).ToString();
 
 
             MyUIEngine.SetupModernGrid(dataGridViewMCSResults);
-            dataGridViewMCSResults.Columns[0].Width = 80;  // prvý stĺpec
-            dataGridViewMCSResults.Columns[1].Width = 120; // druhý stĺpec
+            dataGridViewMCSResults.Columns[0].Width = 120;  // prvý stĺpec
+            dataGridViewMCSResults.Columns[1].Width = 80; // druhý stĺpec
+            dataGridViewMCSResults.Columns[2].Width = 80; // druhý stĺpec
 
             var column = dataGridViewMCSResults.Columns[1];
             dataGridViewMCSResults.Sort(column, System.ComponentModel.ListSortDirection.Descending);
@@ -1389,6 +1410,8 @@ namespace OpenFTA
             MyUIEngine.FillTreeView(treeView1);
 
             tabControl1.SelectedTab = tabPage2;
+
+
 
 
         }
