@@ -10,6 +10,7 @@ using System.Reflection.Metadata;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace OpenFTA
 {
@@ -446,7 +447,7 @@ namespace OpenFTA
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                LoadFile(ofd.FileName);
+                LoadFile(ofd.FileName);              
             }
         }
 
@@ -478,8 +479,17 @@ namespace OpenFTA
                 EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
                 pictureBox1.Invalidate();
 
-                WorkingFileName = fullpath;
-                WorkingDirectory = Path.GetDirectoryName(fullpath);
+                 
+
+                try
+                {
+                    WorkingFileName = fullpath;
+                    WorkingDirectory = Path.GetDirectoryName(fullpath);
+                    LoadFiles(WorkingDirectory);
+                }
+                catch (Exception ex)
+                {
+                }
 
 
                 UpdateMainFormControls();
