@@ -50,6 +50,8 @@
             toolStripButton1 = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             toolStripButtonSettings = new ToolStripButton();
+            toolStripSeparator11 = new ToolStripSeparator();
+            toolStripButtonHelp = new ToolStripButton();
             toolStripButtonCenter = new ToolStripButton();
             toolStripButtonSort = new ToolStripButton();
             toolStripButtonCopy = new ToolStripButton();
@@ -109,8 +111,7 @@
             toolStripButtonCreateWorkingDirectory = new ToolStripButton();
             splitter5 = new Splitter();
             panelLeft_Top = new Panel();
-            toolStripSeparator11 = new ToolStripSeparator();
-            toolStripButtonHelp = new ToolStripButton();
+            toolStripButtonOpenDirectory = new ToolStripButton();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -308,6 +309,21 @@
             toolStripButtonSettings.Text = "Settings ";
             toolStripButtonSettings.ToolTipText = "Settings";
             toolStripButtonSettings.Click += toolStripButtonSettings_Click;
+            // 
+            // toolStripSeparator11
+            // 
+            toolStripSeparator11.Name = "toolStripSeparator11";
+            toolStripSeparator11.Size = new Size(6, 40);
+            // 
+            // toolStripButtonHelp
+            // 
+            toolStripButtonHelp.Image = Open_FTA.Properties.Resources.HelpTableOfContents;
+            toolStripButtonHelp.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripButtonHelp.ImageTransparentColor = Color.Magenta;
+            toolStripButtonHelp.Name = "toolStripButtonHelp";
+            toolStripButtonHelp.Size = new Size(68, 37);
+            toolStripButtonHelp.Text = "Help";
+            toolStripButtonHelp.Click += toolStripButtonHelp_Click;
             // 
             // toolStripButtonCenter
             // 
@@ -814,7 +830,7 @@
             // 
             // toolStripDir
             // 
-            toolStripDir.Items.AddRange(new ToolStripItem[] { toolStripButtonSelectWorkingDirectory, toolStripButtonCreateWorkingDirectory });
+            toolStripDir.Items.AddRange(new ToolStripItem[] { toolStripButtonSelectWorkingDirectory, toolStripButtonCreateWorkingDirectory, toolStripButtonOpenDirectory });
             toolStripDir.Location = new Point(0, 0);
             toolStripDir.Name = "toolStripDir";
             toolStripDir.Size = new Size(233, 25);
@@ -858,20 +874,15 @@
             panelLeft_Top.Size = new Size(233, 494);
             panelLeft_Top.TabIndex = 0;
             // 
-            // toolStripSeparator11
+            // toolStripButtonOpenDirectory
             // 
-            toolStripSeparator11.Name = "toolStripSeparator11";
-            toolStripSeparator11.Size = new Size(6, 40);
-            // 
-            // toolStripButtonHelp
-            // 
-            toolStripButtonHelp.Image = Open_FTA.Properties.Resources.HelpTableOfContents;
-            toolStripButtonHelp.ImageScaling = ToolStripItemImageScaling.None;
-            toolStripButtonHelp.ImageTransparentColor = Color.Magenta;
-            toolStripButtonHelp.Name = "toolStripButtonHelp";
-            toolStripButtonHelp.Size = new Size(68, 37);
-            toolStripButtonHelp.Text = "Help";
-            toolStripButtonHelp.Click += toolStripButtonHelp_Click;
+            toolStripButtonOpenDirectory.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonOpenDirectory.Image = (Image)resources.GetObject("toolStripButtonOpenDirectory.Image");
+            toolStripButtonOpenDirectory.ImageTransparentColor = Color.Magenta;
+            toolStripButtonOpenDirectory.Name = "toolStripButtonOpenDirectory";
+            toolStripButtonOpenDirectory.Size = new Size(23, 22);
+            toolStripButtonOpenDirectory.Text = "Open the current working directory in Explorer";
+            toolStripButtonOpenDirectory.Click += toolStripButtonOpenDirectory_Click;
             // 
             // MainForm
             // 
@@ -1005,6 +1016,7 @@
         private ToolStripButton toolStripButtonRunTopEventFreq;
         private ToolStripSeparator toolStripSeparator11;
         private ToolStripButton toolStripButtonHelp;
+        private ToolStripButton toolStripButtonOpenDirectory;
     }
 }
 

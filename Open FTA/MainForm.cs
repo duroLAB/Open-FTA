@@ -2,6 +2,7 @@
 using Open_FTA.forms;
 using Open_FTA.Properties;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -447,7 +448,7 @@ namespace OpenFTA
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                LoadFile(ofd.FileName);              
+                LoadFile(ofd.FileName);
             }
         }
 
@@ -479,7 +480,7 @@ namespace OpenFTA
                 EngineLogic.MyDrawingEngine.SetStructure(EngineLogic.FTAStructure);
                 pictureBox1.Invalidate();
 
-                 
+
 
                 try
                 {
@@ -1337,7 +1338,7 @@ namespace OpenFTA
             {
                 if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
             }
-           
+
 
             EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);
 
@@ -1399,14 +1400,14 @@ namespace OpenFTA
                 dataGridViewMCSResults.Columns.RemoveAt(i);
 
             }
-           // dataGridViewMCSResults.ColumnHeadersVisible = false;
+            // dataGridViewMCSResults.ColumnHeadersVisible = false;
             dataGridViewMCSResults.RowHeadersVisible = false;
 
             dataGridViewMCSResults.Columns[0].HeaderText = "Name";
             dataGridViewMCSResults.Columns[1].HeaderText = "Frequency";
-            dataGridViewMCSResults.Columns[2].HeaderText = "Contribution (%)";           
-            for(int i=3;i<dataGridViewMCSResults.Columns.Count;i++)
-            dataGridViewMCSResults.Columns[i].HeaderText = "Component " + (i-2).ToString();
+            dataGridViewMCSResults.Columns[2].HeaderText = "Contribution (%)";
+            for (int i = 3; i < dataGridViewMCSResults.Columns.Count; i++)
+                dataGridViewMCSResults.Columns[i].HeaderText = "Component " + (i - 2).ToString();
 
 
             MyUIEngine.SetupModernGrid(dataGridViewMCSResults);
@@ -1743,6 +1744,16 @@ namespace OpenFTA
         {
             FormHelp helpForm = new FormHelp();
             helpForm.Show();
+        }
+
+        private void toolStripButtonOpenDirectory_Click(object sender, EventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = WorkingDirectory,
+                UseShellExecute = true
+            });
         }
     }
 }
