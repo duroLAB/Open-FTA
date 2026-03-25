@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-25
+
+### Added
+Added option to hide frequency for individual events
+Added contribution value of individual MCS to reports and analysis
+Added method to open a specific directory in Windows Explorer
+Embedded sorting script directly in the report, including support for numbers with units
+
+### Changed / Improved
+Optimized text wrapping and font sizing across individual events
+
+### Fixed
+Fixed event text rendering to respect Graphics world transform
+Fixed automatic working directory assignment
+
 ## [1.0.0] - 2025-11-23
 
 ### Added
