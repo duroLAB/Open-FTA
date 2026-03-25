@@ -1755,5 +1755,23 @@ namespace OpenFTA
                 UseShellExecute = true
             });
         }
+
+        private void toolStripButtonArchive_Click(object sender, EventArgs e)
+        {
+            string zipPath = MyUIEngine.CreateArchive(WorkingDirectory, "*.fta", "");
+          
+            var result = MessageBox.Show(
+    $"Archive has been created:\n{zipPath}\n\nDo you want to open it in Explorer?",
+    "Completed",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Information
+);
+
+            if (result == DialogResult.Yes)
+            {
+                Process.Start("explorer.exe", $"/select,\"{zipPath}\"");
+            }
+
+        }
     }
 }

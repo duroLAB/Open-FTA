@@ -109,9 +109,10 @@
             toolStripDir = new ToolStrip();
             toolStripButtonSelectWorkingDirectory = new ToolStripButton();
             toolStripButtonCreateWorkingDirectory = new ToolStripButton();
+            toolStripButtonOpenDirectory = new ToolStripButton();
+            toolStripButtonArchive = new ToolStripButton();
             splitter5 = new Splitter();
             panelLeft_Top = new Panel();
-            toolStripButtonOpenDirectory = new ToolStripButton();
             toolStrip1.SuspendLayout();
             panelBottom.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -830,7 +831,7 @@
             // 
             // toolStripDir
             // 
-            toolStripDir.Items.AddRange(new ToolStripItem[] { toolStripButtonSelectWorkingDirectory, toolStripButtonCreateWorkingDirectory, toolStripButtonOpenDirectory });
+            toolStripDir.Items.AddRange(new ToolStripItem[] { toolStripButtonSelectWorkingDirectory, toolStripButtonCreateWorkingDirectory, toolStripButtonOpenDirectory, toolStripButtonArchive });
             toolStripDir.Location = new Point(0, 0);
             toolStripDir.Name = "toolStripDir";
             toolStripDir.Size = new Size(233, 25);
@@ -857,6 +858,26 @@
             toolStripButtonCreateWorkingDirectory.Text = "Create a new project directory";
             toolStripButtonCreateWorkingDirectory.Click += toolStripButtonCreateWorkingDirectory_Click;
             // 
+            // toolStripButtonOpenDirectory
+            // 
+            toolStripButtonOpenDirectory.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonOpenDirectory.Image = Open_FTA.Properties.Resources.ShowStartWindow;
+            toolStripButtonOpenDirectory.ImageTransparentColor = Color.Magenta;
+            toolStripButtonOpenDirectory.Name = "toolStripButtonOpenDirectory";
+            toolStripButtonOpenDirectory.Size = new Size(23, 22);
+            toolStripButtonOpenDirectory.Text = "Open the current working directory in Explorer";
+            toolStripButtonOpenDirectory.Click += toolStripButtonOpenDirectory_Click;
+            // 
+            // toolStripButtonArchive
+            // 
+            toolStripButtonArchive.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButtonArchive.Image = Open_FTA.Properties.Resources.Package;
+            toolStripButtonArchive.ImageTransparentColor = Color.Magenta;
+            toolStripButtonArchive.Name = "toolStripButtonArchive";
+            toolStripButtonArchive.Size = new Size(23, 22);
+            toolStripButtonArchive.Text = "Create a ZIP archive from files with selected extension in the chosen directory";
+            toolStripButtonArchive.Click += toolStripButtonArchive_Click;
+            // 
             // splitter5
             // 
             splitter5.Dock = DockStyle.Top;
@@ -873,16 +894,6 @@
             panelLeft_Top.Name = "panelLeft_Top";
             panelLeft_Top.Size = new Size(233, 494);
             panelLeft_Top.TabIndex = 0;
-            // 
-            // toolStripButtonOpenDirectory
-            // 
-            toolStripButtonOpenDirectory.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButtonOpenDirectory.Image = (Image)resources.GetObject("toolStripButtonOpenDirectory.Image");
-            toolStripButtonOpenDirectory.ImageTransparentColor = Color.Magenta;
-            toolStripButtonOpenDirectory.Name = "toolStripButtonOpenDirectory";
-            toolStripButtonOpenDirectory.Size = new Size(23, 22);
-            toolStripButtonOpenDirectory.Text = "Open the current working directory in Explorer";
-            toolStripButtonOpenDirectory.Click += toolStripButtonOpenDirectory_Click;
             // 
             // MainForm
             // 
@@ -1017,6 +1028,7 @@
         private ToolStripSeparator toolStripSeparator11;
         private ToolStripButton toolStripButtonHelp;
         private ToolStripButton toolStripButtonOpenDirectory;
+        private ToolStripButton toolStripButtonArchive;
     }
 }
 

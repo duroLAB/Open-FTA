@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Markdig;
+using Markdig.Extensions.AutoIdentifiers;
+using Microsoft.Web.WebView2.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,27 +20,66 @@ namespace Open_FTA.forms
         {
             InitializeComponent();
             helpFolder = Path.Combine(Application.StartupPath, "Help");
+            var pipeline = new MarkdownPipelineBuilder()
+             .UseAdvancedExtensions()        // toto aktivuje veľa vecí vrátane atribútov
+             .UseGenericAttributes()         // a toto explicitne zapne {#kotva}
+             .Build();
         }
 
         private async void HelpForm_Load(object sender, EventArgs e)
         {
             // Naplniť strom kapitol
             treeView1.Nodes.Clear();
-            treeView1.Nodes.Add(new TreeNode("Main Window Overview.md") { Tag = "MainWindowOverview.md" });
+            treeView1.Nodes.Add(new TreeNode("Main Window Overview") { Tag = "MainWindowOverview.md" });
+            treeView1.Nodes.Add(new TreeNode("Settings") { Tag = "Settings.md" });
 
             treeView1.ExpandAll();
+
+            // inicializácia WebView2
+            await webView21.EnsureCoreWebView2Async();
+            webView21.CoreWebView2.NavigationStarting += Core_NavigationStarting;
 
 
             await LoadMarkdown("Main Window Overview.md");
         }
 
-        private async Task LoadMarkdown(string fileName)
+        private async void Core_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            string uri = e.Uri;
+
+
+            if (uri.Contains(".md"))
+            {
+                e.Cancel = true;
+
+                // Získať názov súboru
+                var fullPart = uri.Split('#')[0];
+                string file = Path.GetFileName(fullPart);
+
+                // Získať anchor (sekciu)
+                string anchor = null;
+                if (uri.Contains("#"))
+                    anchor = uri.Split('#').Last();
+
+                await LoadMarkdown(file, anchor);
+            }
+        }
+
+        private async Task LoadMarkdown(string fileName, string anchor = null)
         {
             string path = Path.Combine(helpFolder, fileName);
             if (!File.Exists(path)) return;
 
             string markdown = File.ReadAllText(path);
-            string htmlContent = Markdig.Markdown.ToHtml(markdown);
+
+
+            var pipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .UseAutoIdentifiers(AutoIdentifierOptions.GitHub)   // ← generuje id="moja-sekcia"
+                .UseGenericAttributes()                             // ← podporuje {#vlastnaKotva}               
+                .Build();
+
+            string htmlContent = Markdig.Markdown.ToHtml(markdown, pipeline);
 
             string finalHtml = $@"
 <html>
@@ -57,12 +99,25 @@ pre {{ background:#272822; color:#f8f8f2; padding:15px; border-radius:6px; overf
 </body>
 </html>";
 
-            // Ulož dočasný HTML súbor
             string tempFile = Path.Combine(Path.GetTempPath(), "help_temp.html");
             File.WriteAllText(tempFile, finalHtml);
 
             await webView21.EnsureCoreWebView2Async();
-            webView21.CoreWebView2.Navigate(tempFile);  // <-- naviguje na súbor
+            webView21.CoreWebView2.Navigate(tempFile);
+
+            // Po načítaní skoč na anchor
+            if (!string.IsNullOrEmpty(anchor))
+            {
+                webView21.CoreWebView2.NavigationCompleted += (s, e) =>
+                {
+                    try
+                    {
+                        webView21.CoreWebView2.ExecuteScriptAsync(
+                            $"location.hash = '#{anchor}';");
+                    }
+                    catch { }
+                };
+            }
         }
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)

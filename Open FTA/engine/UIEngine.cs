@@ -1,4 +1,5 @@
 ﻿using System.Drawing.Drawing2D;
+using System.IO.Compression;
 
 class UIEngine
 {
@@ -303,5 +304,37 @@ class UIEngine
 
     }
 
+    public string CreateArchive(string sourceDirectory, string extension, string additionalText = "")
+    {
+        if (!Directory.Exists(sourceDirectory))
+            throw new DirectoryNotFoundException("Adresár neexistuje.");
 
+        if (!extension.StartsWith("."))
+            extension = "." + extension;
+
+        string folderName = new DirectoryInfo(sourceDirectory).Name;
+        string date = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+        string zipFileName = $"{folderName}_autoarchive_{date}";
+
+        if (!string.IsNullOrWhiteSpace(additionalText))
+            zipFileName += $"_{additionalText}";
+
+        string zipPath = Path.Combine(sourceDirectory, zipFileName + ".zip");
+
+        var files = Directory
+            .GetFiles(sourceDirectory, "*", SearchOption.AllDirectories)
+            .Where(f => Path.GetExtension(f).Equals(extension, StringComparison.OrdinalIgnoreCase));
+
+        using (var archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+        {
+            foreach (var file in files)
+            {
+                string entryName = Path.GetRelativePath(sourceDirectory, file);
+                archive.CreateEntryFromFile(file, entryName);
+            }
+        }
+
+        return zipPath;
+    }
 }

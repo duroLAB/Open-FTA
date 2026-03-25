@@ -303,6 +303,16 @@ namespace Open_FTA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Package {
+            get {
+                object obj = ResourceManager.GetObject("Package", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Paste_16 {
             get {
                 object obj = ResourceManager.GetObject("Paste_16", resourceCulture);
@@ -386,6 +396,16 @@ namespace Open_FTA.Properties {
         internal static System.Drawing.Bitmap Settings {
             get {
                 object obj = ResourceManager.GetObject("Settings", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ShowStartWindow {
+            get {
+                object obj = ResourceManager.GetObject("ShowStartWindow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
