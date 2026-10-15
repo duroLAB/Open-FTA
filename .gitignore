@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Open FTA: publish profile is versioned (no secrets, only build/publish settings)
+!/Open FTA/Properties/PublishProfiles/FolderProfile.pubxml
