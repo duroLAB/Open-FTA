@@ -656,52 +656,29 @@ public class FTAlogic
         };
     }
 
+    /// <summary>
+    /// Converts an event value to the probability of occurrence within one base time period
+    /// (MainAppSettings.BaseTimeUnit).
+    /// F and Lambda: exposure time t = one base period expressed in the event's time unit,
+    /// t = Tbase / Tsource (e.g. event in 1/h, base year -> t = 8760 h).
+    /// Simplified: P = f*t, exact: P = 1 - exp(-f*t). P and R do not depend on time units.
+    /// </summary>
     private static double ConvertToProbability(FTAitem e)
     {
-        //double Tsource = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
-        double Tsource = 1.0 / TimeUnitFactors[(int)e.ValueUnit];
+        // Length of one unit in years: year = 1, day = 1/365, hour = 1/8760, second = 1/31 536 000
+        double Tsource = 1.0 / TimeUnitFactors[e.ValueUnit];
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
+        double t = Tbase / Tsource;
 
-        double P;
-
-        if (e.ValueType == ValueTypes.P || e.ValueType == ValueTypes.R)
+        return e.ValueType switch
         {
-            Tsource = Tbase;
-        }
-
-        if (MainAppSettings.Instance.SimplificationStrategy && (e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda))
-            P = e.Value;
-        else
-            P = e.ValueType switch
-            {
-                //ValueTypes.F => 1 - Math.Exp(-e.Value * Tsource),
-                ValueTypes.F => 1 - Math.Exp(-e.Value * Tbase),
-                ValueTypes.P => e.Value,
-                ValueTypes.R => 1 - e.Value,
-                ValueTypes.Lambda => 1 - Math.Exp(-e.Value * Tbase),
-                _ => throw new ArgumentException("Neznámy typ hodnoty")
-            };
-        /*   P = e.UserMetricType switch
-           {
-               0 => 1 - Math.Exp(-e.Value * Tsource),
-               1 => e.Value,
-               2 => 1 - e.Value,
-               3 => 1 - Math.Exp(-e.Value * Tsource),
-               _ => throw new ArgumentException("Neznámy typ hodnoty")
-           };*/
-
-        if (Tbase == Tsource)
-            return P;
-        else
-            if (MainAppSettings.Instance.SimplificationStrategy)
-        {
-            P = P * Tbase / Tsource;
-            return (P);
-        }
-        else
-            return 1 - Math.Pow(1 - P, Tsource / Tbase);
-
-
+            ValueTypes.F or ValueTypes.Lambda => MainAppSettings.Instance.SimplificationStrategy
+                ? e.Value * t
+                : 1 - Math.Exp(-e.Value * t),
+            ValueTypes.P => e.Value,
+            ValueTypes.R => 1 - e.Value,
+            _ => throw new ArgumentException("Neznámy typ hodnoty")
+        };
     }
 
     public static double ProbabilityToFrequency(double P)
