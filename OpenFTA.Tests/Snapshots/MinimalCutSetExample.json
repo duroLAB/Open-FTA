@@ -1,0 +1,9 @@
+{
+  "TopValue": 1,
+  "TopValueType": "F",
+  "McsTopValue": 1,
+  "CutSets": [
+    "BE1",
+    "BE2*BE3*BE4"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "TopValue": 18.199779854400006,
+  "TopValueType": "F",
+  "McsTopValue": 14.123432640000003,
+  "CutSets": [
+    "EP",
+    "FC2*FCV1",
+    "FC2*P1",
+    "FCV1*P2",
+    "P1*P2",
+    "PR"
+  ]
+}

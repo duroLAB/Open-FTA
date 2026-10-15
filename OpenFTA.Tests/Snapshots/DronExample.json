@@ -1,0 +1,13 @@
+{
+  "TopValue": 0.0004459414517167099,
+  "TopValueType": "P",
+  "McsTopValue": 0.00044594145171671,
+  "CutSets": [
+    "BIRD-STRIKE",
+    "BW-WG",
+    "D-GPS*F-EM-LAND",
+    "F-EM-LAND*OP-ERR",
+    "F-FC",
+    "L-COMM"
+  ]
+}

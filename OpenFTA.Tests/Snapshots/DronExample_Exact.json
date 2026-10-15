@@ -1,0 +1,14 @@
+{
+  "TopValue": 0.00108569899,
+  "TopValueType": "P",
+  "McsTopValue": 0.00108569899,
+  "CutSets": [
+    "BE1",
+    "BE2*BE3",
+    "BE2*BE4",
+    "BW-WG",
+    "D-BAT*F-EM-LAND",
+    "D-WIFI*F-EM-LAND",
+    "F-FC"
+  ]
+}

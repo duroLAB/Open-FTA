@@ -19,6 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="OpenFTA.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Main.ico" />
   </ItemGroup>
 

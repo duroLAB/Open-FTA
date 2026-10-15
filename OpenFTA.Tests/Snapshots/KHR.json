@@ -1,0 +1,11 @@
+{
+  "TopValue": 3.0000000000000005E-06,
+  "TopValueType": "F",
+  "McsTopValue": 3E-06,
+  "CutSets": [
+    "BE1*BE2*BE3*BE5",
+    "BE1*BE2*BE3*BE6",
+    "BE1*BE2*BE4*BE5",
+    "BE1*BE2*BE4*BE6"
+  ]
+}
