@@ -70,8 +70,4 @@ public sealed class TreeBuilder
 public static class FtaLogicExtensions
 {
     public static FTAitem Top(this FTAlogic logic) => logic.GetItem(logic.TopEventGuid);
-
-    /// <summary>Top event of the MCS structure created by GenerateMCS.</summary>
-    public static FTAitem McsTop(this FTAlogic logic) =>
-        logic.MCSStructure.Values.Single(i => i.Parent == Guid.Empty);
 }

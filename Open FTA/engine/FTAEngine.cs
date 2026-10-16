@@ -78,6 +78,14 @@ public class FTAlogic
   
 
     public Dictionary<Guid, FTAitem> MCSStructure { get; private set; } = new Dictionary<Guid, FTAitem>();
+
+    /// <summary>Minimal cut sets created by GenerateMCS, in the order of the simplified expression.</summary>
+    public List<MinimalCutSet> MinimalCutSets { get; } = new List<MinimalCutSet>();
+
+    /// <summary>Top event result evaluated from the minimal cut sets: 1 - prod(1 - P_MCS).</summary>
+    public double McsTopValue { get; private set; }
+    public ValueTypes McsTopValueType { get; private set; }
+    public int McsTopValueUnit { get; private set; }
     public List<FTAitem> SelectedEvents { get; set; } = new List<FTAitem>();
     public List<FTAitem> HighlightedEvents { get; set; } = new List<FTAitem>();
 
@@ -639,9 +647,13 @@ public class FTAlogic
         SumChildren(parent, FTAStructure);
     }
 
-    public static double CalculateGate(List<FTAitem> events, Gates gate)
+    public static double CalculateGate(List<FTAitem> events, Gates gate) =>
+        CalculateGate(events.Select(ConvertToProbability), gate);
+
+    /// <summary>Combines probabilities of independent inputs with an OR / AND gate.</summary>
+    public static double CalculateGate(IEnumerable<double> probabilities, Gates gate)
     {
-        var probs = events.Select(ConvertToProbability).ToList();
+        var probs = probabilities.ToList();
 
         if (gate == Gates.OR && MainAppSettings.Instance.SimplificationStrategyLinearOR)
         {
@@ -670,18 +682,23 @@ public class FTAlogic
         if (e.ForcedProbability is double forced)
             return forced;
 
+        return ConvertToProbability(e.Value, e.ValueType, e.ValueUnit);
+    }
+
+    private static double ConvertToProbability(double value, ValueTypes valueType, int valueUnit)
+    {
         // Length of one unit in years: year = 1, day = 1/365, hour = 1/8760, second = 1/31 536 000
-        double Tsource = 1.0 / TimeUnitFactors[e.ValueUnit];
+        double Tsource = 1.0 / TimeUnitFactors[valueUnit];
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
         double t = Tbase / Tsource;
 
-        return e.ValueType switch
+        return valueType switch
         {
             ValueTypes.F or ValueTypes.Lambda => MainAppSettings.Instance.SimplificationStrategy
-                ? e.Value * t
-                : 1 - Math.Exp(-e.Value * t),
-            ValueTypes.P => e.Value,
-            ValueTypes.R => 1 - e.Value,
+                ? value * t
+                : 1 - Math.Exp(-value * t),
+            ValueTypes.P => value,
+            ValueTypes.R => 1 - value,
             _ => throw new ArgumentException("Neznámy typ hodnoty")
         };
     }
@@ -1073,6 +1090,78 @@ public class FTAlogic
 
         // 4) Attach MCS terms directly to the top event .
         ParseMCSIntoStructure(simplifiedEquation, mcsTopEvent.GuidCode);
+
+        // 5) New model: list of cut sets referencing the original events
+        BuildMinimalCutSets(simplifiedEquation);
+        EvaluateMinimalCutSets();
+    }
+
+    /// <summary>Creates MinimalCutSets from a simplified expression like "A*B + C".</summary>
+    private void BuildMinimalCutSets(string simplifiedEquation)
+    {
+        MinimalCutSets.Clear();
+
+        int index = 1;
+        foreach (string term in simplifiedEquation.Split('+'))
+        {
+            var events = new List<FTAitem>();
+            foreach (string factor in term.Split('*'))
+            {
+                string tag = factor.Trim();
+                var originalEvent = FTAStructure.Values.FirstOrDefault(e => string.Equals(e.Tag, tag, StringComparison.OrdinalIgnoreCase));
+                if (originalEvent != null)
+                    events.Add(originalEvent);
+            }
+            MinimalCutSets.Add(new MinimalCutSet(index++, events));
+        }
+    }
+
+    private static bool IsProbabilityType(ValueTypes type) => type == ValueTypes.P || type == ValueTypes.R;
+
+    /// <summary>
+    /// Computes the value of each cut set (AND of its events), the MCS top event value
+    /// (OR of the cut sets) and the contribution of each cut set.
+    /// Same rules as gate-by-gate calculation: the result is a probability if all inputs
+    /// are probabilities, otherwise a frequency per base time unit.
+    /// </summary>
+    public void EvaluateMinimalCutSets()
+    {
+        int baseUnit = (int)MainAppSettings.Instance.BaseTimeUnit;
+
+        foreach (var mcs in MinimalCutSets)
+        {
+            if (mcs.Events.Count == 0)
+            {
+                mcs.Value = 0;
+                mcs.ValueType = ValueTypes.F;
+                mcs.ValueUnit = 0;
+                continue;
+            }
+
+            bool allProbabilities = mcs.Events.All(e => IsProbabilityType(e.ValueType));
+            double p = CalculateGate(mcs.Events.Select(ConvertToProbability), mcs.Gate);
+            mcs.ValueType = allProbabilities ? ValueTypes.P : ValueTypes.F;
+            mcs.Value = allProbabilities ? p : ProbabilityToFrequency(p);
+            mcs.ValueUnit = baseUnit;
+        }
+
+        if (MinimalCutSets.Count == 0)
+        {
+            McsTopValue = 0;
+            McsTopValueType = ValueTypes.F;
+            McsTopValueUnit = 0;
+            return;
+        }
+
+        bool topAllProbabilities = MinimalCutSets.All(m => IsProbabilityType(m.ValueType));
+        double pTop = CalculateGate(
+            MinimalCutSets.Select(m => ConvertToProbability(m.Value, m.ValueType, m.ValueUnit)), Gates.OR);
+        McsTopValueType = topAllProbabilities ? ValueTypes.P : ValueTypes.F;
+        McsTopValue = topAllProbabilities ? pTop : ProbabilityToFrequency(pTop);
+        McsTopValueUnit = baseUnit;
+
+        foreach (var mcs in MinimalCutSets)
+            mcs.Contribution = mcs.Value / McsTopValue * 100;
     }
 
     private void ParseMCSIntoStructure(string equation, Guid parentGuid)

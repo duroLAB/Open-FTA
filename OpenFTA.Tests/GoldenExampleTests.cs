@@ -36,13 +36,11 @@ public class GoldenExampleTests : SettingsTestBase
 
         t.ComputeTree();
         t.GenerateMCS(out string equation, out string simplified);
-        var mcsTop = t.McsTop();
-        t.SumChildren(mcsTop, t.MCSStructure);
 
         var actual = new GoldenResult(
             TopValue: t.Top().Value,
             TopValueType: t.Top().ValueType.ToString(),
-            McsTopValue: mcsTop.Value,
+            McsTopValue: t.McsTopValue,
             CutSets: CutSets.Parse(simplified));
 
         _output.WriteLine($"Equation:   {equation}");
@@ -62,19 +60,15 @@ public class GoldenExampleTests : SettingsTestBase
 
         t.ComputeTree();
         t.GenerateMCS(out _, out _);
-        var mcsTop = t.McsTop();
-        t.SumChildren(mcsTop, t.MCSStructure);
-        double top = mcsTop.Value;
 
-        var actual = mcsTop.Children
-            .Select(g => t.MCSStructure[g])
+        var actual = t.MinimalCutSets
             .Select(m => new McsDetail(
                 Name: m.Name,
-                Events: m.Children.Select(c => t.MCSStructure[c].Tag).ToList(),
+                Events: m.Events.Select(e => e.Tag).ToList(),
                 Value: m.Value,
                 ValueType: m.ValueType.ToString(),
                 ValueUnit: m.ValueUnit,
-                Contribution: m.Value / top * 100))
+                Contribution: m.Contribution))
             .ToList();
 
         foreach (var m in actual)

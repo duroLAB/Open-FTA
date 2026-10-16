@@ -137,12 +137,11 @@ public class GateCalculationTests : SettingsTestBase
 
         t.ComputeTree();
         t.GenerateMCS(out _, out string simplified);
-        t.SumChildren(t.McsTop(), t.MCSStructure);
 
         // Gate by gate treats both A as independent events: 0.28 * 0.37
         Approx.Equal(0.1036, t.Top().Value);
         // Exact: P(A + B*C) = 0.1 + 0.06 - 0.1*0.06
         Assert.Equal(new[] { "A", "B*C" }, CutSets.Parse(simplified));
-        Approx.Equal(0.154, t.McsTop().Value);
+        Approx.Equal(0.154, t.McsTopValue);
     }
 }
