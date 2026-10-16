@@ -1,3 +1,4 @@
+using System.Globalization;
 using OpenFTA.Tests.Helpers;
 using Xunit.Abstractions;
 
@@ -51,5 +52,57 @@ public class GoldenExampleTests : SettingsTestBase
 
         if (Snapshot.Match(file, actual))
             _output.WriteLine($"Snapshot created in {Snapshot.Directory}");
+    }
+
+    [Theory]
+    [MemberData(nameof(ExampleFiles))]
+    public void Example_MCS_details_are_unchanged(string file)
+    {
+        var t = ExampleLoader.Load(file);
+
+        t.ComputeTree();
+        t.GenerateMCS(out _, out _);
+        var mcsTop = t.McsTop();
+        t.SumChildren(mcsTop, t.MCSStructure);
+        double top = mcsTop.Value;
+
+        var actual = mcsTop.Children
+            .Select(g => t.MCSStructure[g])
+            .Select(m => new McsDetail(
+                Name: m.Name,
+                Events: m.Children.Select(c => t.MCSStructure[c].Tag).ToList(),
+                Value: m.Value,
+                ValueType: m.ValueType.ToString(),
+                ValueUnit: m.ValueUnit,
+                Contribution: m.Value / top * 100))
+            .ToList();
+
+        foreach (var m in actual)
+            _output.WriteLine($"{m.Name}: {string.Join("*", m.Events)} = {m.Value:R} ({m.ValueType}), {m.Contribution:F4} %");
+
+        if (Snapshot.MatchMcs(file, actual))
+            _output.WriteLine($"Snapshot created in {Snapshot.Directory}");
+    }
+
+    [Theory]
+    [MemberData(nameof(ExampleFiles))]
+    public void Example_report_is_unchanged(string file)
+    {
+        // The report formats numbers with the current culture; use a fixed one for the snapshot
+        var originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+        try
+        {
+            var t = ExampleLoader.Load(file);
+            t.GenerateHTMLreport();
+
+            string name = Path.GetFileNameWithoutExtension(file) + ".report.html";
+            if (Snapshot.MatchText(name, t.html.ToString()))
+                _output.WriteLine($"Snapshot created in {Snapshot.Directory}");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 }
