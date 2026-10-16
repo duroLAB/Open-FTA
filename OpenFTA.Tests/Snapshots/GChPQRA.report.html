@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenFTA export</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 40px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: left;
+        }
+
+        thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Event</h1>    <h2>Major Flammable Release (TE)</h2><h3> Minimal cut set result:f=0.032191 y⁻¹</h3><h3> Gate by Gate result:f=0.032191 y⁻¹</h3>
+    <h1>List of Basic Events</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>Name</th>
+                <th>Notes</th>
+                <th>Metric</th>
+                <th>Ref.</th>
+            </tr>
+        </thead>
+        <tbody>
+<tr><td>NewTag</td><td>Tank Drain Break</td ><td></td ><td>f=1.0000E-4 y⁻¹</td><td></td></tr>
+<tr><td>B2</td><td>Tank Truck Unloading Frequency</td ><td></td ><td>f=300.000000 y⁻¹</td><td></td></tr>
+<tr><td>B15</td><td>Insufficient Volume in Tank to Unload Truck</td ><td></td ><td>P=0.010000</td><td></td></tr>
+<tr><td>B17</td><td>Wrong Material in Tank Truck</td ><td></td ><td>P=0.001000</td><td></td></tr>
+<tr><td>B18</td><td>Tank Truck not Sampled before Unloading </td ><td></td ><td>P=0.010000</td><td></td></tr>
+<tr><td>B19</td><td>Reagent Reacts with Unloaded Material</td ><td></td ><td>P=0.100000</td><td></td></tr>
+<tr><td>B20</td><td>Pressure Rise Exceeda Capacity of PV-1 and RV-1</td ><td></td ><td>P=0.100000</td><td></td></tr>
+<tr><td>B7</td><td>Unloading Tank Requires Nitrogen Purge</td ><td></td ><td>f=10.000000 y⁻¹</td><td></td></tr>
+<tr><td>B8</td><td>Boiloff Insufficient to Prevent Vacuum</td ><td></td ><td>P=0.010000</td><td></td></tr>
+<tr><td>B9</td><td>PV-2 Fails Closed</td ><td></td ><td>P=0.010000</td><td></td></tr>
+<tr><td>B10</td><td>PICA-1 Fails Closing PV-2</td ><td></td ><td>P=0.010000</td><td></td></tr>
+<tr><td>B11</td><td>Loss of Nitrogen Supply</td ><td></td ><td>P=1.0000E-4</td><td></td></tr>
+<tr><td>B13</td><td>Exceed Capacity of RV-1</td ><td></td ><td>P=0.001000</td><td></td></tr>
+<tr><td>B14</td><td>V-8 Clossed</td ><td></td ><td>P=0.001000</td><td></td></tr>
+<tr><td>B12</td><td>Failure of PICA-1 Closing PV-1</td ><td></td ><td>f=0.010000 y⁻¹</td><td></td></tr>
+<tr><td>B21</td><td>Failure of, or ignoring PICA-1</td ><td></td ><td>P=0.010000</td><td></td></tr>
+<tr><td>B22</td><td>PV-1 Fails Closed</td ><td></td ><td>f=0.001000 y⁻¹</td><td></td></tr>
+<tr><td>B23</td><td>V-7 Closed</td ><td></td ><td>f=0.001000 y⁻¹</td><td></td></tr>
+<tr><td>B24</td><td>temperature of Inlet Hotter than Normal</td ><td></td ><td>f=0.001000 y⁻¹</td><td></td></tr>
+<tr><td>B25</td><td>Hight Pressure in Flare Header</td ><td></td ><td>f=0.001000 y⁻¹</td><td></td></tr>
+<tr><td>B3</td><td>Vehicle Impact</td ><td></td ><td>f=1.0000E-5 y⁻¹</td><td></td></tr>
+<tr><td>B4</td><td>Aircraft Impact</td ><td></td ><td>f=1.0000E-6 y⁻¹</td><td></td></tr>
+<tr><td>B5</td><td>Earthquake</td ><td></td ><td>f=1.0000E-5 y⁻¹</td><td></td></tr>
+<tr><td>B6</td><td>Tornado</td ><td></td ><td>f=1.0000E-5 y⁻¹</td><td></td></tr>
+<tr><td>B16</td><td>Failure of, or Ignoring LIA-1</td ><td></td ><td>P=0.010000</td><td></td></tr>
+        </tbody>
+    </table>
+
+ <h2>References</h2><ul></ul>
+<br>    <h1>Minimal cut sets</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Name</th>
+               <th>Events</th>
+                <th>Metric</th>
+                <th>MCS Contribution</th>
+            </tr>
+        </thead>
+        <tbody>
+<tr><td>MCS1</td><td>{PICA-1 Fails Closing PV-2} - {Unloading Tank Requires Nitrogen Purge} - {Boiloff Insufficient to Prevent Vacuum} </td><td>f=0.001000 y⁻¹</td><td>3.1065 %</td></tr>
+<tr><td>MCS2</td><td>{Loss of Nitrogen Supply} - {Unloading Tank Requires Nitrogen Purge} - {Boiloff Insufficient to Prevent Vacuum} </td><td>f=1.0000E-5 y⁻¹</td><td>0.0311 %</td></tr>
+<tr><td>MCS3</td><td>{Failure of PICA-1 Closing PV-1} - {Exceed Capacity of RV-1} </td><td>f=1.0000E-5 y⁻¹</td><td>0.0311 %</td></tr>
+<tr><td>MCS4</td><td>{Failure of PICA-1 Closing PV-1} - {V-8 Clossed} </td><td>f=1.0000E-5 y⁻¹</td><td>0.0311 %</td></tr>
+<tr><td>MCS5</td><td>{Exceed Capacity of RV-1} - {Failure of, or ignoring PICA-1} - {PV-1 Fails Closed} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS6</td><td>{Exceed Capacity of RV-1} - {Failure of, or ignoring PICA-1} - {V-7 Closed} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS7</td><td>{Exceed Capacity of RV-1} - {Failure of, or ignoring PICA-1} - {temperature of Inlet Hotter than Normal} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS8</td><td>{Exceed Capacity of RV-1} - {Failure of, or ignoring PICA-1} - {Hight Pressure in Flare Header} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS9</td><td>{V-8 Clossed} - {Failure of, or ignoring PICA-1} - {PV-1 Fails Closed} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS10</td><td>{V-8 Clossed} - {Failure of, or ignoring PICA-1} - {V-7 Closed} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS11</td><td>{V-8 Clossed} - {Failure of, or ignoring PICA-1} - {temperature of Inlet Hotter than Normal} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS12</td><td>{V-8 Clossed} - {Failure of, or ignoring PICA-1} - {Hight Pressure in Flare Header} </td><td>f=1.0000E-8 y⁻¹</td><td>0.0000 %</td></tr>
+<tr><td>MCS13</td><td>{Insufficient Volume in Tank to Unload Truck} - {Failure of, or Ignoring LIA-1} - {Tank Truck Unloading Frequency} </td><td>f=0.030000 y⁻¹</td><td>93.1935 %</td></tr>
+<tr><td>MCS14</td><td>{Wrong Material in Tank Truck} - {Tank Truck not Sampled before Unloading } - {Reagent Reacts with Unloaded Material} - {Tank Truck Unloading Frequency} - {Pressure Rise Exceeda Capacity of PV-1 and RV-1} </td><td>f=3.0000E-5 y⁻¹</td><td>0.0932 %</td></tr>
+<tr><td>MCS15</td><td>{Vehicle Impact} </td><td>f=1.0000E-5 y⁻¹</td><td>0.0311 %</td></tr>
+<tr><td>MCS16</td><td>{Aircraft Impact} </td><td>f=1.0000E-6 y⁻¹</td><td>0.0031 %</td></tr>
+<tr><td>MCS17</td><td>{Earthquake} </td><td>f=1.0000E-5 y⁻¹</td><td>0.0311 %</td></tr>
+<tr><td>MCS18</td><td>{Tornado} </td><td>f=1.0000E-5 y⁻¹</td><td>0.0311 %</td></tr>
+<tr><td>MCS19</td><td>{Unloading Tank Requires Nitrogen Purge} - {Boiloff Insufficient to Prevent Vacuum} - {PV-2 Fails Closed} </td><td>f=0.001000 y⁻¹</td><td>3.1065 %</td></tr>
+<tr><td>MCS20</td><td>{Tank Drain Break} </td><td>f=1.0000E-4 y⁻¹</td><td>0.3106 %</td></tr>
+        </tbody>
+    </table>
+<br>    <h1>Importance Measures</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Tag</th>
+                <th>BIM</th>
+                <th>CIM</th>
+                <th>RAW</th>
+                <th>RRW</th>
+                <th>FV</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+<td>Tank Drain Break</td><td>NewTag</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00311613</td><td>0.00310645</td></tr>
+            <tr>
+<td>Tank Truck Unloading Frequency</td><td>B2</td><td>n/a</td><td>n/a</td><td>n/a</td><td>14.89582986</td><td>0.93286712</td></tr>
+            <tr>
+<td>Insufficient Volume in Tank to Unload Truck</td><td>B15</td><td>3</td><td>0.93193518</td><td>93.26158302</td><td>14.69187798</td><td>0.93193518</td></tr>
+            <tr>
+<td>Wrong Material in Tank Truck</td><td>B17</td><td>0.03</td><td>0.00093194</td><td>1.93100325</td><td>1.0009328</td><td>0.00093194</td></tr>
+            <tr>
+<td>Tank Truck not Sampled before Unloading </td><td>B18</td><td>0.003</td><td>0.00093194</td><td>1.09226158</td><td>1.0009328</td><td>0.00093194</td></tr>
+            <tr>
+<td>Reagent Reacts with Unloaded Material</td><td>B19</td><td>0.0003</td><td>0.00093194</td><td>1.00838742</td><td>1.0009328</td><td>0.00093194</td></tr>
+            <tr>
+<td>Pressure Rise Exceeda Capacity of PV-1 and RV-1</td><td>B20</td><td>0.0003</td><td>0.00093194</td><td>1.00838742</td><td>1.0009328</td><td>0.00093194</td></tr>
+            <tr>
+<td>Unloading Tank Requires Nitrogen Purge</td><td>B7</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.06659801</td><td>0.06243966</td></tr>
+            <tr>
+<td>Boiloff Insufficient to Prevent Vacuum</td><td>B8</td><td>0.201</td><td>0.06243966</td><td>7.18152606</td><td>1.06659801</td><td>0.06243966</td></tr>
+            <tr>
+<td>PV-2 Fails Closed</td><td>B9</td><td>0.1</td><td>0.03106451</td><td>4.0753861</td><td>1.03206045</td><td>0.03106451</td></tr>
+            <tr>
+<td>PICA-1 Fails Closing PV-2</td><td>B10</td><td>0.1</td><td>0.03106451</td><td>4.0753861</td><td>1.03206045</td><td>0.03106451</td></tr>
+            <tr>
+<td>Loss of Nitrogen Supply</td><td>B11</td><td>0.1</td><td>0.00031065</td><td>4.10613996</td><td>1.00031074</td><td>0.00031065</td></tr>
+            <tr>
+<td>Exceed Capacity of RV-1</td><td>B13</td><td>0.01004</td><td>0.00031189</td><td>1.31157575</td><td>1.00031198</td><td>0.00031189</td></tr>
+            <tr>
+<td>V-8 Clossed</td><td>B14</td><td>0.01004</td><td>0.00031189</td><td>1.31157575</td><td>1.00031198</td><td>0.00031189</td></tr>
+            <tr>
+<td>Failure of PICA-1 Closing PV-1</td><td>B12</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00062168</td><td>0.00062129</td></tr>
+            <tr>
+<td>Failure of, or ignoring PICA-1</td><td>B21</td><td>8E-06</td><td>2.49E-06</td><td>1.00024603</td><td>1.00000249</td><td>2.49E-06</td></tr>
+            <tr>
+<td>PV-1 Fails Closed</td><td>B22</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00000062</td><td>6.2E-07</td></tr>
+            <tr>
+<td>V-7 Closed</td><td>B23</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00000062</td><td>6.2E-07</td></tr>
+            <tr>
+<td>temperature of Inlet Hotter than Normal</td><td>B24</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00000062</td><td>6.2E-07</td></tr>
+            <tr>
+<td>Hight Pressure in Flare Header</td><td>B25</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00000062</td><td>6.2E-07</td></tr>
+            <tr>
+<td>Vehicle Impact</td><td>B3</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00031074</td><td>0.00031065</td></tr>
+            <tr>
+<td>Aircraft Impact</td><td>B4</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00003107</td><td>3.106E-05</td></tr>
+            <tr>
+<td>Earthquake</td><td>B5</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00031074</td><td>0.00031065</td></tr>
+            <tr>
+<td>Tornado</td><td>B6</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.00031074</td><td>0.00031065</td></tr>
+            <tr>
+<td>Failure of, or Ignoring LIA-1</td><td>B16</td><td>3</td><td>0.93193518</td><td>93.26158302</td><td>14.69187798</td><td>0.93193518</td></tr>
+        </tbody>
+    </table>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const getCellValue = (tr, idx) => {
+        let v = tr.children[idx].innerText || tr.children[idx].textContent;
+        if (!v) return NaN;
+        v = v.trim();
+        v = v.replace(/,/g, ''); // odstranenie tisicoviek
+        const match = v.match(/[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/);
+        if (match) return parseFloat(match[0]);
+        return v;
+      };
+
+      const comparer = (idx, asc) => (a, b) => {
+        const v1 = getCellValue(a, idx);
+        const v2 = getCellValue(b, idx);
+        if (typeof v1 === 'number' && typeof v2 === 'number') {
+          return asc ? v1 - v2 : v2 - v1;
+        } else {
+          return asc ? ('' + v1).localeCompare(v2) : ('' + v2).localeCompare(v1);
+        };
+      };
+
+      document.querySelectorAll('table.sortable th').forEach(th => {
+        th.addEventListener('click', () => {
+          const table = th.closest('table');
+          const tbody = table.tBodies[0];
+          const rows = Array.from(tbody.rows);
+          const idx = Array.from(th.parentNode.children).indexOf(th);
+          const asc = !(th.asc);
+          th.asc = asc;
+          rows.sort(comparer(idx, asc));
+          rows.forEach(row => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>;
+</body>
+</html>

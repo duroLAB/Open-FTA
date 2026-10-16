@@ -1,0 +1,64 @@
+[
+  {
+    "Name": "MCS1",
+    "Events": [
+      "BIRD-STRIKE"
+    ],
+    "Value": 7.5E-05,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 16.818351312998082
+  },
+  {
+    "Name": "MCS2",
+    "Events": [
+      "BW-WG"
+    ],
+    "Value": 0.00012,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 26.90936210079693
+  },
+  {
+    "Name": "MCS3",
+    "Events": [
+      "D-GPS",
+      "F-EM-LAND"
+    ],
+    "Value": 4.7506963671E-07,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 0.10653184064436201
+  },
+  {
+    "Name": "MCS4",
+    "Events": [
+      "F-EM-LAND",
+      "OP-ERR"
+    ],
+    "Value": 7.499718E-08,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 0.016817718942988714
+  },
+  {
+    "Name": "MCS5",
+    "Events": [
+      "F-FC"
+    ],
+    "Value": 0.0002499688,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 56.05417460918073
+  },
+  {
+    "Name": "MCS6",
+    "Events": [
+      "L-COMM"
+    ],
+    "Value": 4.225849E-07,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 0.09476241743690884
+  }
+]

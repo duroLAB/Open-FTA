@@ -1,0 +1,24 @@
+[
+  {
+    "Name": "MCS1",
+    "Events": [
+      "BE1"
+    ],
+    "Value": 1,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 100
+  },
+  {
+    "Name": "MCS2",
+    "Events": [
+      "BE2",
+      "BE3",
+      "BE4"
+    ],
+    "Value": 0,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0
+  }
+]

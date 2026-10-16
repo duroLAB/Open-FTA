@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenFTA export</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 40px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: left;
+        }
+
+        thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Event</h1>    <h2>Vonkajší požiar okolo cisterny s CL2 (TE)</h2><h3> Minimal cut set result:f=3.0000E-6 y⁻¹</h3><h3> Gate by Gate result:f=3.0000E-6 y⁻¹</h3>
+    <h1>List of Basic Events</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>Name</th>
+                <th>Notes</th>
+                <th>Metric</th>
+                <th>Ref.</th>
+            </tr>
+        </thead>
+        <tbody>
+<tr><td>BE1</td><td>Pravdepodobnosť otvorenia poistného ventilu</td ><td>Pravdepodobnosť že vonk. požiar zapríčiní otvorenie poistného ventilu</td ><td>P=1.000000</td><td></td></tr>
+<tr><td>BE2</td><td>Pravdepodobnosť     zapálenia</td ><td>(odhad)</td ><td>P=0.500000</td><td></td></tr>
+<tr><td>BE3</td><td>Horľavý produkt sa vylial z cisterny</td ><td></td ><td>f=2.0000E-6 y⁻¹</td><td></td></tr>
+<tr><td>BE4</td><td>Únik z blízkeho potrubia s horľav. kvap</td ><td></td ><td>f=1.8000E-5 y⁻¹</td><td></td></tr>
+<tr><td>BE5</td><td>Neregistrované rozliatie kvapaliny</td ><td></td ><td>P=0.100000</td><td></td></tr>
+<tr><td>BE6</td><td>Nemožná akcia na zastavenie rozlievania</td ><td></td ><td>P=0.200000</td><td></td></tr>
+        </tbody>
+    </table>
+
+ <h2>References</h2><ul></ul>
+<br>    <h1>Minimal cut sets</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Name</th>
+               <th>Events</th>
+                <th>Metric</th>
+                <th>MCS Contribution</th>
+            </tr>
+        </thead>
+        <tbody>
+<tr><td>MCS1</td><td>{Pravdepodobnosť otvorenia poistného ventilu} - {Pravdepodobnosť     zapálenia} - {Horľavý produkt sa vylial z cisterny} - {Neregistrované rozliatie kvapaliny} </td><td>f=1.0000E-7 y⁻¹</td><td>3.3333 %</td></tr>
+<tr><td>MCS2</td><td>{Pravdepodobnosť otvorenia poistného ventilu} - {Pravdepodobnosť     zapálenia} - {Horľavý produkt sa vylial z cisterny} - {Nemožná akcia na zastavenie rozlievania} </td><td>f=2.0000E-7 y⁻¹</td><td>6.6667 %</td></tr>
+<tr><td>MCS3</td><td>{Pravdepodobnosť otvorenia poistného ventilu} - {Pravdepodobnosť     zapálenia} - {Únik z blízkeho potrubia s horľav. kvap} - {Neregistrované rozliatie kvapaliny} </td><td>f=9.0000E-7 y⁻¹</td><td>30.0000 %</td></tr>
+<tr><td>MCS4</td><td>{Pravdepodobnosť otvorenia poistného ventilu} - {Pravdepodobnosť     zapálenia} - {Únik z blízkeho potrubia s horľav. kvap} - {Nemožná akcia na zastavenie rozlievania} </td><td>f=1.8000E-6 y⁻¹</td><td>60.0000 %</td></tr>
+        </tbody>
+    </table>
+<br>    <h1>Importance Measures</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Tag</th>
+                <th>BIM</th>
+                <th>CIM</th>
+                <th>RAW</th>
+                <th>RRW</th>
+                <th>FV</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+<td>Pravdepodobnosť otvorenia poistného ventilu</td><td>BE1</td><td>3E-06</td><td>1</td><td>1</td><td>∞</td><td>1</td></tr>
+            <tr>
+<td>Pravdepodobnosť     zapálenia</td><td>BE2</td><td>6E-06</td><td>1</td><td>2</td><td>∞</td><td>1</td></tr>
+            <tr>
+<td>Horľavý produkt sa vylial z cisterny</td><td>BE3</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.11111111</td><td>0.1</td></tr>
+            <tr>
+<td>Únik z blízkeho potrubia s horľav. kvap</td><td>BE4</td><td>n/a</td><td>n/a</td><td>n/a</td><td>10</td><td>0.9</td></tr>
+            <tr>
+<td>Neregistrované rozliatie kvapaliny</td><td>BE5</td><td>1E-05</td><td>0.33333333</td><td>4</td><td>1.5</td><td>0.33333333</td></tr>
+            <tr>
+<td>Nemožná akcia na zastavenie rozlievania</td><td>BE6</td><td>1E-05</td><td>0.66666667</td><td>3.66666667</td><td>3</td><td>0.66666667</td></tr>
+        </tbody>
+    </table>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const getCellValue = (tr, idx) => {
+        let v = tr.children[idx].innerText || tr.children[idx].textContent;
+        if (!v) return NaN;
+        v = v.trim();
+        v = v.replace(/,/g, ''); // odstranenie tisicoviek
+        const match = v.match(/[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/);
+        if (match) return parseFloat(match[0]);
+        return v;
+      };
+
+      const comparer = (idx, asc) => (a, b) => {
+        const v1 = getCellValue(a, idx);
+        const v2 = getCellValue(b, idx);
+        if (typeof v1 === 'number' && typeof v2 === 'number') {
+          return asc ? v1 - v2 : v2 - v1;
+        } else {
+          return asc ? ('' + v1).localeCompare(v2) : ('' + v2).localeCompare(v1);
+        };
+      };
+
+      document.querySelectorAll('table.sortable th').forEach(th => {
+        th.addEventListener('click', () => {
+          const table = th.closest('table');
+          const tbody = table.tBodies[0];
+          const rows = Array.from(tbody.rows);
+          const idx = Array.from(th.parentNode.children).indexOf(th);
+          const asc = !(th.asc);
+          th.asc = asc;
+          rows.sort(comparer(idx, asc));
+          rows.forEach(row => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>;
+</body>
+</html>

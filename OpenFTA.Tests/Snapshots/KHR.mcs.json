@@ -1,0 +1,54 @@
+[
+  {
+    "Name": "MCS1",
+    "Events": [
+      "BE1",
+      "BE2",
+      "BE3",
+      "BE5"
+    ],
+    "Value": 1E-07,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.3333333333333335
+  },
+  {
+    "Name": "MCS2",
+    "Events": [
+      "BE1",
+      "BE2",
+      "BE3",
+      "BE6"
+    ],
+    "Value": 2E-07,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 6.666666666666667
+  },
+  {
+    "Name": "MCS3",
+    "Events": [
+      "BE1",
+      "BE2",
+      "BE4",
+      "BE5"
+    ],
+    "Value": 9.000000000000001E-07,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 30
+  },
+  {
+    "Name": "MCS4",
+    "Events": [
+      "BE1",
+      "BE2",
+      "BE4",
+      "BE6"
+    ],
+    "Value": 1.8000000000000001E-06,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 60
+  }
+]

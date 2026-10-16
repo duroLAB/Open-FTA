@@ -1,0 +1,76 @@
+[
+  {
+    "Name": "MCS1",
+    "Events": [
+      "BE1"
+    ],
+    "Value": 7.5E-05,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 6.90799205772495
+  },
+  {
+    "Name": "MCS2",
+    "Events": [
+      "BE2",
+      "BE3"
+    ],
+    "Value": 4.938E-05,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 4.548221970806107
+  },
+  {
+    "Name": "MCS3",
+    "Events": [
+      "BE2",
+      "BE4"
+    ],
+    "Value": 0.00031279760999999997,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 28.810712074071287
+  },
+  {
+    "Name": "MCS4",
+    "Events": [
+      "BW-WG"
+    ],
+    "Value": 0.00012,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 11.052787292359922
+  },
+  {
+    "Name": "MCS5",
+    "Events": [
+      "D-BAT",
+      "F-EM-LAND"
+    ],
+    "Value": 3.2887080000000004E-05,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 3.0291158325568683
+  },
+  {
+    "Name": "MCS6",
+    "Events": [
+      "D-WiFi",
+      "F-EM-LAND"
+    ],
+    "Value": 0.0002456655,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 22.627404304760386
+  },
+  {
+    "Name": "MCS7",
+    "Events": [
+      "F-FC"
+    ],
+    "Value": 0.0002499688,
+    "ValueType": "P",
+    "ValueUnit": 0,
+    "Contribution": 23.02376646772049
+  }
+]

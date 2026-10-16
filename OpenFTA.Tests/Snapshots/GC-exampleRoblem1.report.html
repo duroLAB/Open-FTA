@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenFTA export</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 40px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: left;
+        }
+
+        thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Event</h1>    <h2>Top Event (TE)</h2><h3> Minimal cut set result:f=14.123433 y⁻¹</h3><h3> Gate by Gate result:f=18.199780 y⁻¹</h3>
+    <h1>List of Basic Events</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>Name</th>
+                <th>Notes</th>
+                <th>Metric</th>
+                <th>Ref.</th>
+            </tr>
+        </thead>
+        <tbody>
+<tr><td>P1</td><td>Pump 1 Transfers off</td ><td></td ><td>λ=4.0000E-4 h⁻¹</td><td></td></tr>
+<tr><td>FCV1</td><td>FCV 1 Transfers Closed</td ><td></td ><td>λ=2.0000E-5 h⁻¹</td><td></td></tr>
+<tr><td>EP</td><td>Loss of Electric Power</td ><td></td ><td>λ=5.7000E-5 h⁻¹</td><td></td></tr>
+<tr><td>PR</td><td>Procesor Closes FCV's</td ><td></td ><td>λ=1.0000E-5 h⁻¹</td><td></td></tr>
+<tr><td>P2</td><td>Pump 1 Transfers off</td ><td></td ><td>λ=4.0000E-4 h⁻¹</td><td></td></tr>
+<tr><td>FC2</td><td>FCV 1 Transfers Closed</td ><td></td ><td>λ=2.0000E-5 h⁻¹</td><td></td></tr>
+<tr><td>EP</td><td>Loss of Electric Power</td ><td></td ><td>λ=5.7000E-5 h⁻¹</td><td></td></tr>
+<tr><td>PR</td><td>Procesor Closes FCV's</td ><td></td ><td>λ=1.0000E-5 h⁻¹</td><td></td></tr>
+        </tbody>
+    </table>
+
+ <h2>References</h2><ul></ul>
+<br>    <h1>Minimal cut sets</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Name</th>
+               <th>Events</th>
+                <th>Metric</th>
+                <th>MCS Contribution</th>
+            </tr>
+        </thead>
+        <tbody>
+<tr><td>MCS1</td><td>{Loss of Electric Power} </td><td>f=0.499320 y⁻¹</td><td>3.5354 %</td></tr>
+<tr><td>MCS2</td><td>{FCV 1 Transfers Closed} - {FCV 1 Transfers Closed} </td><td>f=0.030695 y⁻¹</td><td>0.2173 %</td></tr>
+<tr><td>MCS3</td><td>{FCV 1 Transfers Closed} - {Pump 1 Transfers off} </td><td>f=0.613901 y⁻¹</td><td>4.3467 %</td></tr>
+<tr><td>MCS4</td><td>{FCV 1 Transfers Closed} - {Pump 1 Transfers off} </td><td>f=0.613901 y⁻¹</td><td>4.3467 %</td></tr>
+<tr><td>MCS5</td><td>{Pump 1 Transfers off} - {Pump 1 Transfers off} </td><td>f=12.278016 y⁻¹</td><td>86.9337 %</td></tr>
+<tr><td>MCS6</td><td>{Procesor Closes FCV's} </td><td>f=0.087600 y⁻¹</td><td>0.6202 %</td></tr>
+        </tbody>
+    </table>
+<br>    <h1>Importance Measures</h1>
+<table class='sortable'>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Tag</th>
+                <th>BIM</th>
+                <th>CIM</th>
+                <th>RAW</th>
+                <th>RRW</th>
+                <th>FV</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+<td>Pump 1 Transfers off</td><td>P1</td><td>n/a</td><td>n/a</td><td>n/a</td><td>5.59770115</td><td>0.82135524</td></tr>
+            <tr>
+<td>FCV 1 Transfers Closed</td><td>FCV1</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.04282655</td><td>0.04106776</td></tr>
+            <tr>
+<td>Loss of Electric Power</td><td>EP</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.28268794</td><td>0.22038715</td></tr>
+            <tr>
+<td>Procesor Closes FCV's</td><td>PR</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.04236823</td><td>0.04064612</td></tr>
+            <tr>
+<td>Pump 1 Transfers off</td><td>P2</td><td>n/a</td><td>n/a</td><td>n/a</td><td>5.59770115</td><td>0.82135524</td></tr>
+            <tr>
+<td>FCV 1 Transfers Closed</td><td>FC2</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.04282655</td><td>0.04106776</td></tr>
+            <tr>
+<td>Loss of Electric Power</td><td>EP</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.28268794</td><td>0.22038715</td></tr>
+            <tr>
+<td>Procesor Closes FCV's</td><td>PR</td><td>n/a</td><td>n/a</td><td>n/a</td><td>1.04236823</td><td>0.04064612</td></tr>
+        </tbody>
+    </table>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const getCellValue = (tr, idx) => {
+        let v = tr.children[idx].innerText || tr.children[idx].textContent;
+        if (!v) return NaN;
+        v = v.trim();
+        v = v.replace(/,/g, ''); // odstranenie tisicoviek
+        const match = v.match(/[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/);
+        if (match) return parseFloat(match[0]);
+        return v;
+      };
+
+      const comparer = (idx, asc) => (a, b) => {
+        const v1 = getCellValue(a, idx);
+        const v2 = getCellValue(b, idx);
+        if (typeof v1 === 'number' && typeof v2 === 'number') {
+          return asc ? v1 - v2 : v2 - v1;
+        } else {
+          return asc ? ('' + v1).localeCompare(v2) : ('' + v2).localeCompare(v1);
+        };
+      };
+
+      document.querySelectorAll('table.sortable th').forEach(th => {
+        th.addEventListener('click', () => {
+          const table = th.closest('table');
+          const tbody = table.tBodies[0];
+          const rows = Array.from(tbody.rows);
+          const idx = Array.from(th.parentNode.children).indexOf(th);
+          const asc = !(th.asc);
+          th.asc = asc;
+          rows.sort(comparer(idx, asc));
+          rows.forEach(row => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>;
+</body>
+</html>

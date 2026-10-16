@@ -1,0 +1,232 @@
+[
+  {
+    "Name": "MCS1",
+    "Events": [
+      "B10",
+      "B7",
+      "B8"
+    ],
+    "Value": 0.001,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.1064506068140614
+  },
+  {
+    "Name": "MCS2",
+    "Events": [
+      "B11",
+      "B7",
+      "B8"
+    ],
+    "Value": 1E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.031064506068140617
+  },
+  {
+    "Name": "MCS3",
+    "Events": [
+      "B12",
+      "B13"
+    ],
+    "Value": 1E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.031064506068140617
+  },
+  {
+    "Name": "MCS4",
+    "Events": [
+      "B12",
+      "B14"
+    ],
+    "Value": 1E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.031064506068140617
+  },
+  {
+    "Name": "MCS5",
+    "Events": [
+      "B13",
+      "B21",
+      "B22"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS6",
+    "Events": [
+      "B13",
+      "B21",
+      "B23"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS7",
+    "Events": [
+      "B13",
+      "B21",
+      "B24"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS8",
+    "Events": [
+      "B13",
+      "B21",
+      "B25"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS9",
+    "Events": [
+      "B14",
+      "B21",
+      "B22"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS10",
+    "Events": [
+      "B14",
+      "B21",
+      "B23"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS11",
+    "Events": [
+      "B14",
+      "B21",
+      "B24"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS12",
+    "Events": [
+      "B14",
+      "B21",
+      "B25"
+    ],
+    "Value": 1E-08,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.106450606814061E-05
+  },
+  {
+    "Name": "MCS13",
+    "Events": [
+      "B15",
+      "B16",
+      "B2"
+    ],
+    "Value": 0.030000000000000002,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 93.19351820442185
+  },
+  {
+    "Name": "MCS14",
+    "Events": [
+      "B17",
+      "B18",
+      "B19",
+      "B2",
+      "B20"
+    ],
+    "Value": 3.0000000000000004E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.09319351820442186
+  },
+  {
+    "Name": "MCS15",
+    "Events": [
+      "B3"
+    ],
+    "Value": 1E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.031064506068140617
+  },
+  {
+    "Name": "MCS16",
+    "Events": [
+      "B4"
+    ],
+    "Value": 1E-06,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.0031064506068140614
+  },
+  {
+    "Name": "MCS17",
+    "Events": [
+      "B5"
+    ],
+    "Value": 1E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.031064506068140617
+  },
+  {
+    "Name": "MCS18",
+    "Events": [
+      "B6"
+    ],
+    "Value": 1E-05,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.031064506068140617
+  },
+  {
+    "Name": "MCS19",
+    "Events": [
+      "B7",
+      "B8",
+      "B9"
+    ],
+    "Value": 0.001,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.1064506068140614
+  },
+  {
+    "Name": "MCS20",
+    "Events": [
+      "NewTag"
+    ],
+    "Value": 0.0001,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.3106450606814061
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "Name": "MCS1",
+    "Events": [
+      "EP"
+    ],
+    "Value": 0.49932000000000004,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 3.5354011501838416
+  },
+  {
+    "Name": "MCS2",
+    "Events": [
+      "FC2",
+      "FCV1"
+    ],
+    "Value": 0.030695040000000007,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.21733413386393302
+  },
+  {
+    "Name": "MCS3",
+    "Events": [
+      "FC2",
+      "P1"
+    ],
+    "Value": 0.6139008,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 4.34668267727866
+  },
+  {
+    "Name": "MCS4",
+    "Events": [
+      "FCV1",
+      "P2"
+    ],
+    "Value": 0.6139008,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 4.34668267727866
+  },
+  {
+    "Name": "MCS5",
+    "Events": [
+      "P1",
+      "P2"
+    ],
+    "Value": 12.278016,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 86.93365354557318
+  },
+  {
+    "Name": "MCS6",
+    "Events": [
+      "PR"
+    ],
+    "Value": 0.08760000000000001,
+    "ValueType": "F",
+    "ValueUnit": 0,
+    "Contribution": 0.6202458158217266
+  }
+]
