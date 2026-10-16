@@ -61,6 +61,13 @@
 
     public string Reference { get; set; }
 
+    /// <summary>
+    /// Temporary probability override used by importance measures (1 = event occurs, 0 = does not occur).
+    /// Not saved to files.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public double? ForcedProbability { get; set; }
+
     public string TempReference { get; set; }
 
     public RectangleF rect { get; set; }

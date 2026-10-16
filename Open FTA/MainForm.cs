@@ -1531,11 +1531,11 @@ namespace OpenFTA
                     DataRow row = dt.NewRow();
                     row["Event Name"] = evt.Name;
                     row["Event GUID"] = evt.GuidCode.ToString();
-                    row["Birnbaum importance measure (BIM)"] = bimValue;
-                    row["Critical importance measure (CIM)"] = cimValue;
-                    row["Reliability achievement worth (RAW)"] = rawValue;
-                    row["Reliability reduction worth (RRW)"] = rrwValue;
-                    row["Fussell-Vessely importance (FV)"] = fvValue;
+                    row["Birnbaum importance measure (BIM)"] = double.IsNaN(bimValue) ? DBNull.Value : (object)bimValue;
+                    row["Critical importance measure (CIM)"] = double.IsNaN(cimValue) ? DBNull.Value : (object)cimValue;
+                    row["Reliability achievement worth (RAW)"] = double.IsNaN(rawValue) ? DBNull.Value : (object)rawValue;
+                    row["Reliability reduction worth (RRW)"] = double.IsNaN(rrwValue) ? DBNull.Value : (object)rrwValue;
+                    row["Fussell-Vessely importance (FV)"] = double.IsNaN(fvValue) ? DBNull.Value : (object)fvValue;
                     dt.Rows.Add(row);
                 }
             }
@@ -1553,6 +1553,8 @@ namespace OpenFTA
             dataGridViewImportanceMeasureResults.DataSource = sortedDt;
 
             MyUIEngine.SetupModernGrid(dataGridViewImportanceMeasureResults);
+            foreach (DataGridViewColumn column in dataGridViewImportanceMeasureResults.Columns)
+                column.DefaultCellStyle.NullValue = "n/a";   // measure not defined (frequency event)
 
             tabControl1.SelectedTab = tabPage3;
 

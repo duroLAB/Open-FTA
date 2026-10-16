@@ -745,7 +745,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         // 2️⃣ Získame zoznam hodnôt metriky
         var metricValues = DrawingStructure.Values
             .Select(selector)
-            .Where(v => v != 0)
+            .Where(v => v != 0 && double.IsFinite(v))   // NaN = n/a, infinity cannot be scaled
             .ToList();
 
         if (!metricValues.Any())
@@ -766,7 +766,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             {
                 double value = selector(evt); // použitie funkcie
 
-                if (value == 0)
+                if (value == 0 || !double.IsFinite(value))
                     continue;
 
                 double percent = 100 * (value - min) / (max - min);

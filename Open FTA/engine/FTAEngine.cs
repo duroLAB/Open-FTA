@@ -603,7 +603,8 @@ public class FTAlogic
                 events.Clear();
             }
 
-            if (item.ValueType != ValueTypes.P && (AllProbabilities))
+            // P and R are probability-type values; F and lambda make the result a frequency
+            if (item.ValueType != ValueTypes.P && item.ValueType != ValueTypes.R && AllProbabilities)
             {
                 AllProbabilities = false;
             }
@@ -665,6 +666,10 @@ public class FTAlogic
     /// </summary>
     private static double ConvertToProbability(FTAitem e)
     {
+        // Importance measures temporarily force the event to occur (1) or not occur (0)
+        if (e.ForcedProbability is double forced)
+            return forced;
+
         // Length of one unit in years: year = 1, day = 1/365, hour = 1/8760, second = 1/31 536 000
         double Tsource = 1.0 / TimeUnitFactors[e.ValueUnit];
         double Tbase = 1.0 / TimeUnitFactors[(int)MainAppSettings.Instance.BaseTimeUnit];
@@ -876,136 +881,121 @@ public class FTAlogic
         }
     }
 
-    // Computes the Birnbaum Importance Measure (BIM) 
+    // ---------------------------------------------------------------------------------
+    // Importance measures
+    //
+    // The measures use the top event result in its own quantity: frequency (per base time unit)
+    // if the top event is a frequency, otherwise probability. No capping.
+    // The examined basic event - all its instances with the same Tag (repeated event) -
+    // is forced to P = 1 (event occurs) or P = 0 (event does not occur) through
+    // FTAitem.ForcedProbability; the event's Value is never modified.
+    // The tree is recomputed in its normal state at the end.
+    //
+    // Frequency events (F, lambda - initiating events) cannot "occur with certainty", so
+    // BIM, CIM and RAW are not defined for them and return NaN (shown as n/a).
+    // RRW and FV (event removed, P = 0) are defined for all events.
+    // ---------------------------------------------------------------------------------
+
+    private readonly record struct ImportanceInputs(double Top, double TopWhenFails, double TopWhenWorks, double PEvent);
+
+    private static bool IsFrequencyEvent(FTAitem e) =>
+        e.ValueType == ValueTypes.F || e.ValueType == ValueTypes.Lambda;
+
+    /// <summary>All basic events that represent the same event (same Tag, case-insensitive).</summary>
+    private List<FTAitem> GetEventInstances(FTAitem ftaEvent)
+    {
+        var instances = string.IsNullOrWhiteSpace(ftaEvent.Tag)
+            ? new List<FTAitem>()
+            : FTAStructure.Values
+                .Where(i => i.ItemType >= 2 && string.Equals(i.Tag, ftaEvent.Tag, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        if (!instances.Contains(ftaEvent))
+            instances.Add(ftaEvent);
+        return instances;
+    }
+
+    /// <summary>Top event result (frequency or probability) with the event forced to the given probability (null = normal state).</summary>
+    private double TopResultWith(List<FTAitem> instances, double? forcedProbability)
+    {
+        foreach (var item in instances)
+            item.ForcedProbability = forcedProbability;
+        try
+        {
+            ComputeTree();
+            return GetItem(TopEventGuid).Value;
+        }
+        finally
+        {
+            foreach (var item in instances)
+                item.ForcedProbability = null;
+        }
+    }
+
+    private ImportanceInputs EvaluateImportanceInputs(FTAitem ftaEvent)
+    {
+        var instances = GetEventInstances(ftaEvent);
+
+        double whenFails = TopResultWith(instances, 1.0);
+        double whenWorks = TopResultWith(instances, 0.0);
+        double top = TopResultWith(instances, null);   // last: leaves the tree in its normal state
+        double pEvent = ConvertToProbability(ftaEvent);
+
+        return new ImportanceInputs(top, whenFails, whenWorks, pEvent);
+    }
+
+    private void StoreMeasure(FTAitem ftaEvent, Action<FTAitem> store)
+    {
+        foreach (var item in GetEventInstances(ftaEvent))
+            store(item);
+    }
+
+    /// <summary>Birnbaum importance: BIM = Top(event occurs) - Top(event does not occur). NaN for frequency events.</summary>
     public double ComputeBIM(FTAitem ftaEvent)
     {
-
-        //double originalFrequency = ftaEvent.Value;
-        double originalFrequency = ftaEvent.Value;
-
-        // Event failed  
-        // ftaEvent.Value = 1;
-        ftaEvent.Value = 1;
-        ComputeTree();
-        double topFreqWhenFailed = GetItem(TopEventGuid).Frequency;
-        if (topFreqWhenFailed > 1)
-        {
-            topFreqWhenFailed = 1;
-        }
-
-        // Event didnt failed
-        //ftaEvent.Value = 0;
-        ftaEvent.Value = 0;
-        ComputeTree();
-        double topFreqWhenWorks = GetItem(TopEventGuid).Frequency;
-
-
-        //ftaEvent.Value = originalFrequency;
-        ftaEvent.Value = originalFrequency;
-
-        // Calculate BIM
-        double bim = topFreqWhenFailed - topFreqWhenWorks;
-        ftaEvent.BIM = bim;
+        var x = EvaluateImportanceInputs(ftaEvent);
+        double bim = IsFrequencyEvent(ftaEvent) ? double.NaN : x.TopWhenFails - x.TopWhenWorks;
+        StoreMeasure(ftaEvent, i => i.BIM = bim);
         return bim;
     }
-    // Computes the Critical Importance Measure (CIM)
+
+    /// <summary>Criticality importance: CIM = BIM * P(event) / Top. NaN for frequency events.</summary>
     public double ComputeCIM(FTAitem ftaEvent)
     {
-        double pEventNormal = ftaEvent.Value;
-
-        // Event failed 
-        ftaEvent.Value = 0;
-        ComputeTree();
-        double pTopWhenWorks = GetItem(TopEventGuid).Frequency;
-
-        // Event didnt failed
-        ftaEvent.Value = 1;
-        ComputeTree();
-        double pTopWhenFails = GetItem(TopEventGuid).Frequency;
-
-        // Event works normaly
-        ftaEvent.Value = pEventNormal;
-        ComputeTree();
-        double pTopNormal = GetItem(TopEventGuid).Frequency;
-
-        // CIM = P(top event when event works) - P(top event when event fails) * (pEventNormal / pTopNormal)
-        double cim = (pTopWhenFails - pTopWhenWorks) * (pEventNormal / pTopNormal);
-
-        ftaEvent.Value = pEventNormal;
-
-        ftaEvent.CIM = cim;
+        var x = EvaluateImportanceInputs(ftaEvent);
+        double cim = IsFrequencyEvent(ftaEvent) ? double.NaN
+                   : x.Top == 0 ? 0
+                   : (x.TopWhenFails - x.TopWhenWorks) * x.PEvent / x.Top;
+        StoreMeasure(ftaEvent, i => i.CIM = cim);
         return cim;
     }
 
-
+    /// <summary>Risk achievement worth: RAW = Top(event occurs) / Top. NaN for frequency events.</summary>
     public double ComputeRAW(FTAitem ftaEvent)
     {
-        double originalFrequency = ftaEvent.Value;
-
-        // Event failed
-        ftaEvent.Value = 1;
-        ComputeTree();
-        double topProbWhenFails = GetItem(TopEventGuid).Frequency;
-
-        // Event works normaly
-        ftaEvent.Value = originalFrequency;
-        ComputeTree();
-        double topProbNormal = GetItem(TopEventGuid).Frequency;
-
-        if (topProbNormal == 0)
-            return double.PositiveInfinity;
-
-        double raw = topProbWhenFails / topProbNormal;
-        ftaEvent.RAW = raw;
+        var x = EvaluateImportanceInputs(ftaEvent);
+        double raw = IsFrequencyEvent(ftaEvent) ? double.NaN
+                   : x.Top == 0 ? double.PositiveInfinity
+                   : x.TopWhenFails / x.Top;
+        StoreMeasure(ftaEvent, i => i.RAW = raw);
         return raw;
     }
 
-
+    /// <summary>Risk reduction worth: RRW = Top / Top(event does not occur).</summary>
     public double ComputeRRW(FTAitem ftaEvent)
     {
-        double originalFrequency = ftaEvent.Value;
-
-        // Event failed
-        ftaEvent.Value = originalFrequency;
-        ComputeTree();
-        double topProbNormal = GetItem(TopEventGuid).Frequency;
-
-        // Event didnt failed
-        ftaEvent.Value = 0;
-        ComputeTree();
-        double topProbWhenWorks = GetItem(TopEventGuid).Frequency;
-
-        ftaEvent.Value = originalFrequency;
-
-        if (topProbWhenWorks == 0)
-            return double.PositiveInfinity;
-
-        double rrw = topProbNormal / topProbWhenWorks;
-        ftaEvent.RRW = rrw; 
+        var x = EvaluateImportanceInputs(ftaEvent);
+        double rrw = x.TopWhenWorks == 0 ? double.PositiveInfinity : x.Top / x.TopWhenWorks;
+        StoreMeasure(ftaEvent, i => i.RRW = rrw);
         return rrw;
     }
 
+    /// <summary>Fussell-Vesely: FV = (Top - Top(event does not occur)) / Top.</summary>
     public double ComputeFV(FTAitem ftaEvent)
     {
-        double originalFrequency = ftaEvent.Value;
-
-        // Event works normaly
-        ftaEvent.Value = originalFrequency;
-        ComputeTree();
-        double topProbNormal = GetItem(TopEventGuid).Frequency;
-
-        // Event didnt failed
-        ftaEvent.Value = 0;
-        ComputeTree();
-        double topProbWhenWorks = GetItem(TopEventGuid).Frequency;
-
-        ftaEvent.Value = originalFrequency;
-
-        if (topProbNormal == 0)
-            return double.PositiveInfinity;
-
-        double fv = (topProbNormal - topProbWhenWorks) / topProbNormal;
-        ftaEvent.FV = fv;
+        var x = EvaluateImportanceInputs(ftaEvent);
+        double fv = x.Top == 0 ? 0 : (x.Top - x.TopWhenWorks) / x.Top;
+        StoreMeasure(ftaEvent, i => i.FV = fv);
         return fv;
     }
 
@@ -1653,18 +1643,18 @@ public class FTAlogic
             if (evt.ItemType >= 2)
             {
                 html.AppendLine("            <tr>");
-                double bimValue = Math.Round(ComputeBIM(evt), 8);
-                double cimValue = Math.Round(ComputeCIM(evt), 8);
-                double rawValue = Math.Round(ComputeRAW(evt), 8);
-                double rrwValue = Math.Round(ComputeRRW(evt), 8);
-                double fvValue = Math.Round(ComputeFV(evt), 8);
+                double bimValue = ComputeBIM(evt);
+                double cimValue = ComputeCIM(evt);
+                double rawValue = ComputeRAW(evt);
+                double rrwValue = ComputeRRW(evt);
+                double fvValue = ComputeFV(evt);
 
                 temp = "<td>" + evt.Name + "</td><td>" + evt.Tag + "</td>";
-                temp += "<td>" + bimValue.ToString() + "</td>";
-                temp += "<td>" + cimValue.ToString() + "</td>";
-                temp += "<td>" + rawValue.ToString() + "</td>";
-                temp += "<td>" + rrwValue.ToString() + "</td>";
-                temp += "<td>" + fvValue.ToString() + "</td></tr>";
+                temp += "<td>" + FormatMeasure(bimValue) + "</td>";
+                temp += "<td>" + FormatMeasure(cimValue) + "</td>";
+                temp += "<td>" + FormatMeasure(rawValue) + "</td>";
+                temp += "<td>" + FormatMeasure(rrwValue) + "</td>";
+                temp += "<td>" + FormatMeasure(fvValue) + "</td></tr>";
 
                 html.AppendLine(temp);
 
@@ -1675,6 +1665,11 @@ public class FTAlogic
         html.AppendLine("        </tbody>");
         html.AppendLine("    </table>");
     }
+
+    private static string FormatMeasure(double value) =>
+        double.IsNaN(value) ? "n/a"
+        : double.IsPositiveInfinity(value) ? "∞"
+        : Math.Round(value, 8).ToString();
 
     public List<FTAitem> GenerateListOfBasicEvents()
     {

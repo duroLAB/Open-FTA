@@ -116,9 +116,9 @@ public class GateCalculationTests : SettingsTestBase
 
         t.ComputeTree();
 
-        // R is not treated as a probability, so the result is reported as a frequency:
-        // -ln(1 - 0.1*0.2)
-        Approx.Equal(-Math.Log(1 - 0.02), t.Top().Value);
+        // R is a probability-type value, so the result stays a probability
+        Approx.Equal(0.02, t.Top().Value);
+        Assert.Equal(ValueTypes.P, t.Top().ValueType);
     }
 
     [Fact]
