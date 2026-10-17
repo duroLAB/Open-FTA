@@ -1244,27 +1244,12 @@ namespace OpenFTA
             EngineLogic.HighlightedMCS = "";
             ////Minimal cutset test
             EngineLogic.HighlightedEvents.Clear();
-            var selectedMSCItem = EngineLogic.GetItem(treeView1.SelectedNode.Name, EngineLogic.MCSStructure);
-            if (selectedMSCItem != null)
+            var selectedMcs = EngineLogic.MinimalCutSets.FirstOrDefault(m => m.Name == treeView1.SelectedNode.Name);
+            if (selectedMcs != null)
             {
-                if (selectedMSCItem.ItemType == 1)
-                {
-                    EngineLogic.HighlightedMCS = selectedMSCItem.Name;
-                    for (int i = 0; i < selectedMSCItem.Children.Count; i++)
-                    {
-                        var child = EngineLogic.GetItem(selectedMSCItem.Children[i], EngineLogic.MCSStructure);
-
-                        if (child != null)
-                            EngineLogic.HighlightedEvents.Add(child);
-
-                    }
-                }
+                EngineLogic.HighlightedMCS = selectedMcs.Name;
+                EngineLogic.HighlightedEvents.AddRange(selectedMcs.Events);
             }
-
-
-
-
-
 
             pictureBox1.Invalidate();
         }
@@ -1325,26 +1310,13 @@ namespace OpenFTA
             string simplifiedEquation = "";
 
             EngineLogic.GenerateMCS(out equation, out simplifiedEquation);
-            if (EngineLogic.MCSStructure != null && EngineLogic.MCSStructure.Count > 0)
+            if (EngineLogic.MinimalCutSets.Count > 0)
             {
                 string message = "Generated Tree Expression:\n" + equation + Environment.NewLine +
                         "\nSimplified Expression:\n" + simplifiedEquation;
 
                 textBoxMCSExpr.Text = message;
             }
-
-            FTAitem TopEvent = null;
-            foreach (var item in EngineLogic.MCSStructure)
-            {
-                if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
-            }
-
-
-            EngineLogic.SumChildren(TopEvent, EngineLogic.MCSStructure);
-
-            double TopEventFreq = 0;
-            if (TopEvent != null)
-                TopEventFreq = TopEvent.Value;
 
             List<FTAitem> l = EngineLogic.GenerateListOfBasicEvents();
 
@@ -1361,38 +1333,26 @@ namespace OpenFTA
             int rowIndex = 0;
             int MaxColums = 0;
 
-            foreach (var item in EngineLogic.MCSStructure)
+            foreach (var mcs in EngineLogic.MinimalCutSets)
             {
+                if (mcs.Events.Count == 0)
+                    continue;
 
-                if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
+                dataGridViewMCSResults.Rows.Add(mcs.Name);
+                dataGridViewMCSResults.Rows[rowIndex].Cells[1].Value = mcs.Value;
+                dataGridViewMCSResults.Rows[rowIndex].Cells[2].Value = mcs.Contribution;
+
+                for (int i = 0; i < mcs.Events.Count; i++)
                 {
-                    dataGridViewMCSResults.Rows.Add(item.Value.Name);
-                    dataGridViewMCSResults.Rows[rowIndex].Cells[1].Value = item.Value.Value;
+                    if (i + 4 > dataGridViewMCSResults.ColumnCount)
+                        dataGridViewMCSResults.Columns.Add("", "");
 
-                    double MCSEffect = 0;
-                    String MCSEffectString;
-                    MCSEffect = item.Value.Value / TopEventFreq * 100;
-                    MCSEffectString = (MCSEffect < 0.001) ? MCSEffect.ToString("0.000E+0") : MCSEffect.ToString("F2");
-                    // dataGridViewMCSResults.Rows[rowIndex].Cells[2].Value = MCSEffectString;
-                    dataGridViewMCSResults.Rows[rowIndex].Cells[2].Value = MCSEffect;
+                    dataGridViewMCSResults.Rows[rowIndex].Cells[i + 3].Value = mcs.Events[i].Name;
 
-                    for (int i = 0; i < item.Value.Children.Count; i++)
-                    {
-                        if (i + 4 > dataGridViewMCSResults.ColumnCount)
-                            dataGridViewMCSResults.Columns.Add("", "");
-
-                        FTAitem fTAitem = EngineLogic.GetItem(item.Value.Children[i], EngineLogic.MCSStructure);
-                        dataGridViewMCSResults.Rows[rowIndex].Cells[i + 3].Value = fTAitem.Name;
-
-
-
-                        if (i > MaxColums)
-                        {
-                            MaxColums = i;
-                        }
-                    }
-                    rowIndex += 1;
+                    if (i > MaxColums)
+                        MaxColums = i;
                 }
+                rowIndex += 1;
             }
             MaxColums += 4; // plus frequency and name columns
             for (int i = dataGridViewMCSResults.Columns.Count - 1; i >= MaxColums; i--)

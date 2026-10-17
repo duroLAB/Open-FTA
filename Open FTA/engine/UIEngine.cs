@@ -61,30 +61,27 @@ class UIEngine
         treeView1.ExpandAll();
     }
 
+    /// <summary>
+    /// Minimal cut sets in the tree view: top event -> MCS1..n -> events.
+    /// MCS nodes are keyed by the cut set name (stable after regenerating MCS),
+    /// event nodes by the GUID of the original event (selecting it selects the event in the diagram).
+    /// </summary>
     public void FillMinimalCutSets(TreeView treeView1, TreeNode MCSnode)
     {
-        foreach (var evt in EngineLogic.MCSStructure.Values)
+        if (EngineLogic.MinimalCutSets.Count == 0)
+            return;
+
+        FTAitem topItem = EngineLogic.GetItem(EngineLogic.TopEventGuid);
+        TreeNode topNode = MCSnode.Nodes.Add(topItem?.Name ?? "Top Event");
+
+        foreach (var mcs in EngineLogic.MinimalCutSets)
         {
-            foreach (var childGuid in EngineLogic.MCSStructure[evt.GuidCode].Children)
-            {
-                TreeNode parentNode = treeView1.Nodes.Find(evt.GuidCode.ToString(), true).FirstOrDefault();
+            if (mcs.Events.Count == 0)
+                continue;
 
-                if (parentNode == null)
-                {
-                    TreeNode newParentNode = new TreeNode(EngineLogic.MCSStructure[evt.GuidCode].Name)
-                    {
-                        Name = evt.GuidCode.ToString()
-                    };
-                    TreeNode grandParentNode = treeView1.Nodes.Find(EngineLogic.MCSStructure[evt.GuidCode].Parent.ToString(), true).FirstOrDefault();
-                    if (grandParentNode != null)
-                        grandParentNode.Nodes.Add(newParentNode);
-                    else
-                        MCSnode.Nodes.Add(newParentNode);
-
-                    parentNode = newParentNode;
-                }
-                parentNode.Nodes.Add(childGuid.ToString(), EngineLogic.MCSStructure[childGuid].Name);
-            }
+            TreeNode mcsNode = topNode.Nodes.Add(mcs.Name, mcs.Name);
+            foreach (var evt in mcs.Events)
+                mcsNode.Nodes.Add(evt.GuidCode.ToString(), evt.Name);
         }
     }
 

@@ -77,8 +77,6 @@ public class FTAlogic
 
   
 
-    public Dictionary<Guid, FTAitem> MCSStructure { get; private set; } = new Dictionary<Guid, FTAitem>();
-
     /// <summary>Minimal cut sets created by GenerateMCS, in the order of the simplified expression.</summary>
     public List<MinimalCutSet> MinimalCutSets { get; } = new List<MinimalCutSet>();
 
@@ -1061,8 +1059,6 @@ public class FTAlogic
     {
 
 
-        MCSStructure.Clear();
-
         // 1) Generate the MCS equation from the fault tree.
         equation = GenerateEquation();
 
@@ -1075,23 +1071,7 @@ public class FTAlogic
                          "\n\nSimplified Expression:\n" + simplifiedEquation;
         // MessageBox.Show(message, "MCS Equation Overview", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-        // 3) Create the top event for MCS with an OR gate.
-        FTAitem topEvent = GetItem(TopEventGuid);
-        FTAitem mcsTopEvent = new FTAitem
-        {
-            Name = topEvent.Name,
-            ItemType = topEvent.ItemType,
-            Gate = Gates.OR, // OR gate for the top event.
-            X = 200,
-            Y = 100,
-            Frequency = topEvent.Frequency
-        };
-        MCSStructure[mcsTopEvent.GuidCode] = mcsTopEvent;
-
-        // 4) Attach MCS terms directly to the top event .
-        ParseMCSIntoStructure(simplifiedEquation, mcsTopEvent.GuidCode);
-
-        // 5) New model: list of cut sets referencing the original events
+        // 3) List of cut sets referencing the original events
         BuildMinimalCutSets(simplifiedEquation);
         EvaluateMinimalCutSets();
     }
@@ -1162,128 +1142,6 @@ public class FTAlogic
 
         foreach (var mcs in MinimalCutSets)
             mcs.Contribution = mcs.Value / McsTopValue * 100;
-    }
-
-    private void ParseMCSIntoStructure(string equation, Guid parentGuid)
-    {
-        // Split the equation by the OR operator '+'
-        string[] terms = equation.Split('+');
-        int termNumber = 1; // Start numbering intermediate(MCS) events from 1
-
-        foreach (string term in terms)
-        {
-            string trimmedTerm = term.Trim();
-            // Determine gate type for intermediate event:
-            // If term contains '*', it is a multi-component term => use AND gate (Gates = 2)
-            // Otherwise, for a single component, set Gates to -1 (Not set)
-            Gates GateForIntermediate = trimmedTerm.Contains("*") ? Gates.AND : Gates.OR;
-
-            // Create a new intermediate event with name "MCS" followed by termNumber.
-            Guid intermediateGuid = AddIntermediateEvent("MCS" + termNumber, GateForIntermediate, parentGuid);
-            termNumber++;
-
-            if (trimmedTerm.Contains("*"))
-            {
-                // Multi-component term: split the term by '*' to get individual factors.
-                string[] factors = trimmedTerm.Split('*');
-                foreach (string factor in factors)
-                {
-                    string tag = factor.Trim();
-                    // Find the original event by its tag.
-                    var originalEvent = FTAStructure.Values.FirstOrDefault(e => string.Equals(e.Tag, tag, StringComparison.OrdinalIgnoreCase));
-                    if (originalEvent != null)
-                    {
-                        // Create a copy of the original event for the MCS structure.
-                        FTAitem newItem = new FTAitem
-                        {
-                            GuidCode = originalEvent.GuidCode,
-                            Name = originalEvent.Name,
-                            Tag = originalEvent.Tag,
-                            ItemType = originalEvent.ItemType,
-                            Gate = originalEvent.Gate,
-                            Frequency = originalEvent.Frequency,
-                            Value = originalEvent.Value,
-                            ValueType = originalEvent.ValueType,
-                            ValueUnit = originalEvent.ValueUnit,
-                            Parent = intermediateGuid,
-                            X = originalEvent.X,
-                            Y = originalEvent.Y
-                        };
-                        MCSStructure[newItem.GuidCode] = newItem;
-                        // Attach the basic event as a child of the AND intermediate event.
-                        MCSStructure[intermediateGuid].Children.Add(newItem.GuidCode);
-                    }
-                }
-            }
-            else
-            {
-                // Single-component term: attach the literal event directly.
-                string tag = trimmedTerm;
-                var originalEvent = FTAStructure.Values.FirstOrDefault(e => string.Equals(e.Tag, tag, StringComparison.OrdinalIgnoreCase));
-                if (originalEvent != null)
-                {
-                    FTAitem newItem = new FTAitem
-                    {
-                        GuidCode = originalEvent.GuidCode,
-                        Name = originalEvent.Name,
-                        Tag = originalEvent.Tag,
-                        ItemType = originalEvent.ItemType,
-                        Gate = originalEvent.Gate,
-                        Frequency = originalEvent.Frequency,
-                        Value = originalEvent.Value,
-                        ValueType = originalEvent.ValueType,
-                        ValueUnit = originalEvent.ValueUnit,
-                        Parent = intermediateGuid,
-                        X = originalEvent.X,
-                        Y = originalEvent.Y
-                    };
-                    MCSStructure[newItem.GuidCode] = newItem;
-                    MCSStructure[intermediateGuid].Children.Add(newItem.GuidCode);
-                }
-            }
-            // Attach the intermediate event directly to the top event.
-            if (MCSStructure.ContainsKey(parentGuid))
-            {
-                MCSStructure[parentGuid].Children.Add(intermediateGuid);
-            }
-        }
-    }
-
-    private Guid AddIntermediateEvent(string name, Gates Gate, Guid parentGuid)
-    {
-        var intermediateEvent = new FTAitem
-        {
-            Name = name,
-            ItemType = 1, // Intermediate event
-            Gate = Gate, // AND or OR gate
-            Parent = parentGuid,
-            X = 0,
-            Y = 0
-        };
-
-        MCSStructure[intermediateEvent.GuidCode] = intermediateEvent;
-        return intermediateEvent.GuidCode;
-    }
-
-    public void DebugMCSStructure()
-    {
-        Debug.WriteLine("MCS Structure Content:");
-        foreach (var item in MCSStructure.Values)
-        {
-            Debug.WriteLine("Node Details:");
-            Debug.WriteLine($"  Name: {item.Name}");
-            Debug.WriteLine($"  TAG: {item.Tag}");
-            Debug.WriteLine($"  Parent: {item.Parent}");
-            Debug.WriteLine($"  ItemType: {item.ItemType}");
-            Debug.WriteLine($"  Gates: {item.Gate}");
-            Debug.WriteLine($"  Frequency: {item.Frequency}");
-            Debug.WriteLine($"  X: {item.X}, Y: {item.Y}");
-            Debug.WriteLine("  Children:");
-            foreach (var child in item.Children)
-            {
-                Debug.WriteLine($"    Child GUID: {child}");
-            }
-        }
     }
 
     public void GenerateHTMLreport()
@@ -1429,7 +1287,6 @@ public class FTAlogic
 
         html= "    <h1>Top Event</h1>";
 
-        FTAitem MSCTop = MCSStructure.First().Value;
         FTAitem GbG = FTAStructure.First().Value;
 
         string tempTag = "";
@@ -1438,7 +1295,7 @@ public class FTAlogic
             tempTag = " (" + GbG.Tag + ")";
         html += "    <h2>"+GbG.Name+ tempTag+"</h2>";
 
-        string freqText = MSCTop.ValueType switch
+        string freqText = McsTopValueType switch
         {
             ValueTypes.F => "f=",
             ValueTypes.P => "P=",
@@ -1447,10 +1304,10 @@ public class FTAlogic
             _ => ""
         };
 
-        freqText += (MSCTop.Value < 0.001) ? MSCTop.Value.ToString("0.0000E+0") : MSCTop.Value.ToString("F6");
-        if (MSCTop.ValueType == ValueTypes.F || MSCTop.ValueType == ValueTypes.Lambda)
+        freqText += (McsTopValue < 0.001) ? McsTopValue.ToString("0.0000E+0") : McsTopValue.ToString("F6");
+        if (McsTopValueType == ValueTypes.F || McsTopValueType == ValueTypes.Lambda)
         {
-            freqText += " " + MetricUnitsList[MSCTop.ValueUnit];
+            freqText += " " + MetricUnitsList[McsTopValueUnit];
 
         }
 
@@ -1594,70 +1451,38 @@ public class FTAlogic
                   html.AppendLine(temp);
               }
           }*/
-        FTAitem TopEvent = null;
-        foreach (var item in MCSStructure)
+        foreach (var mcs in MinimalCutSets)
         {
-            if (item.Value.Parent == Guid.Empty) TopEvent = item.Value;
-        }
-        SumChildren(TopEvent, MCSStructure);
+            if (mcs.Events.Count == 0)
+                continue;
 
-        double TopEventFreq = TopEvent.Value;
-        
+            temp = "<tr><td>" + mcs.Name + "</td><td>";
+            foreach (var evt in mcs.Events)
+                temp += "{" + evt.Name + "} - ";
+            temp = temp.Remove(temp.Length - 2);
+            temp += "</td><td>";
 
-        foreach (var item in MCSStructure)
-        {
-            temp = "<tr><td>";
-            temp += item.Value.Name;
-            temp += "</td>";
-            if (item.Value.Children.Count > 0 && item.Value.Parent != Guid.Empty)
+            string freqText = mcs.ValueType switch
             {
-                // item.Value.Value;
-                temp += "<td>";
-                for (int i = 0; i < item.Value.Children.Count; i++)
-                {
+                ValueTypes.F => "f=",
+                ValueTypes.P => "P=",
+                ValueTypes.R => "R=",
+                ValueTypes.Lambda => "λ=",
+                _ => ""
+            };
+            freqText += (mcs.Value < 0.001) ? mcs.Value.ToString("0.0000E+0") : mcs.Value.ToString("F6");
+            if (mcs.ValueType == ValueTypes.F || mcs.ValueType == ValueTypes.Lambda)
+                freqText += " " + MetricUnitsList[mcs.ValueUnit];
 
+            temp += freqText;
+            temp += "</td>";
 
-                    FTAitem fTAitem = GetItem(item.Value.Children[i], MCSStructure);
-
-                    temp += "{" + fTAitem.Name + "} - ";
-
-
-
-                }
-                temp = temp.Remove(temp.Length - 2);
-                temp += "</td><td>";
-                //temp += item.Value.Value.ToString();
-
-                string freqText = item.Value.ValueType switch
-                {
-                    ValueTypes.F => "f=",
-                    ValueTypes.P => "P=",
-                    ValueTypes.R => "R=",
-                    ValueTypes.Lambda => "λ=",
-                    _ => ""
-                };
-                freqText += (item.Value.Value < 0.001) ? item.Value.Value.ToString("0.0000E+0") : item.Value.Value.ToString("F6");
-                if (item.Value.ValueType == ValueTypes.F || item.Value.ValueType == ValueTypes.Lambda)
-                {
-                    freqText += " " + MetricUnitsList[item.Value.ValueUnit];
-
-                }
-
-                temp += freqText;
-                temp += "</td>";
-
-                double MCSEffect = 0;
-                String MCSEffectString;
-                MCSEffect = item.Value.Value / TopEventFreq * 100;
-                MCSEffectString = (MCSEffect < 0.00001) ? MCSEffect.ToString("0.000E+0") : MCSEffect.ToString("F4");
-
-                temp += "<td>" + MCSEffectString + " %</td>";
-
-                temp += "</tr>";
-                html.AppendLine(temp);
-            }
+            double MCSEffect = mcs.Contribution;
+            string MCSEffectString = (MCSEffect < 0.00001) ? MCSEffect.ToString("0.000E+0") : MCSEffect.ToString("F4");
+            temp += "<td>" + MCSEffectString + " %</td>";
+            temp += "</tr>";
+            html.AppendLine(temp);
         }
-
 
         html.AppendLine("        </tbody>");
         html.AppendLine("    </table>");
