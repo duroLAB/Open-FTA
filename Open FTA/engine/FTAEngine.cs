@@ -39,7 +39,7 @@ public enum GateFrequencyHandling
 
 public enum ValueTypes { F, P, R, Lambda }
 public enum Gates { NotSet, OR, AND }
-public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left }
+public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left, ALGOIII }
 public enum DisplayMetricType { None, BIM, CIM, RAW, RRW, FV}
 
 public enum FrequencyDisplayMode { topEventsOnly, allEvents, alwaysHidden }
@@ -1923,6 +1923,15 @@ public class FTAlogic
 
     public void ArrangeTree()
     {
+        if (MainAppSettings.Instance.SortingAlgoVersion == SortingStrategy.ALGOIII)
+        {
+            TidyTreeLayout.Apply(this);
+            // Draw the whole tree from the real top event (the Sort button may set TopEvent to the selected event)
+            MyDrawingEngine.SetStructure(FTAStructure);
+            MyDrawingEngine.TopEvent = GetItem(TopEventGuid);
+            return;
+        }
+
         //ArrangeEventsAlgo1();
         ArrangeEventsAlgo0();
 

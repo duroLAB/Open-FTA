@@ -47,7 +47,7 @@
 ### Default sorting algorithm
 - **Type:** SortingStrategy  
 - **Default:** 1  
-- **Description:** ALGOI - safe, fast, but not very effective; ALGOII - best results, slower and less safe; ALGOII-left-aligned behaves like ALGOII but aligns to the left.
+- **Description:** ALGOI - safe, fast, but not very effective; ALGOII - best results, slower and less safe; ALGOII-left-aligned behaves like ALGOII but aligns to the left. ALGOIII - compact tidy tree (Reingold–Tilford / Walker algorithm): fast even for large trees, parents centred above their children, no overlaps.
 
 ## Computation settings
 

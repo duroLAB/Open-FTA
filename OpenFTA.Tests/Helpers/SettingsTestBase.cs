@@ -19,6 +19,7 @@ public abstract class SettingsTestBase : IDisposable
         Settings.SimplificationStrategy = true;
         Settings.SimplificationStrategyLinearOR = true;
         Settings.BaseTimeUnit = MainCompTimeUnit.Year;
+        Settings.SortingAlgoVersion = SortingStrategy.ALGOII_centered;
         Settings.GateANDFrequencyHandling = GateFrequencyHandling.Allow;
         Settings.GateORFrequencyHandling = GateFrequencyHandling.Allow;
     }

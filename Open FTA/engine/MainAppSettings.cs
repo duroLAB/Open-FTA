@@ -68,7 +68,7 @@ public class MainAppSettings
 
     [Category("Sorting algorithm")]
     [DisplayName("Default sorting algorithm")]
-    [Description("ALGOI - safe, fast, but not very effective, ALGOII-best results, but slower and less safe,ALGOII-left-aligned behaves the same as ALGOII, except that it aligns to the left")]
+    [Description("ALGOI - safe, fast, but not very effective, ALGOII-best results, but slower and less safe,ALGOII-left-aligned behaves the same as ALGOII, except that it aligns to the left, ALGOIII - compact tidy tree (Reingold-Tilford/Walker), fast, parents centred, no overlaps")]
     public SortingStrategy SortingAlgoVersion { get; set; } = (SortingStrategy)1;
 
     [Category("Computation settings")]
