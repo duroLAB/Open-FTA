@@ -1019,77 +1019,53 @@ namespace OpenFTA
 
         private void SaveToVector()
         {
-            double BackupGlobalZoom = EngineLogic.MyDrawingEngine.GlobalZoom;
-            int BackupoffsetX = EngineLogic.MyDrawingEngine.offsetX;
-            int BackupoffsetY = EngineLogic.MyDrawingEngine.offsetY;
-
-            EngineLogic.MyDrawingEngine.GlobalZoom = 1;
-            EngineLogic.MyDrawingEngine.offsetX = 0;
-            EngineLogic.MyDrawingEngine.offsetY = 0;
-
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "wmf Image|*.wmf";
-            sfd.Title = "Save Screenshot";
-            sfd.FileName = "FaultTreeimg.wmf";
-
-
-            pictureBox1.Invalidate();
-            if (sfd.ShowDialog() == DialogResult.OK)
+            using SaveFileDialog sfd = new SaveFileDialog
             {
-                EngineLogic.MyDrawingEngine.ExportToMeta(sfd.FileName);
-            }
+                Filter = "wmf Image|*.wmf",
+                Title = "Save Screenshot",
+                FileName = "FaultTreeimg.wmf"
+            };
 
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
 
-
-
-            EngineLogic.MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
-            EngineLogic.MyDrawingEngine.offsetX = BackupoffsetX;
-            EngineLogic.MyDrawingEngine.offsetY = BackupoffsetY;
-            pictureBox1.Invalidate();
+            EngineLogic.MyDrawingEngine.ExportToMeta(sfd.FileName);
+            AskToShowInExplorer(sfd.FileName, "Image has been exported");
         }
+
         private void SaveToBMP()
         {
-            double BackupGlobalZoom = EngineLogic.MyDrawingEngine.GlobalZoom;
-            int BackupoffsetX = EngineLogic.MyDrawingEngine.offsetX;
-            int BackupoffsetY = EngineLogic.MyDrawingEngine.offsetY;
-
-            EngineLogic.MyDrawingEngine.GlobalZoom = 1;
-            EngineLogic.MyDrawingEngine.offsetX = 0;
-            EngineLogic.MyDrawingEngine.offsetY = 0;
-
-
-            Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            pictureBox1.DrawToBitmap(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Choice1 Image|*.bmp";
-            sfd.Title = "Save Screenshot";
-            sfd.FileName = "FaultTreeimg.png";
-
-            if (sfd.ShowDialog() == DialogResult.OK)
+            using SaveFileDialog sfd = new SaveFileDialog
             {
-                ImageFormat format = ImageFormat.Png;
-                switch (sfd.FilterIndex)
-                {
-                    case 2:
-                        format = ImageFormat.Jpeg;
-                        break;
-                    case 3:
-                        format = ImageFormat.Bmp;
-                        break;
-                    default:
-                        format = ImageFormat.Png;
-                        break;
-                }
+                Filter = "PNG Image|*.png|JPEG Image|*.jpg|Choice1 Image|*.bmp",
+                Title = "Save Screenshot",
+                FileName = "FaultTreeimg.png"
+            };
 
-                //  bmp.Save(sfd.FileName, format);
-                // MessageBox.Show("Screenshot saved successfully!", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                EngineLogic.MyDrawingEngine.ExportToBMP(sfd.FileName, format);
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
 
-                EngineLogic.MyDrawingEngine.GlobalZoom = BackupGlobalZoom;
-                EngineLogic.MyDrawingEngine.offsetX = BackupoffsetX;
-                EngineLogic.MyDrawingEngine.offsetY = BackupoffsetY;
-                pictureBox1.Invalidate();
-            }
+            ImageFormat format = sfd.FilterIndex switch
+            {
+                2 => ImageFormat.Jpeg,
+                3 => ImageFormat.Bmp,
+                _ => ImageFormat.Png
+            };
+            EngineLogic.MyDrawingEngine.ExportToBMP(sfd.FileName, format);
+            AskToShowInExplorer(sfd.FileName, "Image has been exported");
+        }
+
+        /// <summary>Asks whether to open the folder in Explorer with the file selected.</summary>
+        private static void AskToShowInExplorer(string filePath, string message)
+        {
+            var result = MessageBox.Show(
+                $"{message}:\n{filePath}\n\nDo you want to open it in Explorer?",
+                "Completed",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+                Process.Start("explorer.exe", $"/select,\"{filePath}\"");
         }
 
         private void toolStripButton5_Click(object sender, EventArgs e)
@@ -1721,18 +1697,7 @@ namespace OpenFTA
         private void toolStripButtonArchive_Click(object sender, EventArgs e)
         {
             string zipPath = MyUIEngine.CreateArchive(WorkingDirectory, "*.fta", "");
-          
-            var result = MessageBox.Show(
-    $"Archive has been created:\n{zipPath}\n\nDo you want to open it in Explorer?",
-    "Completed",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Information
-);
-
-            if (result == DialogResult.Yes)
-            {
-                Process.Start("explorer.exe", $"/select,\"{zipPath}\"");
-            }
+            AskToShowInExplorer(zipPath, "Archive has been created");
 
         }
     }

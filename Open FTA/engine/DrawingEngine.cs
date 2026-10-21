@@ -1445,12 +1445,14 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         
     }
 
+    private const float ExportMargin = 20f;
+
+    /// <summary>Vector export (WMF) of the whole tree at zoom 1.</summary>
     public void ExportToMeta(string Filename)
     {
-        var bounds = GetBounds(EngineLogic.FTAStructure);
-        float margin = 10f;
-        float width = bounds.Width + 200 + 2 * margin;
-        float height = bounds.Height + 200 + 2 * margin;
+        RectangleF bounds = GetExportBounds();
+        float width = bounds.Width + 2 * ExportMargin;
+        float height = bounds.Height + 2 * ExportMargin;
 
         using (var stream = new FileStream(Filename, FileMode.Create))
         using (var refGraphics = Graphics.FromHwnd(IntPtr.Zero))
@@ -1463,83 +1465,76 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 refGraphics.ReleaseHdc(hdc);
 
                 using (Graphics gMeta = Graphics.FromImage(metafile))
-                {
-                    // Posun, aby sa záporné hodnoty dostali do viditeľnej oblasti
-                    gMeta.TranslateTransform(margin - bounds.Left, margin - bounds.Top);
-
-                    DrawFTA(gMeta, DrawingStructure.First().Value);
-
-                    // Kreslenie všetkých položiek
-                    /*  foreach (var fta in items.Values)
-                      {
-                          gMeta.FillEllipse(Brushes.Red, (float)fta.X - 2, (float)fta.Y - 2, 4, 4);
-                      }*/
-
-                    // Ak chceš kresliť polygony:
-                    // var points = items.Values.Select(i => new PointF((float)i.X, (float)i.Y)).ToArray();
-                    // gMeta.DrawPolygon(Pens.Blue, points);
-                }
+                    DrawForExport(gMeta, bounds);
             }
         }
-
     }
 
+    /// <summary>Bitmap export (PNG, JPEG, BMP) of the whole tree at zoom 1.</summary>
     public void ExportToBMP(string Filename, ImageFormat format)
-    { 
-        var bounds = GetBounds(EngineLogic.FTAStructure);
-       /* float margin = 10f;
-        int width = (int)(bounds.Width + 200 + 2 * margin);
-        int height = (int)(bounds.Height + 200 + 2 * margin);*/
-
-
-        float margin = 0f;
-        int width = (int)(bounds.Width + 0 + 2 * margin);
-        int height = (int)(bounds.Height + 0 + 2 * margin);
+    {
+        RectangleF bounds = GetExportBounds();
+        int width = (int)Math.Ceiling(bounds.Width + 2 * ExportMargin);
+        int height = (int)Math.Ceiling(bounds.Height + 2 * ExportMargin);
 
         using (var bitmap = new Bitmap(width, height))
-        using (Graphics g = Graphics.FromImage(bitmap))
         {
-            g.Clear(Color.White);
-
-            // Posun, aby sa záporné hodnoty dostali do viditeľnej oblasti
-            g.TranslateTransform(margin - bounds.Left, margin - bounds.Top);
-
-            // Kreslenie prvej položky
-            DrawFTA(g, DrawingStructure.First().Value);
-
-
-
-            // Uloženie do súboru, napr. PNG
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.Clear(Color.White);
+                DrawForExport(g, bounds);
+            }
             bitmap.Save(Filename, format);
-
-
         }
-
     }
-    RectangleF GetBounds(Dictionary<Guid, FTAitem> items)
+
+    /// <summary>
+    /// Draws the whole tree from the real top event at zoom 1 without offset, shifted so that
+    /// the export area starts at (ExportMargin, ExportMargin). The view (zoom, offset, TopEvent)
+    /// is restored afterwards.
+    /// </summary>
+    private void DrawForExport(Graphics g, RectangleF bounds)
     {
-           if (items == null || items.Count == 0)
-              return RectangleF.Empty;
+        double zoom = GlobalZoom;
+        int ox = offsetX, oy = offsetY;
+        var previousTop = TopEvent;
+        try
+        {
+            GlobalZoom = 1;
+            offsetX = 0;
+            offsetY = 0;
+            g.TranslateTransform(ExportMargin - bounds.Left, ExportMargin - bounds.Top);
+            DrawFTA(g, EngineLogic.GetItem(EngineLogic.TopEventGuid) ?? DrawingStructure.First().Value);
+        }
+        finally
+        {
+            GlobalZoom = zoom;
+            offsetX = ox;
+            offsetY = oy;
+            TopEvent = previousTop;
+        }
+    }
 
-          double minX = double.MaxValue;
-          double maxX = double.MinValue;
-          double minY = double.MaxValue;
-          double maxY = double.MinValue;
+    /// <summary>
+    /// Area covered by the visible events in model coordinates: whole event rectangles
+    /// (FTAitem.X/Y is the top-left corner) plus the metric bars below the events.
+    /// </summary>
+    private RectangleF GetExportBounds()
+    {
+        var visible = EngineLogic.FTAStructure.Values.Where(i => !i.IsHidden).ToList();
+        if (visible.Count == 0)
+            return new RectangleF(0, 0, Constants.EventWidth, Constants.EventHeight);
 
-           foreach (var fta in items.Values)
-          {
-              if (fta.X < minX) minX = fta.X;
-              if (fta.X > maxX) maxX = fta.X;
-              if (fta.Y < minY) minY = fta.Y;
-              if (fta.Y > maxY) maxY = fta.Y;
-          }
-    
-        return new RectangleF(
-            (float)minX,
-            (float)minY,
-            (float)(maxX - minX),
-            (float)(maxY - minY)
-        );
+        float left = visible.Min(i => i.X);
+        float top = visible.Min(i => i.Y);
+        float right = visible.Max(i => i.X) + Constants.EventWidth;
+        float bottom = visible.Max(i => i.Y) + Constants.EventHeight;
+
+        // DrawProgressBars draws the metric bar up to ~0.47 * EventHeight below the event
+        if (MainAppSettings.Instance.DisplayedMetric != DisplayMetricType.None)
+            bottom += Constants.EventHeight * 0.5f;
+
+        return RectangleF.FromLTRB(left, top, right, bottom);
     }
 
     
