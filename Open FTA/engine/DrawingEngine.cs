@@ -124,11 +124,28 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     {
         for (int i = 0; i < top.Children.Count; i++)
         {
-            DrawEvents(g, EngineLogic.GetItem(top.Children[i]), false);
+            FTAitem? child = GetDrawingItem(top.Children[i]);
+            if (child != null)
+                DrawEvents(g, child, false);
         }
 
         DrawEvent(g, top, isTopEvent);
     }
+
+    // The engine draws only its own DrawingStructure (the fault tree or the MCS tree),
+    // so events, children and collapsed state are always looked up there.
+    private FTAitem? GetDrawingItem(Guid guid) =>
+        DrawingStructure.TryGetValue(guid, out FTAitem? item) ? item : null;
+
+    /// <summary>True if the children of the event are collapsed (hidden) in the drawn structure.</summary>
+    private bool HasHiddenChildren(FTAitem evt) =>
+        !evt.IsHidden && evt.Children.Count > 0 && GetDrawingItem(evt.Children[0]) is { IsHidden: true };
+
+    /// <summary>Root of the drawn structure: the top event of the fault tree, otherwise the item without a parent.</summary>
+    private FTAitem GetRoot() =>
+        GetDrawingItem(EngineLogic.TopEventGuid)
+        ?? DrawingStructure.Values.FirstOrDefault(i => !DrawingStructure.ContainsKey(i.Parent))
+        ?? DrawingStructure.Values.First();
     private void DrawEventOLD(Graphics g, FTAitem evt)
     {
         // using (Pen selPen = new Pen(Color.Blue))
@@ -243,7 +260,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     {
                         case 1:
                             if (evt.Children.Count > 0)
-                                if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
+                                if (HasHiddenChildren(evt))
                                     BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
                             break;
                         case 2: // Basic Event                                
@@ -422,7 +439,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 {
                     case 1:
                         if (evt.Children.Count > 0)
-                            if (EngineLogic.GetItem(evt.Children[0]).IsHidden)
+                            if (HasHiddenChildren(evt))
                                 BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
                         break;
                     case 2:
@@ -931,7 +948,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 if (parent.IsHidden || (DrawingStructure.ContainsKey(parent.Parent) && DrawingStructure[parent.Parent].IsHidden))
                     continue;
 
-                if (EngineLogic.HasEventHiddenChildren(parent))
+                if (HasHiddenChildren(parent))
                 { continue; }
 
 
@@ -960,8 +977,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     // Child-Gate line
                     foreach (var childGuid in parent.Children)
                     {
-                        var child = EngineLogic.GetItem(childGuid, DrawingStructure);
-                        if (child.IsHidden) continue;
+                        var child = GetDrawingItem(childGuid);
+                        if (child == null || child.IsHidden) continue;
 
                         Rectangle childRect = RealPositionToPixel(new Rectangle
                         {
@@ -1008,7 +1025,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                     else
                     {
-                        if (!EngineLogic.HasEventHiddenChildren(parent))
+                        if (!HasHiddenChildren(parent))
                             switch (parent.Gate)
                             {
                                 case Gates.OR: // OR Gate
@@ -1504,7 +1521,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             offsetX = 0;
             offsetY = 0;
             g.TranslateTransform(ExportMargin - bounds.Left, ExportMargin - bounds.Top);
-            DrawFTA(g, EngineLogic.GetItem(EngineLogic.TopEventGuid) ?? DrawingStructure.First().Value);
+            DrawFTA(g, GetRoot());
         }
         finally
         {
@@ -1521,7 +1538,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     /// </summary>
     private RectangleF GetExportBounds()
     {
-        var visible = EngineLogic.FTAStructure.Values.Where(i => !i.IsHidden).ToList();
+        var visible = DrawingStructure.Values.Where(i => !i.IsHidden).ToList();
         if (visible.Count == 0)
             return new RectangleF(0, 0, Constants.EventWidth, Constants.EventHeight);
 

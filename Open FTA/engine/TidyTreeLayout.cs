@@ -52,16 +52,21 @@ internal static class TidyTreeLayout
             return;
 
         logic.FindAllChilren();
+        Apply(logic.FTAStructure, top);
+    }
 
+    /// <summary>Lays out the tree below <paramref name="root"/>; Children lists of the items must be filled.</summary>
+    public static void Apply(Dictionary<Guid, FTAitem> structure, FTAitem root)
+    {
         // +1 px so that rounded positions never touch (IsAnyItemOverlapping uses strict intersection)
         double distance = Constants.EventWidth + Constants.EventHorizontalSpacing + 1;
         int levelHeight = Constants.EventHeight + Constants.EventVerticalSpacing;
 
-        Node root = Build(logic, top, null, 1, 0, new HashSet<Guid>());
-        FirstWalk(root, distance);
+        Node rootNode = Build(structure, root, null, 1, 0, new HashSet<Guid>());
+        FirstWalk(rootNode, distance);
 
         var positions = new List<(Node Node, double X)>();
-        SecondWalk(root, -root.Prelim, positions);
+        SecondWalk(rootNode, -rootNode.Prelim, positions);
 
         double minX = positions.Min(p => p.X);
         foreach (var (node, x) in positions)
@@ -71,7 +76,7 @@ internal static class TidyTreeLayout
         }
     }
 
-    private static Node Build(FTAlogic logic, FTAitem item, Node? parent, int number, int depth, HashSet<Guid> visited)
+    private static Node Build(Dictionary<Guid, FTAitem> structure, FTAitem item, Node? parent, int number, int depth, HashSet<Guid> visited)
     {
         visited.Add(item.GuidCode);
         var node = new Node(item, parent, number, depth);
@@ -79,10 +84,9 @@ internal static class TidyTreeLayout
         int childNumber = 1;
         foreach (Guid guid in item.Children)
         {
-            FTAitem? child = logic.GetItem(guid);
-            if (child == null || child.IsHidden || visited.Contains(guid))
+            if (!structure.TryGetValue(guid, out FTAitem? child) || child.IsHidden || visited.Contains(guid))
                 continue;
-            node.Children.Add(Build(logic, child, node, childNumber++, depth + 1, visited));
+            node.Children.Add(Build(structure, child, node, childNumber++, depth + 1, visited));
         }
         return node;
     }

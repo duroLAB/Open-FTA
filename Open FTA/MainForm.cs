@@ -33,6 +33,10 @@ namespace OpenFTA
 
         CustomTreeView treeView1;
 
+        // Tab "Minimal Cut Set Tree" (read-only drawing of the minimal cut sets)
+        TabPage tabPageMcsTree;
+        McsTreeView mcsTreeView;
+
         private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
         private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
 
@@ -80,6 +84,16 @@ namespace OpenFTA
             tabControl1.Padding = new Point(20, 5);
             tabControl1.Alignment = TabAlignment.Bottom;   // ⇦ záložky budú dole
             tabControl1.DrawItem += TabControl1_DrawItem;
+
+            mcsTreeView = new McsTreeView { Dock = DockStyle.Fill };
+            mcsTreeView.RunAnalysisRequested += (s, e) =>
+            {
+                minimalCutSetToolStripMenuItem_Click(this, EventArgs.Empty);
+                tabControl1.SelectedTab = tabPageMcsTree;
+            };
+            tabPageMcsTree = new TabPage("Minimal Cut Set Tree");
+            tabPageMcsTree.Controls.Add(mcsTreeView);
+            tabControl1.TabPages.Insert(2, tabPageMcsTree);
 
 
 
@@ -474,6 +488,8 @@ namespace OpenFTA
                 }
 
                 EngineLogic.TopEventGuid = root.GuidCode;
+                EngineLogic.MinimalCutSets.Clear();   // MCS of the previous file
+                mcsTreeView.Clear();
                 EngineLogic.FindAllChilren();
                 EngineLogic.AssignLevelsToAllEvents();
                 MyUIEngine.FillTreeView(treeView1);
@@ -874,6 +890,7 @@ namespace OpenFTA
 
 
             EngineLogic.GenerateHTMLreport();
+            mcsTreeView.ShowTree(EngineLogic);   // report regenerates MCS and importance measures
 
             ReportForm r = new ReportForm();
             r.html = EngineLogic.html.ToString();
@@ -1056,7 +1073,7 @@ namespace OpenFTA
         }
 
         /// <summary>Asks whether to open the folder in Explorer with the file selected.</summary>
-        private static void AskToShowInExplorer(string filePath, string message)
+        internal static void AskToShowInExplorer(string filePath, string message)
         {
             var result = MessageBox.Show(
                 $"{message}:\n{filePath}\n\nDo you want to open it in Explorer?",
@@ -1228,6 +1245,7 @@ namespace OpenFTA
             }
 
             pictureBox1.Invalidate();
+            mcsTreeView.RefreshView();
         }
 
         private void toolStripMenuItem_HIDEUNHIDE_Click(object sender, EventArgs e)
@@ -1355,6 +1373,7 @@ namespace OpenFTA
             dataGridViewMCSResults.Sort(column, System.ComponentModel.ListSortDirection.Descending);
 
             MyUIEngine.FillTreeView(treeView1);
+            mcsTreeView.ShowTree(EngineLogic);
 
             tabControl1.SelectedTab = tabPage2;
 
@@ -1492,6 +1511,9 @@ namespace OpenFTA
             foreach (DataGridViewColumn column in dataGridViewImportanceMeasureResults.Columns)
                 column.DefaultCellStyle.NullValue = "n/a";   // measure not defined (frequency event)
 
+            if (EngineLogic.MinimalCutSets.Count > 0)
+                mcsTreeView.ShowTree(EngineLogic);   // show the new importance measures in the MCS tree
+
             tabControl1.SelectedTab = tabPage3;
 
         }
@@ -1519,6 +1541,7 @@ namespace OpenFTA
             redoStack.Clear();
 
             EngineLogic = new FTAlogic();
+            mcsTreeView.Clear();
 
             EngineLogic.FTAStructure.Clear();
             EngineLogic.SelectedEvents.Clear();
