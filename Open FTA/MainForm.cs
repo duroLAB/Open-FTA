@@ -95,6 +95,13 @@ namespace OpenFTA
             tabPageMcsTree.Controls.Add(mcsTreeView);
             tabControl1.TabPages.Insert(2, tabPageMcsTree);
 
+            // Hint shown in the result tables until the analysis is run
+            textBoxMCSExpr.Text = "";
+            AttachEmptyHint(dataGridViewMCSResults,
+                "Run the minimal cut set analysis (Run Analysis) to list the minimal cut sets.");
+            AttachEmptyHint(dataGridViewImportanceMeasureResults,
+                "Run the importance measure analysis (Run Analysis) to compute BIM, CIM, RAW, RRW and FV.");
+
 
 
 
@@ -489,7 +496,7 @@ namespace OpenFTA
 
                 EngineLogic.TopEventGuid = root.GuidCode;
                 EngineLogic.MinimalCutSets.Clear();   // MCS of the previous file
-                mcsTreeView.Clear();
+                ClearAnalysisResults();
                 EngineLogic.FindAllChilren();
                 EngineLogic.AssignLevelsToAllEvents();
                 MyUIEngine.FillTreeView(treeView1);
@@ -1072,6 +1079,33 @@ namespace OpenFTA
             AskToShowInExplorer(sfd.FileName, "Image has been exported");
         }
 
+        /// <summary>Removes results of the previous file (MCS table, MCS tree, importance measures).</summary>
+        private void ClearAnalysisResults()
+        {
+            textBoxMCSExpr.Text = "";
+            dataGridViewMCSResults.Rows.Clear();
+            dataGridViewMCSResults.Columns.Clear();
+            dataGridViewImportanceMeasureResults.DataSource = null;
+            dataGridViewImportanceMeasureResults.Rows.Clear();
+            mcsTreeView.Clear();
+        }
+
+        /// <summary>Draws a hint in the middle of the grid while it has no data rows.</summary>
+        private static void AttachEmptyHint(DataGridView grid, string text)
+        {
+            grid.Paint += (s, e) =>
+            {
+                bool hasData = grid.Rows.Cast<DataGridViewRow>().Any(r => !r.IsNewRow);
+                if (hasData)
+                    return;
+
+                using var font = new Font("Segoe UI", 11);
+                TextRenderer.DrawText(e.Graphics, text, font, grid.ClientRectangle, Color.DimGray,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
+            };
+            grid.Resize += (s, e) => grid.Invalidate();
+        }
+
         /// <summary>Asks whether to open the folder in Explorer with the file selected.</summary>
         internal static void AskToShowInExplorer(string filePath, string message)
         {
@@ -1541,7 +1575,7 @@ namespace OpenFTA
             redoStack.Clear();
 
             EngineLogic = new FTAlogic();
-            mcsTreeView.Clear();
+            ClearAnalysisResults();
 
             EngineLogic.FTAStructure.Clear();
             EngineLogic.SelectedEvents.Clear();
