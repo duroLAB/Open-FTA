@@ -797,7 +797,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                 };
                 r = RealPositionToPixel(r);
 
-                string txt = $"{MainAppSettings.Instance.DisplayedMetric}: {percent:F4}";
+                // Label shows the value of the measure; the bar (colour, length) shows its position between min and max
+                string txt = $"{MainAppSettings.Instance.DisplayedMetric}: {value:G4}";
                 DrawTurboProgressBar(g, r, (float)percent, txt);
             }
         }

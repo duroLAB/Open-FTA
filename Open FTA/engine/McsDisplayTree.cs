@@ -60,7 +60,8 @@ public sealed class McsDisplayTree
                 Tag = mcs.Name,
                 Description = string.Join(" * ", mcs.Events.Select(e => e.Tag)),
                 ItemType = 1,
-                Gate = mcs.Gate,
+                // A first-order cut set (one event) is drawn without a gate, only a connecting line
+                Gate = mcs.Events.Count > 1 ? Gates.AND : Gates.NotSet,
                 Value = mcs.Value,
                 Frequency = mcs.Value,
                 ValueType = mcs.ValueType,

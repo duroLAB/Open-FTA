@@ -41,6 +41,25 @@ public class McsDisplayTreeTests : SettingsTestBase
     }
 
     [Fact]
+    public void First_order_cut_set_has_no_gate()
+    {
+        // TOP = A + B*C: MCS1 = A (one event, no gate), MCS2 = B*C (AND)
+        var b = new TreeBuilder(Gates.OR);
+        b.AddBasic(b.Top, "A", 0.1);
+        var ie = b.AddGate(b.Top, "IE1", Gates.AND);
+        b.AddBasic(ie, "B", 0.2);
+        b.AddBasic(ie, "C", 0.3);
+        var t = b.Build();
+        t.GenerateMCS(out _, out _);
+
+        var tree = McsDisplayTree.Build(t);
+
+        var gates = tree.Root.Children.Select(g => tree.Items[g]).ToDictionary(n => n.Name, n => n.Gate);
+        Assert.Equal(Gates.NotSet, gates["MCS1"]);
+        Assert.Equal(Gates.AND, gates["MCS2"]);
+    }
+
+    [Fact]
     public void Values_are_taken_from_the_MCS_calculation()
     {
         UseExactCalculation();
