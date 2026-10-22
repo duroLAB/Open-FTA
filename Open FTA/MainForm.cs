@@ -820,7 +820,8 @@ namespace OpenFTA
 
             if (item.ItemType > 1)
             {
-                item.Value = Convert.ToDouble(edit.textBoxFrequency.Text.ToString());
+                if (NumberParsing.TryParse(edit.textBoxFrequency.Text, out double value))
+                    item.Value = value;
                 //   item.UserMetricType = edit.comboBoxMetricType.SelectedIndex;
                 item.ValueType = (ValueTypes)edit.comboBoxMetricType.SelectedIndex;
 

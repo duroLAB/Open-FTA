@@ -12,8 +12,6 @@ namespace OpenFTA
     {
         string strPICPath;
         public FTAlogic EngineLogic;
-        private string previousUnit = "y⁻¹";
-        private bool isLoading = false;
 
         public FormEditEvent(FTAlogic EngineLogic)
         {
@@ -206,67 +204,6 @@ namespace OpenFTA
             }
         }
 
-        private void comboBoxUnits_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (isLoading) return;
-
-            try
-            {
-                isLoading = true;
-
-                string newUnit = comboBoxUnits.SelectedItem.ToString();
-                if (string.IsNullOrWhiteSpace(textBoxFrequency.Text)) return;
-
-                // Podpora vedeckého zápisu (napr. 1e-4)
-                if (!double.TryParse(textBoxFrequency.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double originalValue))
-                {
-                    MessageBox.Show("Invalid frequency format.");
-                    return;
-                }
-
-                // Prevod na roky
-                double valueInYears = ConvertToYears(originalValue, previousUnit);
-                double newValue = ConvertFromYears(valueInYears, newUnit);
-
-                // Zobraziť vhodný formát (vedecký, ak je hodnota malá)
-                if (Math.Abs(newValue) < 0.001)
-                    textBoxFrequency.Text = newValue.ToString("0.000E0", System.Globalization.CultureInfo.InvariantCulture);
-                else
-                    textBoxFrequency.Text = newValue.ToString("0.######", System.Globalization.CultureInfo.InvariantCulture);
-
-                previousUnit = newUnit;
-            }
-            catch
-            {
-                MessageBox.Show("Conversion failed.");
-            }
-            finally
-            {
-                isLoading = false;
-            }
-        }
-        private double ConvertToYears(double freq, string unit)
-        {
-            switch (unit)
-            {
-                case "h⁻¹": return freq * 24 * 365;
-                case "s⁻¹": return freq * 60 * 60 * 24 * 365;
-                case "y⁻¹":
-                default: return freq;
-            }
-        }
-
-        private double ConvertFromYears(double freqPerYear, string unit)
-        {
-            switch (unit)
-            {
-                case "h⁻¹": return freqPerYear / (24 * 365);
-                case "s⁻¹": return freqPerYear / (60 * 60 * 24 * 365);
-                case "y⁻¹":
-                default: return freqPerYear;
-            }
-        }
-
         private void FormEditEvent_Load(object sender, EventArgs e)
         {
 
@@ -428,20 +365,8 @@ namespace OpenFTA
 
         public bool Validatefrequency()
         {
-            string text = textBoxFrequency.Text.Trim();
-
-            bool valid = double.TryParse(text,
-                                         System.Globalization.NumberStyles.Float,
-                                         System.Globalization.CultureInfo.CurrentCulture,
-                                         out double value);
-
-            if (!valid)
-            {
-                valid = double.TryParse(text,
-                                        System.Globalization.NumberStyles.Float,
-                                        System.Globalization.CultureInfo.InvariantCulture,
-                                        out value);
-            }
+            // Decimal comma and decimal point are both accepted (independent of the Windows regional format)
+            bool valid = NumberParsing.TryParse(textBoxFrequency.Text, out _);
 
             if (!valid)
             {

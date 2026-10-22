@@ -167,7 +167,12 @@ namespace Open_FTA.forms
 
             if (form.DialogResult == DialogResult.OK)
             {
-                double val = double.TryParse(form.textBoxR_Val.Text, out double v) ? v : 0.0;
+                if (!NumberParsing.TryParse(form.textBoxR_Val.Text, out double val))
+                {
+                    MessageBox.Show("The value \"" + form.textBoxR_Val.Text + "\" cannot be interpreted as a number. The entry was not saved.",
+                        "Invalid value", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 int unit = (int)form.comboBoxMetricUnits.SelectedValue;
                 string title = form.textBoxR_Title.Text;
                 DBEngine.Instance.InsertReliability(Guid.NewGuid().ToString(),
@@ -202,7 +207,12 @@ namespace Open_FTA.forms
             form.ShowDialog();
             if (form.DialogResult == DialogResult.OK)
             {
-                double val = double.TryParse(form.textBoxR_Val.Text, out double v) ? v : 0.0;
+                if (!NumberParsing.TryParse(form.textBoxR_Val.Text, out double val))
+                {
+                    MessageBox.Show("The value \"" + form.textBoxR_Val.Text + "\" cannot be interpreted as a number. The entry was not saved.",
+                        "Invalid value", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 int unit = (int)form.comboBoxMetricUnits.SelectedValue;
                 string title2 = form.textBoxR_Title.Text;
                 DBEngine.Instance.UpdateReliability(id,
