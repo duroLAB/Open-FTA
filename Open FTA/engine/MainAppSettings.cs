@@ -2,6 +2,9 @@
 using System.Drawing.Design;
 using System.Drawing.Drawing2D;
 using System.Xml.Serialization;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 
@@ -113,51 +116,70 @@ public class MainAppSettings
     [Description("Automatically sort tree after collapsing or expanding tree structure")]
     public bool AutoSortTreeCollapseExpand { get; set; } = true;
 
-    // Cesta k súboru – vždy vedľa exe
-    private static string FilePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppSettings.xml");
+    // ---------------------------------------------------------------------------------
+    // Persistence: %AppData%\OpenFTA\AppSettings.json
+    // (not next to the exe - that folder is read-only when the app is installed in Program Files)
+    // ---------------------------------------------------------------------------------
 
-    // Uloženie do AppSettings.xml
-    public void Save()
+    public static string DefaultFilePath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OpenFTA", "AppSettings.json");
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter(), new ColorJsonConverter() },
+    };
+
+    /// <summary>Saves all settings. Errors are ignored (settings are not critical).</summary>
+    public void Save() => Save(DefaultFilePath);
+
+    public void Save(string filePath)
     {
         try
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(MainAppSettings));
-            using (StreamWriter writer = new StreamWriter(FilePath))
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            File.WriteAllText(filePath, JsonSerializer.Serialize(this, JsonOptions));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Settings could not be saved: " + ex.Message);
+        }
+    }
+
+    /// <summary>Loads saved settings into this instance; missing or invalid values keep their defaults.</summary>
+    public void Load() => Load(DefaultFilePath);
+
+    public void Load(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return;
+
+        try
+        {
+            using JsonDocument doc = JsonDocument.Parse(File.ReadAllText(filePath));
+            foreach (PropertyInfo property in typeof(MainAppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                serializer.Serialize(writer, this);
+                if (!property.CanRead || !property.CanWrite)
+                    continue;
+                if (!doc.RootElement.TryGetProperty(property.Name, out JsonElement value))
+                    continue;
+
+                try
+                {
+                    object? loaded = value.Deserialize(property.PropertyType, JsonOptions);
+                    if (loaded != null)
+                        property.SetValue(this, loaded);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Setting {property.Name} could not be loaded, default is used: {ex.Message}");
+                }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Chyba pri ukladaní nastavení: " + ex.Message);
+            Console.WriteLine("Settings could not be loaded, defaults are used: " + ex.Message);
         }
-    }
-
-    // Načítanie z AppSettings.xml
-    public void Load()
-    {
-        if (File.Exists(FilePath))
-        {
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(MainAppSettings));
-                using (StreamReader reader = new StreamReader(FilePath))
-                {
-                    var loaded = (MainAppSettings)serializer.Deserialize(reader);
-                    if (loaded != null)
-                    {
-                        //Faktor = loaded.Faktor;
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Chyba pri načítaní nastavení, použijem default: " + ex.Message);
-                // Ak sa načítanie nepodarí, zostanú default hodnoty
-            }
-        }
-        // Ak súbor neexistuje, zostanú default hodnoty
     }
 }
 
@@ -177,6 +199,7 @@ public class PenSettings
     public DashStyle DashStyle { get; set; } = DashStyle.Solid;
 
     [Browsable(false)]
+    [JsonIgnore]
     public Pen Pen => new Pen(Color, Width) { DashStyle = this.DashStyle };
 
     public override string ToString()
@@ -184,4 +207,21 @@ public class PenSettings
         string s = $"Color: {Color}, Width: {Width}, DashStyle: {DashStyle}";
         return (s);
     }
+}
+
+
+/// <summary>Stores a Color as "#AARRGGBB" in JSON.</summary>
+public sealed class ColorJsonConverter : JsonConverter<Color>
+{
+    public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        string? text = reader.GetString();
+        if (text != null && text.StartsWith('#') && text.Length == 9 &&
+            uint.TryParse(text.AsSpan(1), System.Globalization.NumberStyles.HexNumber, null, out uint argb))
+            return Color.FromArgb(unchecked((int)argb));
+        throw new JsonException($"Invalid color value: {text}");
+    }
+
+    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options) =>
+        writer.WriteStringValue($"#{value.ToArgb():X8}");
 }

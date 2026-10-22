@@ -85,6 +85,10 @@ namespace OpenFTA
             tabControl1.Alignment = TabAlignment.Bottom;   // ⇦ záložky budú dole
             tabControl1.DrawItem += TabControl1_DrawItem;
 
+            // Saved settings (loaded by MainAppSettings.Instance) - event sizes and spacing
+            GetAppSetings();
+            FormClosing += (s, e) => MainAppSettings.Instance.Save();
+
             mcsTreeView = new McsTreeView { Dock = DockStyle.Fill };
             mcsTreeView.RunAnalysisRequested += (s, e) =>
             {
@@ -953,12 +957,14 @@ namespace OpenFTA
         private void toolStripButtonSettings_Click(object sender, EventArgs e)
         {
 
-            FormSettings settingsForm = new FormSettings();
+            // The property grid edits MainAppSettings.Instance directly, so the changes are
+            // always applied and saved when the dialog is closed.
+            using FormSettings settingsForm = new FormSettings();
+            settingsForm.ShowDialog();
 
-            if (settingsForm.ShowDialog() == DialogResult.OK)
-            {
-                GetAppSetings();
-            }
+            MainAppSettings.Instance.Save();
+            GetAppSetings();
+            pictureBox1.Invalidate();
         }
 
         private void toolStripButtonExportImage_Click(object sender, EventArgs e)
