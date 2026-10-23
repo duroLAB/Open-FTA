@@ -10,19 +10,20 @@ The foundation of the application is based on the diploma thesis of M. Doller: [
 
 ## Key Features
 
-- Calculation of the probability of the top event.  
-- Identification of **Minimal Cut Sets (MCS)** and computation of reliability indices.  
+- Calculation of the frequency or probability of the top event (gate by gate and from minimal cut sets).  
+- Identification of **Minimal Cut Sets (MCS)** and drawing of the **minimal cut set tree**.  
+- **Importance measures** of basic events (Birnbaum, criticality, RAW, RRW, Fussell–Vesely).  
 - Database browser for easier assignment of basic event frequencies.  
-- Three core algorithms for fault tree alignment.  
-- Export of analysis results as detailed reports (top event frequency, list of basic events with references, MCS analysis).  
-- Export of the tree structure as **bitmap** or **vector graphics**.  
+- Automatic tree layout, including the compact tidy-tree algorithm (ALGO III).  
+- Export of analysis results as detailed reports (top event frequency, list of basic events with references, MCS analysis, importance measures).  
+- Export of the fault tree and of the minimal cut set tree as **bitmap** or **vector graphics**.  
 
 ## Installation
 
 1. Go to the [Releases](https://github.com/duroLAB/Open-FTA/releases) page on GitHub.  
 2. Download the latest ZIP archive.  
 3. Extract the contents of the ZIP to a folder of your choice.  
-4. Open the folder and run the executable (`OpenFTA.exe`).  
+4. Open the folder and run the executable (`Open FTA.exe`).  
 
 ## License
 
@@ -34,4 +35,4 @@ This software is provided "as is", without warranty of any kind.
 
 ## Changelog
 
-For a complete list of changes and release notes, see [CHANGELOG.md](CHANGELOG.md).
+For a complete list of changes and release notes, see [Changelog.md](Changelog.md).
