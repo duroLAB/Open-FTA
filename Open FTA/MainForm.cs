@@ -443,7 +443,6 @@ namespace OpenFTA
                 {
                     SaveTreeClass saveData = new SaveTreeClass
                     {
-                        BuildVersion = "1.0.1.0",
                         Zoom = EngineLogic.MyDrawingEngine.GlobalZoom,
                         OffsetX = EngineLogic.MyDrawingEngine.offsetX,
                         OffsetY = EngineLogic.MyDrawingEngine.offsetY,
@@ -482,6 +481,11 @@ namespace OpenFTA
             try
             {
                 SaveTreeClass loadedData = SaveTreeClass.LoadFromFile(fullpath);
+                if (loadedData.IsFromNewerVersion())
+                    MessageBox.Show(
+                        $"The file was created with a newer version of Open FTA ({loadedData.BuildVersion}) " +
+                        $"than this one ({SaveTreeClass.CurrentBuildVersion}).\nSome information may not be loaded correctly.",
+                        "Newer file version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
                 EngineLogic.MyDrawingEngine.GlobalZoom = loadedData.Zoom;
                 EngineLogic.MyDrawingEngine.offsetX = (int)loadedData.OffsetX;
