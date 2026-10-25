@@ -1413,6 +1413,9 @@ namespace OpenFTA
             dataGridViewMCSResults.Columns[0].Width = 120;  // prvý stĺpec
             dataGridViewMCSResults.Columns[1].Width = 80; // druhý stĺpec
             dataGridViewMCSResults.Columns[2].Width = 80; // druhý stĺpec
+            // Display only; cells keep the full double value (sorting, CSV export)
+            dataGridViewMCSResults.Columns[1].DefaultCellStyle.Format = "G4";
+            dataGridViewMCSResults.Columns[2].DefaultCellStyle.Format = "G3";
 
             var column = dataGridViewMCSResults.Columns[1];
             dataGridViewMCSResults.Sort(column, System.ComponentModel.ListSortDirection.Descending);

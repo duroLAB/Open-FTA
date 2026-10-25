@@ -105,7 +105,7 @@
             Controls.Add(webView21);
             Controls.Add(toolStrip1);
             Name = "ReportForm";
-            Text = "ReportForm";
+            Text = "Report";
             Load += ReportForm_Load;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
