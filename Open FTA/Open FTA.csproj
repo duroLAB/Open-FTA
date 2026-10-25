@@ -9,6 +9,8 @@
     <ApplicationIcon>Main.ico</ApplicationIcon>
 
     <!-- Publikovanie: nastavenia su v Properties/PublishProfiles/FolderProfile.pubxml -->
+    <!-- Restore also for win-x64, needed by the self-contained publish (RuntimeIdentifier is set in the profile) -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <InvariantGlobalization>false</InvariantGlobalization>
 
     <Version>1.1.0</Version>
