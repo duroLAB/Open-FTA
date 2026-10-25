@@ -11,7 +11,7 @@
     <!-- Publikovanie: nastavenia su v Properties/PublishProfiles/FolderProfile.pubxml -->
     <InvariantGlobalization>false</InvariantGlobalization>
 
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
 
     <!--   <Configuration>Release</Configuration>
     <DebugType>none</DebugType>
