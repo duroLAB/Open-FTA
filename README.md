@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/duroLAB/Open-FTA/releases/latest"><img src="https://img.shields.io/github/v/release/duroLAB/Open-FTA?label=release" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6" alt="Windows 10 | 11">
-  <img src="https://img.shields.io/badge/.NET-9.0-512BD4" alt=".NET 9">
+  <img src="https://img.shields.io/badge/.NET-10.0-512BD4" alt=".NET 10">
   <a href="Open%20FTA/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
 </p>
 
@@ -59,7 +59,7 @@ Under **Settings** you can choose the calculation options, the base time unit, t
 
 ## Building from source
 
-Requirements: [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) and Windows. Visual Studio 2022 is recommended.
+Requirements: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and Windows. Visual Studio 2026 is recommended.
 
 ```powershell
 git clone https://github.com/duroLAB/Open-FTA.git

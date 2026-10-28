@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Target framework .NET 10 (LTS); .NET 9 support ends on 10 November 2026.
+
+### Fixed
+- Minimal cut set table showed raw floating-point values (e.g. 0.030000000000000002); frequency is shown with 4 and contribution with 3 significant digits.
+- Title of the report window.
+
 ## [1.1.0] - 2026-10-25
 
 ### Added
