@@ -13,6 +13,7 @@ namespace Open_FTA.forms
         {
             InitializeComponent();
             this.Icon = Resources.Main;
+            Text = "Reliability database – " + DBEngine.Instance.FilePath;
             u = new UIEngine(EngineLogic);
             u.MakeTabControlModern(tabControlMain);
             //            u.SetupModernGrid(dataGridView1);

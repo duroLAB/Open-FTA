@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Minimal cut set table showed raw floating-point values (e.g. 0.030000000000000002); frequency is shown with 4 and contribution with 3 significant digits.
 - Title of the report window.
+- Own records in the reliability database were lost: `MainAppDB.db` next to the exe was overwritten by every build and by an update. The database is now kept in `%AppData%\OpenFTA\MainAppDB.db`; on first start it is created as a copy of the shipped database. Records added in an earlier version are in `MainAppDB.db` next to the old `Open FTA.exe` – copy that file to `%AppData%\OpenFTA\` (before the first start of the new version) to keep them.
+- The reliability database window shows its title and the path of the database file.
 
 ## [1.1.0] - 2026-10-25
 

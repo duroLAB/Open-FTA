@@ -80,7 +80,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="MainAppDB.db">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <!-- Template only; the user's database is in %AppData%\OpenFTA (DBEngine.DefaultFilePath) -->
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

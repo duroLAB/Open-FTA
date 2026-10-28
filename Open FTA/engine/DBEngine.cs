@@ -19,23 +19,55 @@ public class DBEngine
         get
         {
             if (_instance == null)
-            {
-                _instance = new DBEngine();
-                _instance.InitializeDatabase(); // načítanie pri prvom použití
-            }
+                _instance = new DBEngine(PrepareUserDatabase(DefaultFilePath, TemplateFilePath));
             return _instance;
         }
     }
 
+    private const string DatabaseFileName = "MainAppDB.db";
+
+    /// <summary>User's database: %AppData%\OpenFTA\MainAppDB.db (kept across builds and updates).</summary>
+    public static string DefaultFilePath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OpenFTA", DatabaseFileName);
+
+    /// <summary>Database shipped next to the exe; only copied, never written.</summary>
+    public static string TemplateFilePath => Path.Combine(AppContext.BaseDirectory, DatabaseFileName);
+
+    /// <summary>Full path of the database file in use.</summary>
+    public string FilePath { get; }
+
     private readonly string _connectionString;
 
-    private DBEngine(string dbName = "MainAppDB.db")
+    internal DBEngine(string dbPath)
     {
-        string exeFolder = AppContext.BaseDirectory;
-        string dbPath = Path.Combine(exeFolder, dbName);
-        _connectionString = $"Data Source={dbPath}";
+        FilePath = dbPath;
+        _connectionString = new SqliteConnectionStringBuilder { DataSource = dbPath }.ToString();
 
         InitializeDatabase();
+    }
+
+    /// <summary>
+    /// Returns the path of the database to use. On first start the shipped database is copied
+    /// to <paramref name="userPath"/>; an existing user database is never overwritten.
+    /// If the user folder cannot be written, the shipped database is used (behaviour before 1.1.1).
+    /// </summary>
+    internal static string PrepareUserDatabase(string userPath, string templatePath)
+    {
+        if (File.Exists(userPath))
+            return userPath;
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(userPath)!);
+            if (File.Exists(templatePath))
+                File.Copy(templatePath, userPath, overwrite: false);
+            // without a template, InitializeDatabase creates an empty database
+            return userPath;
+        }
+        catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+        {
+            return templatePath;
+        }
     }
 
     public void InitializeDatabase()

@@ -237,7 +237,7 @@
             Controls.Add(tabControlMain);
             Controls.Add(panelButtons);
             Name = "FormDbViewer";
-            Text = "FormDbViewer";
+            Text = "Reliability database";
             Load += FormDbViewer_Load;
             Shown += FormDbViewer_Shown;
             tabControlMain.ResumeLayout(false);
