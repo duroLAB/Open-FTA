@@ -458,9 +458,7 @@ public class FTAlogic
         FI.Gate = Gate;
         FI.Parent = Parent;
         FI.Frequency = Freq;
-        //FI.Tag = Tag;
-        if (Tag.Length < 2)
-            FI.Tag = GetNextAvailableTag(ItemType);
+        FI.Tag = string.IsNullOrWhiteSpace(Tag) ? GetNextAvailableTag(ItemType) : Tag;
         if (Name.Length < 2)
             FI.Name = "New - " + FI.Tag;
         FI.level = level;
@@ -472,7 +470,7 @@ public class FTAlogic
             FI.X = x;
             FI.Y = y;
         }
-        else
+        else if (ParentEvent != null)
         {
 
             if (ParentEvent.Children.Count == 0)
@@ -487,6 +485,9 @@ public class FTAlogic
             }
         }
         AddItem(FI);
+        // keep the parent's list of children up to date (not only after FindAllChilren)
+        if (ParentEvent != null && !ParentEvent.Children.Contains(FI.GuidCode))
+            ParentEvent.Children.Add(FI.GuidCode);
         return (FI.GuidCode);
     }
 
@@ -548,22 +549,19 @@ public class FTAlogic
     // Methode for removing event with its children
     public void RemoveItem(Guid guid)
     {
-        if (FTAStructure.ContainsKey(guid))
-        {
-            // Remove child
-            RemoveChildren(guid);
-            // Remove event
-            FTAStructure.Remove(guid);
-        }
-    }
+        if (!FTAStructure.TryGetValue(guid, out FTAitem? item))
+            return;
 
-    private void RemoveChildren(Guid parentGuid)
-    {
-        for (int i = 0; i < FTAStructure[parentGuid].Children.Count; i++)
-        {
+        // children from both the Children list and the Parent links (the list may be out of date)
+        List<Guid> children = item.Children
+            .Concat(FTAStructure.Values.Where(e => e.Parent == guid).Select(e => e.GuidCode))
+            .Distinct()
+            .ToList();
+        foreach (Guid child in children)
+            RemoveItem(child);
 
-            RemoveItem(FTAStructure[parentGuid].Children[i]);
-        }
+        FTAStructure.Remove(guid);
+        GetItem(item.Parent)?.Children.Remove(guid);
     }
 
     public void ComputeTree()

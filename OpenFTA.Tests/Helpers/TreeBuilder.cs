@@ -2,8 +2,8 @@ namespace OpenFTA.Tests.Helpers;
 
 /// <summary>
 /// Builds small fault trees directly in code.
-/// Events are created as FTAitem objects (not through FTAlogic.AddNewEvent,
-/// which currently ignores the Tag argument).
+/// Events are created as FTAitem objects with full control over their values
+/// (FTAlogic.AddNewEvent is tested in EventEditingTests).
 /// </summary>
 public sealed class TreeBuilder
 {
