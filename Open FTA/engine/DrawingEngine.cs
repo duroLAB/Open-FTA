@@ -23,6 +23,12 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
     private FTAitem HoveredItem = null;
 
+    // Hover and selection are not drawn into exported images.
+    private bool _exporting;
+
+    // Accent colour of hover and selection (Windows accent blue); the MCS highlight stays green.
+    private static readonly Color SelectionAccent = Color.FromArgb(0, 120, 215);
+
     double minX;
     double maxX;
     double minY;
@@ -60,13 +66,6 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
         DrawLinesAndGates(e);
         DrawProgressBars(e);
-        /*
-        if (EngineLogic.IsAnyItemOverlapping())
-        {
-            Rectangle headerRect = new Rectangle(0, 30, 300, 25);
-            string t = "Warning: Some items are overlapping!";
-            DrawMCSHeader(e, headerRect, t, 25, 10);
-        }*/
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
@@ -75,50 +74,38 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         TopEvent = structure.First().Value;
     }
 
+    private static readonly Color CanvasColor = Color.FromArgb(245, 247, 250);
+    private static readonly Color CanvasDotColor = Color.FromArgb(214, 220, 228);
+    private const int GridStep = 20;   // distance of the grid dots in model units
+
+    /// <summary>Light grey canvas with a dot grid that moves with pan and zoom; exports stay white.</summary>
     private void DrawBackGround(Graphics g)
     {
-        using (Brush brush = new SolidBrush(Color.White))
+        if (_exporting)
         {
+            g.FillRectangle(Brushes.White, 0, 0, FTAWidth, FTAHeight);
+            return;
+        }
+
+        using (var brush = new SolidBrush(CanvasColor))
             g.FillRectangle(brush, 0, 0, FTAWidth, FTAHeight);
-        }
+
+        float step = (float)(GridStep * GlobalZoom);
+        if (step < 8)
+            return;   // too dense when zoomed out
+
+        float dot = (float)Math.Clamp(1.5 * GlobalZoom, 1.2, 2.5);
+        float startX = offsetX % step;
+        float startY = offsetY % step;
+        if (startX < 0) startX += step;
+        if (startY < 0) startY += step;
+
+        using var dotBrush = new SolidBrush(CanvasDotColor);
+        for (float x = startX; x < FTAWidth; x += step)
+            for (float y = startY; y < FTAHeight; y += step)
+                g.FillRectangle(dotBrush, x - dot / 2, y - dot / 2, dot, dot);
     }
 
-    private void DrawMCSHeader(Graphics g, Rectangle rect, string text, int Height, int FontSize)
-    {
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-        // Výška hlavičky
-        int headerHeight = Height;
-
-        // Vytvorenie obdĺžnika v hornej časti
-        Rectangle headerRect = new Rectangle(rect.X, rect.Y, rect.Width, headerHeight);
-
-        // Vyplnenie zelenou farbou
-        using (Brush headerBrush = new SolidBrush(Color.LightGreen))
-        {
-            g.FillRectangle(headerBrush, headerRect);
-        }
-
-        // Ohraničenie hlavičky
-        using (Pen borderPen = new Pen(Color.DarkGreen, 2))
-        {
-            g.DrawRectangle(borderPen, headerRect);
-        }
-
-        // Text v strede
-        using (Font font = new Font("Segoe UI", FontSize, FontStyle.Bold))
-        using (Brush textBrush = new SolidBrush(Color.DarkGreen))
-        {
-            StringFormat sf = new StringFormat
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            };
-
-            g.DrawString(text, font, textBrush, headerRect, sf);
-        }
-    }
 
     private void DrawEvents(Graphics g, FTAitem top, bool isTopEvent)
     {
@@ -146,501 +133,288 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         GetDrawingItem(EngineLogic.TopEventGuid)
         ?? DrawingStructure.Values.FirstOrDefault(i => !DrawingStructure.ContainsKey(i.Parent))
         ?? DrawingStructure.Values.First();
-    private void DrawEventOLD(Graphics g, FTAitem evt)
-    {
-        // using (Pen selPen = new Pen(Color.Blue))
-        using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
-        {
-            // Prejdeme všetky udalosti v hlavnej štruktúre
-            /* foreach (var evtPair in DrawingStructure)
-             {*/
-
-            // FTAitem evt = evtPair.Value;
-
-            {
-                // Určíme polohu a rozmery udalosti
-                Rectangle r = new Rectangle
-                {
-                    X = evt.X,
-                    Y = evt.Y,
-                    Width = Constants.EventWidth,
-                    Height = Constants.EventHeight
-                };
-                r = RealPositionToPixel(r);
-
-                // Nastavíme farbu pera podľa toho, či je udalosť vybraná (multiselect)
-                if (evt.IsSelected)
-                {
-                    selPen.Color = Color.Red;
-                    selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-                }
-                else
-                {
-                    selPen.Color = MainAppSettings.Instance.ItemPen.Color;
-                    selPen.Width = MainAppSettings.Instance.ItemPen.Width;
-                }
-
-
-                string searchGuid = evt.Tag;
-                bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
-                if (exists)
-                {
-                    selPen.Color = Color.Green;
-
-                    selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-                    Rectangle headerRect = new Rectangle(0, 0, 220, 25);
-                    string t = "Minimal Cut Set:" + EngineLogic.HighlightedMCS;
-                    DrawMCSHeader(g, headerRect, t, 25, 10);
-
-                    headerRect = r;
-                    headerRect.X = r.X + r.Width / 2 + 2;
-                    headerRect.Y = r.Y - 18;
-                    headerRect.Width = r.Width / 2 - 5;
-
-                    DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS, 16, 8);
-                }
-
-
-                // Ak je aktívny režim ťahania a udalosť je vybraná, použijeme čierne perá so šrafovaním.
-                if (SelectedEventDrag && evt.IsSelected)
-                {
-                    selPen.Color = Color.Black;
-                    selPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                }
-
-                if (evt.IsHidden)
-                {
-                    /*
-                    // Zobrazíme trojuholník len pre najvyššiu skrytú udalosť
-                    if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
-                    {
-                        // Vykreslíme obrázok trojuholníka pomocou bitmapy
-                        DrawEventBitmap(g, r, "pic\\events\\Transferin.png", verticalOffset: -r.Height);
-
-                        // Ak je udalosť vybraná, zvýrazníme obrys trojuholníka
-                        if (evt.IsSelected)
-                        {
-                            // Vypočítame rozmery obrázku trojuholníka (používame predvolené scale faktory z DrawEventBitmap)
-                            int imageWidth = (int)(r.Width * 0.5f);
-                            int imageHeight = (int)(r.Height * 0.5f);
-                            int imageX = r.X + (r.Width - imageWidth) / 2;
-                            int imageY = r.Y;
-
-                            // Definujeme body trojuholníka
-                            Point topVertex = new Point(imageX + imageWidth / 2, imageY);
-                            Point bottomLeft = new Point(imageX, imageY + imageHeight);
-                            Point bottomRight = new Point(imageX + imageWidth, imageY + imageHeight);
-                            Point[] trianglePoints = new Point[] { topVertex, bottomLeft, bottomRight };
-
-                            using (Pen redDashPen = new Pen(Color.Red, 1))
-                            {
-                                redDashPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                                g.DrawPolygon(redDashPen, trianglePoints);
-                            }
-                        }
-                    }*/
-                }
-
-                bool temp = false;
-                /* if (evt.Parent == Guid.Empty || !DrawingStructure[evt.Parent].IsHidden)
-                     temp = true;*/
-                if (!evt.IsHidden)
-                    temp = true;
-
-
-                if (temp)
-                {
-                    if (evt.X < minX) minX = evt.X;
-                    if (evt.X > maxX) maxX = evt.X;
-                    if (evt.Y < minY) minY = evt.Y;
-                    if (evt.Y > maxY) maxY = evt.Y;
-
-                    // Vykreslíme udalosť podľa jej typu – pomocou bitmapy, ak je to definované.
-                    switch (evt.ItemType)
-                    {
-                        case 1:
-                            if (evt.Children.Count > 0)
-                                if (HasHiddenChildren(evt))
-                                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
-                            break;
-                        case 2: // Basic Event                                
-                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
-                            break;
-                        case 3: // House Event
-                                // DrawEventBitmap(g, r, "pic\\events\\eventHouse.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
-                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
-                            break;
-                        case 4: // Undeveloped Event 
-                            //DrawEventBitmap(g, r, "pic\\events\\eventUndeveloped.png", verticalOffset: 0, scaleFactorWidth: 0.3f, scaleFactorHeight: 0.4f);
-                            BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
-                            break;
-                        case 5: // Conditioning Event 
-                                // Pre Conditioning Event použijeme odlišný scaling, aby vznikol oválny tvar
-                           
-                            break;
-                        case 6: // Basic Repeat Event 
-                                // Prípadne vykreslite obdĺžnik alebo inú bitmapu pre Basic Repeat Event.
-                            break;
-                        default: // Not Set 
-                            break;
-                    }
-
-
-
-                    // Definujeme rozloženie textu v udalosti: horná časť pre TAG, stred pre názov, spodná pre frekvenciu.
-                    int topRowHeight = r.Height / 6;
-                    int bottomRowHeight = r.Height / 6;
-                    int middleHeight = r.Height - topRowHeight - bottomRowHeight;
-
-                    Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
-                    Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
-                    Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
-
-                    // Nakreslíme oddelenie jednotlivých častí pomocou čiar.
-                    g.DrawLine(selPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
-                    g.DrawLine(selPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
-
-                    // Vykreslenie TAG textu v hornej časti
-                    string tagText = evt.Tag;
-                    Font tagFont = FindFittingFont(g, tagText, topRect);
-                    SizeF tagSize = g.MeasureString(tagText, tagFont);
-                    PointF tagPos = new PointF(
-                        topRect.X + (topRect.Width - tagSize.Width) / 2,
-                        topRect.Y + (topRect.Height - tagSize.Height) / 2
-                    );
-                    g.DrawString(tagText, tagFont, Brushes.Black, tagPos);
-
-                    // Vykreslenie názvu udalosti v strednej časti
-                    //   string nameText = evt.Name;
-                    string nameText = SplitStringToLines(evt.Name);
-
-                    Font nameFont = FindFittingFont(g, nameText, middleRect);
-                    SizeF nameSize = g.MeasureString(nameText, nameFont);
-
-                    // Overíme, či sa text zmestí do obdlžníka
-                    if (nameSize.Width <= middleRect.Width && nameSize.Height <= middleRect.Height)
-                    {
-                        PointF namePos = new PointF(
-                            middleRect.X + (middleRect.Width - nameSize.Width) / 2,
-                            middleRect.Y + (middleRect.Height - nameSize.Height) / 2
-                        );
-
-                        // Nastavenie zarovnania
-                        StringFormat format = new StringFormat();
-                        format.Alignment = StringAlignment.Center;
-                        format.LineAlignment = StringAlignment.Center;
-
-                        //g.DrawString(nameText, nameFont, Brushes.Black, namePos);
-                        g.DrawString(nameText, nameFont, Brushes.Black, middleRect, format);
-
-                    }
-
-                    // Vykreslenie frekvencie v spodnej časti
-                    string freqText = (evt.Frequency == 0) ? "" :
-                              (evt.Frequency < 0.001) ? evt.Frequency.ToString("0.0000E+0") :
-                              evt.Frequency.ToString("F6");
-
-                    if (evt.ItemType > -1)
-                    {
-
-                        freqText = evt.ValueType switch
-                        {
-                            ValueTypes.F => "f=",
-                            ValueTypes.P => "P=",
-                            ValueTypes.R => "R=",
-                            ValueTypes.Lambda => "λ=",
-                            _ => ""
-                        };
-                        freqText += (evt.Value < 0.001) ? evt.Value.ToString("0.0000E+0") : evt.Value.ToString("F6");
-                        if (evt.ValueType == ValueTypes.F || evt.ValueType == ValueTypes.Lambda) { freqText += " " + EngineLogic.MetricUnitsList[evt.ValueUnit]; }
-
-                    }
-
-                    Font freqFont = FindFittingFont(g, freqText, bottomRect);
-                    SizeF freqSize = g.MeasureString(freqText, freqFont);
-                    PointF freqPos = new PointF(
-                        bottomRect.X + (bottomRect.Width - freqSize.Width) / 2,
-                        bottomRect.Y + (bottomRect.Height - freqSize.Height) / 2
-                    );
-                    g.DrawString(freqText, freqFont, Brushes.Black, freqPos);
-
-                    // Nakreslíme vonkajšie zaoblené okraje udalosti.
-                    using (GraphicsPath roundedRect = GetRoundedRectangle(r, 5))
-                    {
-                        g.DrawPath(selPen, roundedRect);
-                    }
-
-
-                }
-            }
-        }
-        //}
-    }
 
     private void DrawEvent(Graphics g, FTAitem evt, bool isTopEvent)
     {
-
         if (evt.IsHidden)
             return;
 
-        double TempConstant = 1;
-       /* if (evt.Name.Length > 30)
-            TempConstant = 1.2;
-        else
-            TempConstant = 1;*/
+        Rectangle r = RealPositionToPixel(new Rectangle(evt.X, evt.Y, Constants.EventWidth, Constants.EventHeight));
 
-            using (Pen selPen = new Pen(MainAppSettings.Instance.ItemPen.Color, MainAppSettings.Instance.ItemPen.Width))
+        // events of the minimal cut set selected in the tree: green border and the name of the MCS above
+        bool inHighlightedMcs = EngineLogic.HighlightedEvents.Any(item => item.Tag == evt.Tag);
+        if (inHighlightedMcs)
+            DrawMcsLabel(g, r, EngineLogic.HighlightedMCS);
+
+        bool isSelected = evt.IsSelected && !_exporting;
+        bool isHover = HoveredItem == evt && !_exporting;
+        FrequencyDisplayMode mode = MainAppSettings.Instance.FrequencyDisplayMode;
+        bool hideValue = mode == FrequencyDisplayMode.alwaysHidden
+                         || (mode == FrequencyDisplayMode.topEventsOnly && !isTopEvent);
+
+        using Pen? mcsPen = inHighlightedMcs ? new Pen(EventPalette.Mcs, 2f) : null;
+        DrawCard(g, evt, r, MainAppSettings.Instance.EventStyle, isTopEvent, mcsPen, isSelected, isHover, hideValue);
+        DrawTypeIcon(g, evt, r);
+    }
+
+    /// <summary>Name of the highlighted minimal cut set as a green label above the top right corner of the event.</summary>
+    private void DrawMcsLabel(Graphics g, Rectangle r, string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        float k = r.Height / 90f;
+        int h = Math.Max(4, (int)Math.Round(15 * k));
+        int gap = (int)Math.Round(4 * k);
+        using var font = new Font("Segoe UI Semibold", Math.Max(1f, 8.5f * k), FontStyle.Regular, GraphicsUnit.Pixel);
+        int w = Math.Max(h, (int)Math.Ceiling(g.MeasureString(text, font).Width + 10 * k));
+        var pill = new Rectangle(r.Right - w - gap, r.Y - h - gap, w, h);
+
+        System.Drawing.Text.TextRenderingHint oldHint = g.TextRenderingHint;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        using (GraphicsPath path = GetRoundedRectangle(pill, Math.Max(1, h / 2)))
+        using (var fill = new SolidBrush(EventPalette.Mcs))
+            g.FillPath(fill, path);
+        using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+            g.DrawString(text, font, Brushes.White, pill, sf);
+        g.TextRenderingHint = oldHint;
+    }
+
+    /// <summary>Symbol below the event: basic, house, undeveloped, or transfer for collapsed children.</summary>
+    private void DrawTypeIcon(Graphics g, FTAitem evt, Rectangle r)
+    {
+        switch (evt.ItemType)
+        {
+            case 1:
+                if (evt.Children.Count > 0 && HasHiddenChildren(evt))
+                    BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer", EventPalette.Intermediate);
+                break;
+            case 2:
+                BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic", EventPalette.Basic);
+                break;
+            case 3:
+                BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House", EventPalette.House);
+                break;
+            case 4:
+                BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped", EventPalette.Undeveloped);
+                break;
+        }
+    }
+
+    // ---- Event card styles (Settings: Event style) ----
+
+    private static readonly Color CardText = Color.FromArgb(31, 41, 51);
+    private static readonly Color CardValueText = Color.FromArgb(72, 82, 94);
+    private static readonly Color CleanAccent = Color.FromArgb(40, 70, 110);
+
+    /// <summary>
+    /// Event card: Header (tag band coloured by event type, grey value row),
+    /// Minimal (colour stripe, tag and value as labels), Clean (tinted tag and value rows).
+    /// Sizes are given for a 90 px high card and scale with the zoom. Names have the same font size
+    /// in all events; it is reduced only when the text does not fit.
+    /// </summary>
+    private void DrawCard(Graphics g, FTAitem evt, Rectangle r, EventStyle style, bool isTopEvent,
+                                Pen? mcsPen, bool isSelected, bool isHover, bool hideValue)
+    {
+        float k = r.Height / 90f;
+        int Px(float v) => Math.Max(1, (int)Math.Round(v * k));
+        int radius = Px(style switch { EventStyle.Header => 7, EventStyle.Minimal => 6, _ => 9 });
+        Color typeColor = EventPalette.ForEvent(evt, isTopEvent);
+
+        System.Drawing.Text.TextRenderingHint oldHint = g.TextRenderingHint;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        try
+        {
+            DrawShadowRounded(g, r, radius, lifted: isHover || isSelected);
+
+            using GraphicsPath card = GetRoundedRectangle(r, radius);
+            using (var white = new SolidBrush(Color.White))
+                g.FillPath(white, card);
+
+            Rectangle tagRect, nameRect, valueRect = Rectangle.Empty;
+            Color tagColor, valueColor, borderColor;
+            string nameFamily = "Segoe UI Semibold";
+            StringAlignment tagAlign = StringAlignment.Center;
+
+            switch (style)
             {
-                Rectangle r = new Rectangle
+                case EventStyle.Header:
                 {
-                    X = evt.X,
-                    Y = evt.Y,
-                    Width = (int)(Constants.EventWidth * TempConstant),
-                    Height = Constants.EventHeight
-                };
-                r = RealPositionToPixel(r);
-
-
-
-                // ---- SELECTION COLORS ----
-                /*   if (evt.IsSelected)
-                   {
-                       selPen.Color = Color.Red;
-                       selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-                   }*/
-
-
-
-                // Highlight logic preserved
-                string searchGuid = evt.Tag;
-                bool exists = EngineLogic.HighlightedEvents.Any(item => item.Tag == searchGuid);
-                if (exists)
-                {
-                    selPen.Color = Color.Green;
-                    selPen.Width = MainAppSettings.Instance.ItemPen.Width + 1;
-
-                    Rectangle headerRect = new Rectangle(r.X + r.Width / 2 + 2, r.Y - 18, r.Width / 2 - 5, 20);
-                    DrawMCSHeader(g, headerRect, EngineLogic.HighlightedMCS, 16, 8);
+                    int band = Px(18);
+                    tagRect = new Rectangle(r.X, r.Y, r.Width, band);
+                    FillClipped(g, card, tagRect, typeColor);
+                    if (!hideValue)
+                    {
+                        valueRect = new Rectangle(r.X, r.Bottom - band, r.Width, band);
+                        FillClipped(g, card, valueRect, Color.FromArgb(241, 243, 245));
+                        using var sep = new Pen(Color.FromArgb(222, 226, 230));
+                        g.DrawLine(sep, r.X, valueRect.Y, r.Right, valueRect.Y);
+                    }
+                    nameRect = Rectangle.FromLTRB(r.X + Px(5), tagRect.Bottom, r.Right - Px(5), hideValue ? r.Bottom : valueRect.Top);
+                    (tagColor, valueColor, borderColor) = (Color.White, CardValueText, Color.FromArgb(150, 160, 172));
+                    break;
                 }
-
-                // ---- DRAW MODERN SHADOW ----
-                if (!evt.IsSelected)
-                    DrawShadowRounded(g, r, 12);
-
-                if (!evt.IsSelected)
-                    Draw3DGradientBackground(g, r, 12);
-
-                // ---- BORDER (rounded) ----
-                using (GraphicsPath border = GetRoundedRectangle(r, 12))
-                    g.DrawPath(selPen, border);
-
-                // ---- ORIGINAL ICON DRAWING ----
-                switch (evt.ItemType)
+                case EventStyle.Minimal:
                 {
-                    case 1:
-                        if (evt.Children.Count > 0)
-                            if (HasHiddenChildren(evt))
-                                BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Transfer");
-                        break;
-                    case 2:
-                        BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Basic");
-                        break;
-                    case 3:
-                        BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "House");
-                        break;
-                    case 4:
-                        BitmapDrawingEngine.Instance.DrawEventIcon(g, r, "Undeveloped");
-                        break;
+                    int stripe = Px(5);
+                    FillClipped(g, card, new Rectangle(r.X, r.Y, stripe, r.Height), typeColor);
+                    tagRect = new Rectangle(r.X + Px(11), r.Y + Px(3), r.Width - Px(16), Px(16));
+                    tagAlign = StringAlignment.Near;
+                    if (!hideValue)
+                        valueRect = new Rectangle(r.X + stripe, r.Bottom - Px(20), r.Width - stripe, Px(14));
+                    nameRect = Rectangle.FromLTRB(r.X + stripe + Px(4), r.Y + Px(18), r.Right - Px(4), hideValue ? r.Bottom - Px(4) : r.Bottom - Px(22));
+                    (tagColor, valueColor, borderColor) = (typeColor, CleanAccent, Color.FromArgb(203, 210, 217));
+                    break;
                 }
-
-
-                bool isHover = (HoveredItem == evt);
-
-                if (isHover)
+                default: // Clean
                 {
-                    DrawHoverEffect(g, r, 12);
+                    int band = Px(16);
+                    Color tint = Color.FromArgb(234, 241, 250);
+                    tagRect = new Rectangle(r.X, r.Y, r.Width, band);
+                    FillClipped(g, card, tagRect, tint);
+                    using var sep = new Pen(Color.FromArgb(196, 212, 232));
+                    g.DrawLine(sep, r.X, tagRect.Bottom, r.Right, tagRect.Bottom);
+                    if (!hideValue)
+                    {
+                        valueRect = new Rectangle(r.X, r.Bottom - band, r.Width, band);
+                        FillClipped(g, card, valueRect, tint);
+                        g.DrawLine(sep, r.X, valueRect.Y, r.Right, valueRect.Y);
+                    }
+                    nameRect = Rectangle.FromLTRB(r.X + Px(5), tagRect.Bottom, r.Right - Px(5), hideValue ? r.Bottom : valueRect.Top);
+                    nameFamily = "Segoe UI";
+                    (tagColor, valueColor, borderColor) = (CleanAccent, CleanAccent, Color.FromArgb(74, 111, 165));
+                    break;
                 }
-
-
-                if (evt.IsSelected)
-                {
-                    //  DrawSelectedEffect(g, r, 12);
-                    //DrawNeonSelection(g, r, 12);
-                    //DrawPressedSelection(g, r, 12);
-                    DrawPressedSelectionv2(g, r, 12);
-                }
-                bool TempHideFrequency = false;
-
-                if(FrequencyDisplayMode.alwaysHidden == MainAppSettings.Instance.FrequencyDisplayMode || FrequencyDisplayMode.topEventsOnly == MainAppSettings.Instance.FrequencyDisplayMode)
-                TempHideFrequency = true;
-           
-                if (isTopEvent && FrequencyDisplayMode.topEventsOnly == MainAppSettings.Instance.FrequencyDisplayMode)
-                {
-                    TempHideFrequency = false;
-                }
-
-            // ---- TEXT LAYOUT (unchanged) ----
-            int topRowHeight = r.Height / 6;
-                int bottomRowHeight = r.Height / 6;
-
-                if(TempHideFrequency)
-                {
-                    bottomRowHeight = 0;
-                }
-
-                int middleHeight = r.Height - topRowHeight - bottomRowHeight;
-
-                Rectangle topRect = new Rectangle(r.X, r.Y, r.Width, topRowHeight);
-                Rectangle middleRect = new Rectangle(r.X, r.Y + topRowHeight, r.Width, middleHeight);
-                Rectangle bottomRect = new Rectangle(r.X, r.Y + topRowHeight + middleHeight, r.Width, bottomRowHeight);
-
-                // Separator lines — softened color for modern UI
-                using (Pen softPen = new Pen(Color.FromArgb(120, selPen.Color), 1))
-                {
-                    g.DrawLine(softPen, r.X, r.Y + topRowHeight, r.X + r.Width, r.Y + topRowHeight);
-                if (!TempHideFrequency)
-                    g.DrawLine(softPen, r.X, r.Y + topRowHeight + middleHeight, r.X + r.Width, r.Y + topRowHeight + middleHeight);
-                }
-
-                // ----- TAG -----
-                string tagText = evt.Tag;
-                Font tagFont = FindFittingFont(g, tagText, topRect);
-                /*  TextRenderer.DrawText(g, tagText, tagFont, topRect,
-                                         Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);   */
-
-                // ----- NAME -----
-                /* string nameText = SplitStringToLines(evt.Name);
-                Font nameFont = FindFittingFont(g, nameText, middleRect);
-               TextRenderer.DrawText(g, nameText, nameFont, middleRect,
-                                      Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
-
-                // ----- FREQUENCY -----
-                /* string freqText = GetFrequencyText(evt);
-                Font freqFont = FindFittingFont(g, freqText, bottomRect);
-               TextRenderer.DrawText(g, freqText, freqFont, bottomRect,
-                                      Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);*/
-
-                StringFormat sf = new StringFormat();
-                sf.Alignment = StringAlignment.Center;
-                sf.LineAlignment = StringAlignment.Center;
-
-                g.DrawString(tagText, tagFont, Brushes.Black, topRect, sf);
-
-                // ----- NAME -----
-                //    string nameText = SplitStringToLines(evt.Name);
-                string nameText = (evt.Name);
-
-                float maxFontSize = middleRect.Height * 0.15f; // 15% z výšky
-
-                Font nameFont = FindFittingFont(g, nameText, middleRect, maxFontSize);
-
-                g.DrawString(nameText, nameFont, Brushes.Black, middleRect, sf);
-
-                // ----- FREQUENCY -----
-                string freqText = GetFrequencyText(evt);
-                Font freqFont = FindFittingFont(g, freqText, bottomRect);
-                if(!TempHideFrequency)
-                g.DrawString(freqText, freqFont, Brushes.Black, bottomRect, sf);
-
-
             }
+
+            // ---- state and border (green border of a highlighted minimal cut set stays) ----
+            if (isSelected)
+            {
+                DrawSelection(g, r, radius, style == EventStyle.Clean ? tagRect : Rectangle.Empty, isHover);
+            }
+            else
+            {
+                if (isHover)
+                    DrawHoverTint(g, r, radius);
+                using var hoverPen = new Pen(SelectionAccent, 1.5f);
+                using var stylePen = new Pen(borderColor, 1f);
+                g.DrawPath(mcsPen ?? (isHover ? hoverPen : stylePen), card);
+            }
+
+            // ---- texts ----
+            using var oneLine = new StringFormat(StringFormatFlags.NoWrap)
+            { Alignment = tagAlign, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter };
+            using var centred = new StringFormat
+            { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisWord };
+
+            string tag = evt.Tag ?? "";
+            using (Font f = FitFont(g, tag, tagRect, "Segoe UI", FontStyle.Bold, 9.5f * k, singleLine: true))
+            using (var b = new SolidBrush(tagColor))
+                g.DrawString(tag, f, b, tagRect, oneLine);
+
+            // "|" in a name is a manual line break
+            string name = (evt.Name ?? "").Contains('|')
+                ? string.Join("\n", evt.Name!.Split('|').Select(t => t.Trim()))
+                : evt.Name ?? "";
+            using (Font f = FitFont(g, name, nameRect, nameFamily, FontStyle.Regular, 10.5f * k))
+            using (var b = new SolidBrush(CardText))
+                g.DrawString(name, f, b, nameRect, centred);
+
+            if (!hideValue)
+            {
+                string value = GetFrequencyText(evt);
+                oneLine.Alignment = StringAlignment.Center;
+                using Font f = FitFont(g, value, valueRect, "Segoe UI", FontStyle.Regular, 9f * k, singleLine: true);
+                if (style == EventStyle.Minimal)
+                {
+                    // value as a pill
+                    float w = Math.Min(valueRect.Width - Px(4), g.MeasureString(value, f).Width + Px(10));
+                    var pill = new Rectangle((int)(valueRect.X + (valueRect.Width - w) / 2), valueRect.Y, (int)w, valueRect.Height);
+                    using GraphicsPath pillPath = GetRoundedRectangle(pill, Math.Max(1, pill.Height / 2));
+                    using (var fill = new SolidBrush(Color.FromArgb(232, 240, 250)))
+                        g.FillPath(fill, pillPath);
+                }
+                using var b = new SolidBrush(valueColor);
+                g.DrawString(value, f, b, valueRect, oneLine);
+            }
+        }
+        finally
+        {
+            g.TextRenderingHint = oldHint;
+        }
     }
 
-    private void DrawPressedSelection(Graphics g, Rectangle r, int radius)
+    /// <summary>Fills a rectangle clipped to a path (bands inside a rounded card).</summary>
+    private static void FillClipped(Graphics g, GraphicsPath clip, Rectangle rect, Color color)
+    {
+        GraphicsState state = g.Save();
+        g.SetClip(clip, CombineMode.Intersect);
+        using (var brush = new SolidBrush(color))
+            g.FillRectangle(brush, rect);
+        g.Restore(state);
+    }
+
+    /// <summary>
+    /// Font of the given pixel size, made smaller (down to half) only if the text does not fit
+    /// into the rectangle; text that still does not fit is trimmed with an ellipsis when drawn.
+    /// </summary>
+    private static Font FitFont(Graphics g, string text, Rectangle rect, string family, FontStyle style,
+                                float maxPx, bool singleLine = false)
+    {
+        float size = Math.Max(1f, maxPx);
+        float minPx = Math.Max(1f, maxPx * 0.5f);
+        if (rect.Width <= 0 || rect.Height <= 0 || string.IsNullOrEmpty(text))
+            return new Font(family, size, style, GraphicsUnit.Pixel);
+
+        using var sf = new StringFormat(singleLine ? StringFormatFlags.NoWrap : 0);
+        while (true)
+        {
+            var font = new Font(family, size, style, GraphicsUnit.Pixel);
+            SizeF needed = singleLine
+                ? g.MeasureString(text, font, PointF.Empty, sf)
+                : g.MeasureString(text, font, rect.Width, sf);
+            if ((needed.Width <= rect.Width && needed.Height <= rect.Height) || size <= minPx)
+                return font;
+            font.Dispose();
+            size = Math.Max(minPx, size * 0.92f);
+        }
+    }
+
+    /// <summary>
+    /// Selected event: light accent fill, tinted tag row, 2 px accent border and a soft focus ring
+    /// around the card (stronger when the mouse is over it).
+    /// </summary>
+    private void DrawSelection(Graphics g, Rectangle r, int radius, Rectangle tagRow, bool hover)
     {
         using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (LinearGradientBrush brush = new LinearGradientBrush(
-            r,
-            Color.FromArgb(255, 240, 160, 160),
-            Color.FromArgb(255, 200, 60, 60),
-            LinearGradientMode.Vertical
-        ))
         {
-            g.FillPath(brush, path);
+            using (var fill = new SolidBrush(Color.FromArgb(hover ? 34 : 24, SelectionAccent)))
+                g.FillPath(fill, path);
+
+            GraphicsState state = g.Save();   // tag row tinted, clipped to the rounded card
+            g.SetClip(path, CombineMode.Intersect);
+            using (var band = new SolidBrush(Color.FromArgb(55, SelectionAccent)))
+                g.FillRectangle(band, tagRow);
+            g.Restore(state);
+
+            using (var border = new Pen(SelectionAccent, 2f))
+                g.DrawPath(border, path);
         }
 
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen p = new Pen(Color.DarkRed, 2))
-        {
-            g.DrawPath(p, path);
-        }
+        using (GraphicsPath ring = GetRoundedRectangle(Rectangle.Inflate(r, 4, 4), radius + 4))
+        using (var ringPen = new Pen(Color.FromArgb(hover ? 110 : 75, SelectionAccent), 3f))
+            g.DrawPath(ringPen, ring);
     }
 
-    private void DrawPressedSelectionv2(Graphics g, Rectangle r, int radius)
-    {
-        // Jemné zosvetlené pozadie
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (LinearGradientBrush brush = new LinearGradientBrush(
-            r,
-            Color.FromArgb(40, 255, 120, 120),   // svetlá transparentná červená
-            Color.FromArgb(10, 200, 60, 60),     // tmavšia šeď s červeným tónom
-            LinearGradientMode.Vertical))
-        {
-            g.FillPath(brush, path);
-        }
-
-        // Jemný vnútorný biely highlight (moderné UI)
-        Rectangle inner = Rectangle.Inflate(r, -1, -1);
-        using (GraphicsPath path = GetRoundedRectangle(inner, radius - 1))
-        using (Pen lightPen = new Pen(Color.FromArgb(80, 255, 255, 255), 1))
-        {
-            g.DrawPath(lightPen, path);
-        }
-
-        // Jemný vonkajší červený rám
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen border = new Pen(Color.FromArgb(180, 220, 50, 50), 2))
-        {
-            g.DrawPath(border, path);
-        }
-    }
-
-    private void DrawNeonSelection(Graphics g, Rectangle r, int radius)
+    /// <summary>Event under the mouse: very light accent fill (the border is drawn by the caller).</summary>
+    private void DrawHoverTint(Graphics g, Rectangle r, int radius)
     {
         using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen p = new Pen(Color.FromArgb(255, 255, 50, 50), 3))
-        {
-            p.LineJoin = LineJoin.Round;
-            g.DrawPath(p, path);
-        }
-
-        // jemná neónová žiara
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen glow = new Pen(Color.FromArgb(70, 255, 70, 70), 7))
-        {
-            glow.LineJoin = LineJoin.Round;
-            g.DrawPath(glow, path);
-        }
+        using (var fill = new SolidBrush(Color.FromArgb(14, SelectionAccent)))
+            g.FillPath(fill, path);
     }
 
-    private void DrawSelectedEffect(Graphics g, Rectangle r, int radius)
-    {
-        // Outer glow
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (PathGradientBrush glow = new PathGradientBrush(path))
-        {
-            glow.CenterColor = Color.FromArgb(120, 255, 80, 80);          // červený glow
-            glow.SurroundColors = new[] { Color.FromArgb(0, 255, 80, 80) };
-
-            g.FillPath(glow, path);
-        }
-
-        // Inner white highlight (jemný)
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen inner = new Pen(Color.FromArgb(140, 255, 255, 255), 1))
-        {
-            g.DrawPath(inner, path);
-        }
-
-        // Strong outer border
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen outer = new Pen(Color.FromArgb(200, 255, 40, 40), 2))
-        {
-            g.DrawPath(outer, path);
-        }
-    }
-
-    private string GetFrequencyText(FTAitem evt)
+    internal string GetFrequencyText(FTAitem evt)
     {
         // Ak nemá item definovaný typ hodnoty, nič nevykreslíme
         if (evt.ItemType < 0)
@@ -672,61 +446,18 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return prefix + formattedValue + unit;
     }
 
-    private void DrawHoverEffect(Graphics g, Rectangle r, int radius)
+    /// <summary>Soft shadow; a lifted card (hover, selection) has a larger and darker shadow.</summary>
+    private void DrawShadowRounded(Graphics g, Rectangle r, int radius, bool lifted = false)
     {
-
-        // glow
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (PathGradientBrush glow = new PathGradientBrush(path))
-        {
-            glow.CenterColor = Color.FromArgb(90, 80, 140, 255);      // modrastý glow
-            glow.SurroundColors = new[] { Color.FromArgb(0, 80, 140, 255) };
-            g.FillPath(glow, path);
-        }
-
-        // jemné zosvetlenie pozadia
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (SolidBrush brush = new SolidBrush(Color.FromArgb(40, Color.White)))
-        {
-            g.FillPath(brush, path);
-        }
-
-        // zvýraznený vonkajší rám
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (Pen p = new Pen(Color.FromArgb(130, 80, 140, 255), 2))
-        {
-            g.DrawPath(p, path);
-        }
-    }
-
-
-    private void DrawShadowRounded(Graphics g, Rectangle r, int radius)
-    {
-        
-
-        Rectangle shadow = new Rectangle(r.X + 4, r.Y + 4, r.Width, r.Height);
+        int offset = lifted ? 6 : 4;
+        Rectangle shadow = new Rectangle(r.X + offset, r.Y + offset, r.Width, r.Height);
 
         using (GraphicsPath path = GetRoundedRectangle(shadow, radius))
         using (PathGradientBrush brush = new PathGradientBrush(path))
         {
-            brush.CenterColor = Color.FromArgb(50, 0, 0, 0);
+            brush.CenterColor = Color.FromArgb(lifted ? 75 : 50, 0, 0, 0);
             brush.SurroundColors = new[] { Color.FromArgb(0, 0, 0, 0) };
             g.FillPath(brush, path);
-        }
-    }
-
-    private void Draw3DGradientBackground(Graphics g, Rectangle r, int radius)
-    {
- 
-
-        using (GraphicsPath path = GetRoundedRectangle(r, radius))
-        using (LinearGradientBrush b = new LinearGradientBrush(
-            r,
-            Color.White,
-            Color.FromArgb(225, 225, 225),
-            LinearGradientMode.Vertical))
-        {
-            g.FillPath(b, path);
         }
     }
 
@@ -788,159 +519,19 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
                 double percent = 100 * (value - min) / (max - min);
 
-                Rectangle r = new Rectangle
-                {
-                    X = evt.X,
-                    Y = evt.Y + (int)(Constants.EventHeight + 0.3 * Constants.EventHeight),
-                    Width = Constants.EventWidth,
-                    Height = (int)(Constants.EventHeight / 6)
-                };
-                r = RealPositionToPixel(r);
+                Rectangle r = RealPositionToPixel(new Rectangle(
+                    evt.X, evt.Y + MetricBarTop, Constants.EventWidth, MetricBarHeight));
 
-                // Label shows the value of the measure; the bar (colour, length) shows its position between min and max
-                string txt = $"{MainAppSettings.Instance.DisplayedMetric}: {value:G4}";
-                DrawTurboProgressBar(g, r, (float)percent, txt);
+                // the bar (length, colour) shows the position between min and max, the text the value
+                DrawMetricBar(g, r, (float)percent, MainAppSettings.Instance.DisplayedMetric.ToString(), value.ToString("G4"));
             }
         }
     }
-
-    static string SplitStringToLines(string text)
-    {
-        if (text.Contains('|'))
-        {
-            var parts = text.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            return string.Join("\n", parts.Select(p => p.Trim()));
-        }
-
-        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        int totalLength = text.Length;
-
-
-        int lineCount;
-        if (totalLength < 15)
-            lineCount = 1;
-        else if (totalLength < 30)
-            lineCount = 2;
-        else
-            lineCount = 3;
-
-        if (lineCount == 1)
-            return text;
-
-
-        double[] thresholds;
-        if (lineCount == 2)
-            thresholds = new double[] { 0.6 };
-        else
-            thresholds = new double[] { 0.5, 0.8 }; // 50% + 30% + 20%
-
-        var sb = new StringBuilder();
-        int currentLength = 0;
-        int newlineCount = 0;
-
-        foreach (var word in words)
-        {
-            if (newlineCount < thresholds.Length &&
-                currentLength + word.Length + 1 > totalLength * thresholds[newlineCount])
-            {
-                sb.Append('\n');
-                newlineCount++;
-            }
-            else if (sb.Length > 0 && sb[^1] != '\n')
-            {
-                sb.Append(' ');
-            }
-
-            sb.Append(word);
-            currentLength += word.Length + 1;
-        }
-
-        return sb.ToString();
-    }
-
-    private Font FindFittingFontOLD(Graphics g, string text, Rectangle rect)// Methode for fitting text into to event visual borders
-    {
-      /*  float maxFontSize = 10f;
-        float minFontSize = 6f;*/
-
-        float maxFontSize = 100f;
-        float minFontSize = 1f;
-        Font font;
-
-        for (float fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 0.5f)
-        {
-            font = new Font("Arial", fontSize);
-            SizeF textSize = g.MeasureString(text, font);
-
-            if (textSize.Width <= rect.Width && textSize.Height <= rect.Height)
-            {
-
-                return font;
-            }
-
-            font.Dispose();
-        }
-        return new Font("Arial", minFontSize);
-    }
-
-    private Font FindFittingFont(Graphics g, string text, Rectangle rect, float maxFontSize = 100f, float minFontSize = 1f)
-    {
-        if (text == null) text = " ";
-            
-        // --- prepare text (support for | as manual line break) ---
-        string preparedText = text.Contains("|")
-            ? string.Join("\n", text.Split('|').Select(t => t.Trim()))
-            : text;
-
-        // --- string format (center + word wrap) ---
-        StringFormat sf = new StringFormat
-        {
-            Alignment = StringAlignment.Center,
-            LineAlignment = StringAlignment.Center,
-            Trimming = StringTrimming.Word
-        };
-
-        // enable word wrap
-        sf.FormatFlags &= ~StringFormatFlags.NoWrap;
-
-        float low = minFontSize;
-        float high = maxFontSize;
-
-        Font bestFont = new Font("Arial", minFontSize);
-
-        while (high - low > 0.5f) // precision
-        {
-            float mid = (low + high) / 2f;
-
-            using (Font testFont = new Font("Arial", mid))
-            {
-                SizeF size = g.MeasureString(preparedText, testFont, rect.Width, sf);
-
-                if (size.Height <= rect.Height)
-                {
-                    // fits → try bigger
-                    bestFont.Dispose();
-                    bestFont = (Font)testFont.Clone();
-                    low = mid;
-                }
-                else
-                {
-                    // too big → go smaller
-                    high = mid;
-                }
-            }
-        }
-
-        return bestFont;
-    }
-
-    
 
     private void DrawLinesAndGates(Graphics g)
     {
 
-        using (Pen linePen = new Pen(Color.Black, 2))
-        using (Brush gateBrush = new SolidBrush(Color.Black))
+        using (Pen linePen = new Pen(EventPalette.Line, 1.5f))
         {
             foreach (var parentEvent in DrawingStructure)
             {
@@ -1030,10 +621,10 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                             switch (parent.Gate)
                             {
                                 case Gates.OR: // OR Gate
-                                    BitmapDrawingEngine.Instance.DrawOrGate(g, parentRect);
+                                    BitmapDrawingEngine.Instance.DrawOrGate(g, parentRect, EventPalette.ForEvent(parent, parent == TopEvent));
                                     break;
                                 case Gates.AND: // AND Gate
-                                    BitmapDrawingEngine.Instance.DrawANDGate(g, parentRect);
+                                    BitmapDrawingEngine.Instance.DrawANDGate(g, parentRect, EventPalette.ForEvent(parent, parent == TopEvent));
                                     break;
                                 /*  case 3: // Not Gate
                                       DrawGateBitmap(g, parentRect, "pic\\gates\\gateNot.png", verticalOffset: 10);
@@ -1083,24 +674,6 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return true;
     }
 
-    private GraphicsPath GetRoundedRectangleOLD(Rectangle bounds, int radius)//Methode for rounding corners of events
-    {
-        GraphicsPath path = new GraphicsPath();
-        int diameter = radius * 2;
-
-        path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
-        path.AddLine(bounds.X + radius, bounds.Y, bounds.Right - radius, bounds.Y);
-        path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
-        path.AddLine(bounds.Right, bounds.Y + radius, bounds.Right, bounds.Bottom - radius);
-        path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
-        path.AddLine(bounds.Right - radius, bounds.Bottom, bounds.X + radius, bounds.Bottom);
-        path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
-        path.AddLine(bounds.X, bounds.Bottom - radius, bounds.X, bounds.Y + radius);
-        path.CloseFigure();
-
-        return path;
-    }
-
     public Rectangle RealPositionToPixel(Rectangle r)
     {
         Rectangle outR = new Rectangle();
@@ -1141,153 +714,74 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return subtree;
     }
 
-    public static void DrawTurboProgressBar(Graphics g, Rectangle rect, float value, string text = null)
+    // Metric of a basic event at the height of its symbol (model units relative to the event):
+    // "BIM [=====]  (symbol)  3" - nothing is drawn lower than the symbol itself
+    private static int SymbolHeight => (int)(0.2 * Constants.EventWidth);
+    private const int MetricBarHeight = 12;
+    private static int MetricBarTop => Constants.EventHeight + (SymbolHeight - MetricBarHeight) / 2;
+
+    /// <summary>
+    /// Left of the symbol: name of the measure and a thin bar (light to deep orange) showing the
+    /// position of the value between min and max; right of the symbol: the value.
+    /// </summary>
+    private static void DrawMetricBar(Graphics g, Rectangle rect, float percent, string label, string value)
     {
-        value = Math.Clamp(value, 0, 100);
+        if (rect.Width <= 0 || rect.Height <= 0)
+            return;
+        float k = rect.Height / (float)MetricBarHeight;
+        float p = Math.Clamp(percent, 0f, 100f) / 100f;
         g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-        // pozadie
-        using (var backBrush = new SolidBrush(Color.FromArgb(230, 230, 230)))
-            g.FillRectangle(backBrush, rect);
+        // the symbol is drawn from 0.4 to 0.6 of the event width
+        var leftZone = Rectangle.FromLTRB(rect.X, rect.Y, rect.X + (int)(0.37 * rect.Width), rect.Bottom);
+        var rightZone = Rectangle.FromLTRB(rect.X + (int)(0.63 * rect.Width), rect.Y, rect.Right, rect.Bottom);
 
-        // výplň
-        int fillWidth = (int)(rect.Width * (value / 100f));
-        if (fillWidth > 0)
-        {
-            Rectangle fillRect = new Rectangle(rect.X, rect.Y, fillWidth, rect.Height);
+        System.Drawing.Text.TextRenderingHint oldHint = g.TextRenderingHint;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        float fontPx = Math.Max(1f, 8.5f * k);
+        using var labelFont = new Font("Segoe UI Semibold", fontPx, FontStyle.Regular, GraphicsUnit.Pixel);
+        using var valueFont = new Font("Segoe UI", fontPx, FontStyle.Bold, GraphicsUnit.Pixel);
+        using var labelBrush = new SolidBrush(Color.FromArgb(100, 110, 122));
+        using var valueBrush = new SolidBrush(Color.FromArgb(31, 41, 51));
+        using var left = new StringFormat(StringFormatFlags.NoWrap) { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
+        using var right = new StringFormat(StringFormatFlags.NoWrap) { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter };
 
-            // vypočítaj "horný limit" palety (koľko % z nej sa použije)
-            float stopLimit = value / 100f;
+        float labelWidth = g.MeasureString(label, labelFont).Width;
+        g.DrawString(label, labelFont, labelBrush, leftZone, left);
+        g.DrawString(value, valueFont, valueBrush, rightZone, right);
+        g.TextRenderingHint = oldHint;
 
-            // definícia Turbo colormap
-            ColorBlend blend = new ColorBlend
-            {
-                Colors = new[]
-                {
-                    Color.FromArgb(  48,  18,  59), // dark blue
-                    Color.FromArgb(  50,  72, 174), // blue
-                    Color.FromArgb(  31, 167, 206), // cyan
-                    Color.FromArgb(  87, 216, 122), // greenish
-                    Color.FromArgb( 194, 223,  35), // yellow
-                    Color.FromArgb( 253, 161,  34), // orange
-                    Color.FromArgb( 241,  47,  47)  // red
-                },
-                Positions = new[]
-                {
-                    0.0f, 0.15f, 0.35f, 0.55f, 0.7f, 0.85f, 1.0f
-                }
-            };
+        int barLeft = (int)(leftZone.X + labelWidth + 2 * k);
+        int barRight = leftZone.Right;
+        if (barRight - barLeft < 4)
+            return;   // too small to show the bar
+        int track = Math.Max(2, (int)Math.Round(5 * k));
+        int barY = rect.Y + (rect.Height - track) / 2;
 
-            // vytvor nový ColorBlend "orezaný" podľa hodnoty
-            ColorBlend partial = CropColorBlend(blend, stopLimit);
+        var trackRect = new Rectangle(barLeft, barY, barRight - barLeft, track);
+        using (GraphicsPath path = RoundedBar(trackRect))
+        using (var brush = new SolidBrush(Color.FromArgb(226, 230, 236)))
+            g.FillPath(brush, path);
 
-            using (var brush = new LinearGradientBrush(
-                fillRect,
-                Color.Black,
-                Color.Black,
-                LinearGradientMode.Horizontal))
-            {
-                brush.InterpolationColors = partial;
-                g.FillRectangle(brush, fillRect);
-            }
-        }
-
-        // rámik
-        using (var borderPen = new Pen(Color.Gray, 1))
-            g.DrawRectangle(borderPen, rect);
-
-        // text
-        if (!string.IsNullOrEmpty(text))
-        {
-            using (var font = new Font("Segoe UI", 9, FontStyle.Bold))
-            using (var sf = new StringFormat
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            })
-            {
-                Color textColor = value < 50 ? Color.Black : Color.White;
-                using (var textBrush = new SolidBrush(textColor))
-                    g.DrawString(text, font, textBrush, rect, sf);
-            }
-        }
+        Color lo = Color.FromArgb(250, 205, 160), hi = Color.FromArgb(217, 72, 15);
+        Color fill = Color.FromArgb(
+            (int)(lo.R + (hi.R - lo.R) * p), (int)(lo.G + (hi.G - lo.G) * p), (int)(lo.B + (hi.B - lo.B) * p));
+        var fillRect = new Rectangle(barLeft, barY, Math.Max(track, (int)(trackRect.Width * Math.Max(p, 0.02f))), track);
+        using (GraphicsPath path = RoundedBar(fillRect))
+        using (var brush = new SolidBrush(fill))
+            g.FillPath(brush, path);
     }
 
-    /// <summary>
-    /// Oreže farebný prechod podľa "percenta" palety (0–1)
-    /// </summary>
-    private static ColorBlend CropColorBlend(ColorBlend original, float limit)
+    /// <summary>Rectangle with fully rounded ends.</summary>
+    private static GraphicsPath RoundedBar(Rectangle r)
     {
-        limit = Math.Clamp(limit, 0f, 1f);
-
-        // ak je veľmi nízke percento, zjednodušene použijeme len 1 farbu
-        if (limit <= 0.001f)
-        {
-            var single = new ColorBlend(2)
-            {
-                Colors = new[] { original.Colors[0], original.Colors[0] },
-                Positions = new[] { 0f, 1f }
-            };
-            return single;
-        }
-
-        // interpolácia farby pri danej pozícii limitu
-        Color endColor = InterpolateColor(original, limit);
-
-        // všetky farby a pozície do limitu
-        var colors = new System.Collections.Generic.List<Color>();
-        var positions = new System.Collections.Generic.List<float>();
-
-        for (int i = 0; i < original.Positions.Length; i++)
-        {
-            float pos = original.Positions[i];
-            if (pos <= limit)
-            {
-                colors.Add(original.Colors[i]);
-                positions.Add(pos / limit); // preškáluj do 0–1
-            }
-            else
-                break;
-        }
-
-        // pridaj "koncovú" interpolovanú farbu
-        colors.Add(endColor);
-        positions.Add(1f);
-
-        return new ColorBlend
-        {
-            Colors = colors.ToArray(),
-            Positions = positions.ToArray()
-        };
+        var path = new GraphicsPath();
+        int d = Math.Max(1, Math.Min(r.Height, r.Width));
+        path.AddArc(r.X, r.Y, d, r.Height, 90, 180);
+        path.AddArc(r.Right - d, r.Y, d, r.Height, 270, 180);
+        path.CloseFigure();
+        return path;
     }
-
-    /// <summary>
-    /// Nájde interpolovanú farbu v rámci palety pre dané t (0–1)
-    /// </summary>
-    private static Color InterpolateColor(ColorBlend blend, float t)
-    {
-        for (int i = 1; i < blend.Positions.Length; i++)
-        {
-            float p0 = blend.Positions[i - 1];
-            float p1 = blend.Positions[i];
-            if (t >= p0 && t <= p1)
-            {
-                float localT = (t - p0) / (p1 - p0);
-                return Lerp(blend.Colors[i - 1], blend.Colors[i], localT);
-            }
-        }
-        return blend.Colors[^1];
-    }
-
-    private static Color Lerp(Color a, Color b, float t)
-    {
-        return Color.FromArgb(
-            (int)(a.R + (b.R - a.R) * t),
-            (int)(a.G + (b.G - a.G) * t),
-            (int)(a.B + (b.B - a.B) * t));
-    }
-
 
     public void Mouse_DragEvent(Point mouseCoordinates)
     {
@@ -1431,6 +925,14 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
     }
 
+    /// <summary>Clears the hover state (mouse left the canvas); true if a repaint is needed.</summary>
+    public bool ClearHover()
+    {
+        bool changed = HoveredItem != null;
+        HoveredItem = null;
+        return changed;
+    }
+
     public bool Mouse_OnEvevt(Point mouseCoordinates,out bool Inv)
     {
         Inv = false;
@@ -1457,7 +959,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
 
         HoveredItem = null;
-        Inv = true;
+        Inv = old != null;   // repaint only when the hover ends, not on every move over empty space
         return (false);
 
         
@@ -1486,6 +988,25 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     DrawForExport(gMeta, bounds);
             }
         }
+    }
+
+    /// <summary>
+    /// Zoom and offset so that the whole visible tree (events, symbols, metric bars) fills the view
+    /// of the given size with a small margin; the zoom is limited to 2 so that small trees are not blown up.
+    /// </summary>
+    public void FitToView(int viewWidth, int viewHeight, int margin = 20)
+    {
+        if (viewWidth <= 2 * margin || viewHeight <= 2 * margin || DrawingStructure.Count == 0)
+            return;
+
+        RectangleF bounds = GetExportBounds();
+        double zoom = Math.Min((viewWidth - 2.0 * margin) / Math.Max(1, bounds.Width),
+                               (viewHeight - 2.0 * margin) / Math.Max(1, bounds.Height));
+        zoom = Math.Clamp(zoom, 0.05, 2.0);
+
+        GlobalZoom = zoom;
+        offsetX = (int)Math.Round((viewWidth - bounds.Width * zoom) / 2 - bounds.Left * zoom);
+        offsetY = (int)Math.Round((viewHeight - bounds.Height * zoom) / 2 - bounds.Top * zoom);
     }
 
     /// <summary>Bitmap export (PNG, JPEG, BMP) of the whole tree at zoom 1.</summary>
@@ -1518,6 +1039,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         var previousTop = TopEvent;
         try
         {
+            _exporting = true;
             GlobalZoom = 1;
             offsetX = 0;
             offsetY = 0;
@@ -1526,6 +1048,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         }
         finally
         {
+            _exporting = false;
             GlobalZoom = zoom;
             offsetX = ox;
             offsetY = oy;
@@ -1535,7 +1058,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
 
     /// <summary>
     /// Area covered by the visible events in model coordinates: whole event rectangles
-    /// (FTAitem.X/Y is the top-left corner) plus the metric bars below the events.
+    /// (FTAitem.X/Y is the top-left corner) plus the symbols and metric bars below the events.
     /// </summary>
     private RectangleF GetExportBounds()
     {
@@ -1548,9 +1071,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         float right = visible.Max(i => i.X) + Constants.EventWidth;
         float bottom = visible.Max(i => i.Y) + Constants.EventHeight;
 
-        // DrawProgressBars draws the metric bar up to ~0.47 * EventHeight below the event
-        if (MainAppSettings.Instance.DisplayedMetric != DisplayMetricType.None)
-            bottom += Constants.EventHeight * 0.5f;
+        // symbols below the events (basic, house, ...); the metric is drawn at the same height
+        bottom += SymbolHeight + 2;
 
         return RectangleF.FromLTRB(left, top, right, bottom);
     }

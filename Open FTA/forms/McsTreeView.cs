@@ -109,16 +109,7 @@ namespace Open_FTA.forms
             if (engine == null || tree == null || canvas.Width <= 0 || canvas.Height <= 0)
                 return;
 
-            var items = tree.Items.Values;
-            int minX = items.Min(i => i.X);
-            int minY = items.Min(i => i.Y);
-            float width = Math.Max(1, items.Max(i => i.X) + Constants.EventWidth - minX);
-            float height = Math.Max(1, items.Max(i => i.Y) + Constants.EventHeight - minY);
-
-            double zoom = Math.Clamp(Math.Min(canvas.Width / width, canvas.Height / height) * 0.9, 0.1, 5.0);
-            engine.GlobalZoom = zoom;
-            engine.offsetX = (int)((canvas.Width - width * zoom) / 2 - minX * zoom);
-            engine.offsetY = (int)((canvas.Height - height * zoom) / 2 - minY * zoom);
+            engine.FitToView(canvas.ClientSize.Width, canvas.ClientSize.Height);
             needsFit = false;
         }
 

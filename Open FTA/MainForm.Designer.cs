@@ -621,7 +621,7 @@
             toolStripButtonAddBasicEvent.ImageTransparentColor = Color.Magenta;
             toolStripButtonAddBasicEvent.Name = "toolStripButtonAddBasicEvent";
             toolStripButtonAddBasicEvent.Size = new Size(57, 28);
-            toolStripButtonAddBasicEvent.Text = "Add";
+            toolStripButtonAddBasicEvent.Text = "Add basic event";
             toolStripButtonAddBasicEvent.Click += toolStripButtonAddBasicEvent_Click;
             // 
             // toolStripButtonAddIntermediateEvent
@@ -631,7 +631,7 @@
             toolStripButtonAddIntermediateEvent.ImageTransparentColor = Color.Magenta;
             toolStripButtonAddIntermediateEvent.Name = "toolStripButtonAddIntermediateEvent";
             toolStripButtonAddIntermediateEvent.Size = new Size(57, 28);
-            toolStripButtonAddIntermediateEvent.Text = "Add";
+            toolStripButtonAddIntermediateEvent.Text = "Add event";
             toolStripButtonAddIntermediateEvent.Click += toolStripButtonAddIntermediateEvent_Click;
             // 
             // toolStripButtonEdit

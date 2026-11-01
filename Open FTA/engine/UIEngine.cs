@@ -10,12 +10,16 @@ class UIEngine
     }
     public TreeNode TreeNodeMinimalCutSet;
 
+    /// <summary>Section nodes at the top level of the tree view.</summary>
+    public const string MainTreeNodeText = "Main Tree Structure";
+    public const string McsNodeText = "Minimal Cut Sets";
+
     public void FillTreeView(TreeView treeView1)
     {
         treeView1.Nodes.Clear();
 
-        TreeNode MainTree = treeView1.Nodes.Add("Basic Structure");
-        TreeNodeMinimalCutSet = treeView1.Nodes.Add("Minimal cut sets");
+        TreeNode MainTree = treeView1.Nodes.Add(MainTreeNodeText);
+        TreeNodeMinimalCutSet = treeView1.Nodes.Add(McsNodeText);
         FTAitem topItem = EngineLogic.GetItem(EngineLogic.TopEventGuid);
         if (topItem == null)
         {
@@ -59,6 +63,38 @@ class UIEngine
         }
 
         treeView1.ExpandAll();
+        StyleSectionNodes(treeView1);
+    }
+
+    private static readonly Color SectionNodeColor = Color.FromArgb(33, 52, 77);
+    private static Font? _regularNodeFont;
+
+    /// <summary>
+    /// Section nodes (Main Tree Structure, Minimal Cut Sets) in bold and dark blue, all other nodes regular.
+    /// The tree view itself gets the bold font, so that the native control measures the bold section
+    /// names correctly (a bold NodeFont in a regular tree would be cut off); the other nodes get a
+    /// regular NodeFont.
+    /// </summary>
+    private static void StyleSectionNodes(TreeView tree)
+    {
+        if (!tree.Font.Bold)
+            tree.Font = new Font(tree.Font, FontStyle.Bold);
+        _regularNodeFont ??= new Font(tree.Font, FontStyle.Regular);
+
+        foreach (TreeNode section in tree.Nodes)
+        {
+            section.ForeColor = SectionNodeColor;
+            SetRegularFont(section.Nodes, _regularNodeFont);
+        }
+    }
+
+    private static void SetRegularFont(TreeNodeCollection nodes, Font font)
+    {
+        foreach (TreeNode node in nodes)
+        {
+            node.NodeFont = font;
+            SetRegularFont(node.Nodes, font);
+        }
     }
 
     /// <summary>
@@ -255,50 +291,34 @@ class UIEngine
         };
     }
 
-    private Font headerFont = new Font("Segoe UI", 10, FontStyle.Bold);
-    Color textColor = Color.FromArgb(30, 60, 120); // tmavomodrá
-    public void CreateHeaderPanel(Panel p,String title)
+    private readonly Font headerFont = new Font("Segoe UI Semibold", 8.25f);
+
+    /// <summary>
+    /// Title of a side panel in the style of current tool windows: light background, small
+    /// upper-case grey text and a thin line below (instead of the former blue gradient band).
+    /// </summary>
+    public void CreateHeaderPanel(Panel p, String title)
     {
-      
-        Panel headerPanel = new Panel();
-        headerPanel.Dock = DockStyle.Top;
-        headerPanel.Height = 20;
-        //  headerPanel.BackColor = Color.FromArgb(45, 45, 48); // tmavý moderný odtieň
-        headerPanel.BackColor = Color.FromArgb(33, 150, 243); // Material Blue
+        string text = title.ToUpperInvariant();
+        var headerPanel = new Panel
+        {
+            Dock = DockStyle.Top,
+            Height = TextRenderer.MeasureText("Ag", headerFont).Height + 12,
+            BackColor = Color.FromArgb(245, 247, 250),
+        };
         p.Controls.Add(headerPanel);
         headerPanel.SendToBack();
 
-        // Label pre text
-        /*   Label headerLabel = new Label();
-           headerLabel.Text = "Tree Structure";
-           headerLabel.ForeColor = Color.White;
-           headerLabel.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-           headerLabel.AutoSize = true;
-           headerLabel.Location = new Point(10, (headerPanel.Height - headerLabel.Height) / 2);
-           headerPanel.Controls.Add(headerLabel);*/
-
+        headerPanel.Resize += (s, e) => headerPanel.Invalidate();
         headerPanel.Paint += (s, e) =>
         {
-            // gradient tmavomodrého pozadia
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-                headerPanel.ClientRectangle,
-                // Color.FromArgb(20, 40, 90),   // tmavomodrá - začiatok
-                //Color.FromArgb(40, 70, 140),  // tmavomodrá - koniec
-            Color.FromArgb(33, 150, 243),
-            Color.FromArgb(13, 130, 223),
-            LinearGradientMode.Horizontal))
-            {
-                e.Graphics.FillRectangle(brush, headerPanel.ClientRectangle);
-            }
+            Rectangle r = headerPanel.ClientRectangle;
+            TextRenderer.DrawText(e.Graphics, text, headerFont, new Rectangle(r.X + 10, r.Y, r.Width - 12, r.Height - 1),
+                Color.FromArgb(82, 92, 105), TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
-            // text
-            string text = title;
-            float x = 10;
-            float y = (headerPanel.Height - headerFont.Height) / 2;
-
-            e.Graphics.DrawString(text, headerFont, Brushes.White, x, y);
+            using var line = new Pen(Color.FromArgb(222, 226, 230));
+            e.Graphics.DrawLine(line, r.Left, r.Bottom - 1, r.Right, r.Bottom - 1);
         };
-
     }
 
     public string CreateArchive(string sourceDirectory, string extension, string additionalText = "")

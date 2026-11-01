@@ -7,8 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Keyboard shortcuts: Ctrl+N (new), Ctrl+O (open), Ctrl+S (save), F5 (analysis of the selected tab), F1 (help), Ctrl+plus / Ctrl+minus (zoom), Ctrl+0 (center the tree); shortcuts are shown in the tool tips.
+- About window (Help → About Open FTA) with the version, author, licence and links to the source code and to the thesis.
+
 ### Changed
 - Target framework .NET 10 (LTS); .NET 9 support ends on 10 November 2026.
+- New look of the events with three styles in Settings (Display settings → Event style): Header (tag band coloured by event type, default), Minimal (colour stripe, tag and value as labels) and Clean (tinted tag and value rows). All event names have the same font size; it is reduced only when a name does not fit. The original look and the setting "Event pen type" were removed.
+- Gates, event symbols, connecting lines, metric bars (BIM, RAW, …) and the label of the highlighted minimal cut set drawn in the same flat style and colours as the events; light grey canvas with a dot grid. Exported images keep a white background.
+- Titles of the side panels (Tree Structure, Working Directory) as light headers with grey upper-case text instead of blue bands.
+- Main window: flat tool bars, flat tabs with an accent line, the tree of events and the file list in the style of Windows Explorer. The sections of the tree of events are named Main Tree Structure and Minimal Cut Sets and shown in bold. The two "Add" buttons are named "Add event" and "Add basic event".
+- Center (Ctrl+0) fits the whole visible tree into the view as large as possible (collapsed branches, symbols and metric bars are taken into account) and is no longer an undo step; the minimal cut set tree uses the same fitting.
+- Status bar shows the result of the top event, the number of events and the zoom.
+- The importance measure table no longer shows the event GUID (it stays in the CSV export).
+- New look of selected events (accent border, focus ring, tinted tag row) and of the event under the mouse (accent border, raised shadow). Hover and selection are not drawn into exported images. The tree is no longer repainted on every mouse move over an empty area.
 
 ### Fixed
 - Minimal cut set table showed raw floating-point values (e.g. 0.030000000000000002); frequency is shown with 4 and contribution with 3 significant digits.

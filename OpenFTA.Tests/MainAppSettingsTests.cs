@@ -1,4 +1,3 @@
-using System.Drawing.Drawing2D;
 using OpenFTA.Tests.Helpers;
 
 namespace OpenFTA.Tests;
@@ -12,8 +11,7 @@ public class MainAppSettingsTests : SettingsTestBase
     public void Saved_settings_are_loaded_back()
     {
         var s = Settings;
-        var original = (s.DisplayedMetric, s.FrequencyDisplayMode, s.EventWidth, s.Technicalgates,
-                        s.ItemPen.Color, s.ItemPen.Width, s.ItemPen.DashStyle);
+        var original = (s.DisplayedMetric, s.FrequencyDisplayMode, s.EventWidth, s.Technicalgates);
         string path = TempFile();
         try
         {
@@ -24,9 +22,7 @@ public class MainAppSettingsTests : SettingsTestBase
             s.FrequencyDisplayMode = FrequencyDisplayMode.allEvents;
             s.EventWidth = 177;
             s.Technicalgates = true;
-            s.ItemPen.Color = Color.FromArgb(200, 10, 20, 30);
-            s.ItemPen.Width = 2.5f;
-            s.ItemPen.DashStyle = DashStyle.Dash;
+            s.EventStyle = EventStyle.Minimal;
             s.Save(path);
 
             // back to other values, then load
@@ -35,7 +31,6 @@ public class MainAppSettingsTests : SettingsTestBase
             s.FrequencyDisplayMode = FrequencyDisplayMode.alwaysHidden;
             s.EventWidth = 140;
             s.Technicalgates = false;
-            s.ItemPen = new PenSettings();
             s.Load(path);
 
             Assert.Equal(SortingStrategy.ALGOIII, s.SortingAlgoVersion);
@@ -45,9 +40,7 @@ public class MainAppSettingsTests : SettingsTestBase
             Assert.Equal(FrequencyDisplayMode.allEvents, s.FrequencyDisplayMode);
             Assert.Equal(177, s.EventWidth);
             Assert.True(s.Technicalgates);
-            Assert.Equal(Color.FromArgb(200, 10, 20, 30).ToArgb(), s.ItemPen.Color.ToArgb());
-            Assert.Equal(2.5f, s.ItemPen.Width);
-            Assert.Equal(DashStyle.Dash, s.ItemPen.DashStyle);
+            Assert.Equal(EventStyle.Minimal, s.EventStyle);
 
             // enums are stored by name, so the file stays readable
             Assert.Contains("\"ALGOIII\"", File.ReadAllText(path));
@@ -55,9 +48,34 @@ public class MainAppSettingsTests : SettingsTestBase
         finally
         {
             File.Delete(path);
-            (s.DisplayedMetric, s.FrequencyDisplayMode, s.EventWidth, s.Technicalgates) =
-                (original.DisplayedMetric, original.FrequencyDisplayMode, original.EventWidth, original.Technicalgates);
-            s.ItemPen = new PenSettings { Color = original.Color, Width = original.Width, DashStyle = original.DashStyle };
+            (s.DisplayedMetric, s.FrequencyDisplayMode, s.EventWidth, s.Technicalgates) = original;
+        }
+    }
+
+    [Fact]
+    public void Settings_of_older_versions_are_loaded()
+    {
+        // ItemPen and the Classic event style were removed in 1.1.1
+        string path = TempFile();
+        try
+        {
+            File.WriteAllText(path, """
+                {
+                  "EventStyle": "Classic",
+                  "ItemPen": { "Color": "#FF0000FF", "Width": 1, "DashStyle": "Solid" },
+                  "EventWidth": 150
+                }
+                """);
+
+            Settings.Load(path);
+
+            Assert.Equal(EventStyle.Header, Settings.EventStyle);
+            Assert.Equal(150, Settings.EventWidth);
+        }
+        finally
+        {
+            File.Delete(path);
+            Settings.EventWidth = 140;
         }
     }
 

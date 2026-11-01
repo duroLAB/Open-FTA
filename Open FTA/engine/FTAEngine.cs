@@ -42,6 +42,9 @@ public enum SortingStrategy { ALGOI, ALGOII_centered, ALGOII_align_left, ALGOIII
 public enum DisplayMetricType { None, BIM, CIM, RAW, RRW, FV}
 
 public enum FrequencyDisplayMode { topEventsOnly, allEvents, alwaysHidden }
+
+/// <summary>Look of the event cards (Settings: Event style).</summary>
+public enum EventStyle { Header, Minimal, Clean }
 public class FTAlogic
 {
     public DrawingEngine MyDrawingEngine;

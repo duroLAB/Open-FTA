@@ -68,6 +68,11 @@ namespace OpenFTA
             // panelLeft.Controls.Add(treeView1);
             panelLeft_Top.Controls.Add(treeView1);
             treeView1.AfterSelect += treeView1_AfterSelect;
+            pictureBox1.MouseLeave += (_, _) =>
+            {
+                if (EngineLogic.MyDrawingEngine.ClearHover())
+                    pictureBox1.Invalidate();
+            };
             treeView1.BeforeCollapse += TreeView1_BeforeCollapse;
             treeView1.BeforeExpand += TreeView1_BeforeExpand;
 
@@ -147,6 +152,20 @@ namespace OpenFTA
                 }
             }
 
+            SetupShortcutTooltipsAndHelpMenu();
+
+            // Flat tool strips, Explorer look of the tree and of the file list
+            ModernUi.ApplyFlatToolStrips(this);
+            contextMenuStrip_Treeview.Renderer = ModernUi.ToolStripRenderer;
+            treeView1.ShowLines = false;          // required for FullRowSelect
+            treeView1.FullRowSelect = true;
+            treeView1.HotTracking = true;
+            ModernUi.ApplyExplorerTheme(treeView1);
+            ModernUi.ApplyExplorerTheme(listView1);
+
+            // right part of the status bar: result of the top event, number of events, zoom
+            toolStripStatusLabelCoordinates.Spring = true;
+            toolStripStatusLabelCoordinates.TextAlign = ContentAlignment.MiddleRight;
 
             UpdateMainFormControls();
 
@@ -163,7 +182,7 @@ namespace OpenFTA
         {
             var tree = (CustomTreeView)sender;
 
-            if (HasAncestorWithName(e.Node, "Minimal cut sets")) return;
+            if (HasAncestorWithName(e.Node, UIEngine.McsNodeText)) return;
 
 
             var selectedItem = EngineLogic.GetItem(e.Node.Name);
@@ -183,7 +202,7 @@ namespace OpenFTA
 
             var tree = (CustomTreeView)sender;
 
-            if (HasAncestorWithName(e.Node, "Minimal cut sets")) return;
+            if (HasAncestorWithName(e.Node, UIEngine.McsNodeText)) return;
 
             var selectedItem = EngineLogic.GetItem(e.Node.Name);
             if (tree.IsUserAction)
@@ -225,44 +244,28 @@ namespace OpenFTA
             Constants.EventHeight = MainAppSettings.Instance.EventHeight;
         }
 
+        /// <summary>Flat tabs: the selected one is white with an accent line on the side of the page.</summary>
         private void TabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             var tab = (TabControl)sender;
-            var g = e.Graphics;
-            var rect = e.Bounds;
-            bool selected = (e.Index == tab.SelectedIndex);
+            Graphics g = e.Graphics;
+            Rectangle rect = e.Bounds;
+            bool selected = e.Index == tab.SelectedIndex;
+            bool bottomTabs = tab.Alignment == TabAlignment.Bottom;
 
-            // zisti, či sú tabs dole
-            bool bottomTabs = (tab.Alignment == TabAlignment.Bottom);
+            using (var back = new SolidBrush(selected ? Color.White : ModernUi.PanelBack))
+                g.FillRectangle(back, rect);
 
-            // farby
-            // Color backColor = selected ? Color.FromArgb(45, 120, 230) : Color.FromArgb(240, 240, 240);
-            Color backColor = selected ? Color.FromArgb(33, 150, 243) : Color.FromArgb(240, 240, 240);
-            Color textColor = selected ? Color.White : Color.Black;
-
-            // vyplnenie pozadia tab-u
-            using (var brush = new SolidBrush(backColor))
-                g.FillRectangle(brush, rect);
-
-            // text v strede
-            string text = tab.TabPages[e.Index].Text;
-            using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
-            using (var brush = new SolidBrush(textColor))
-                g.DrawString(text, tab.Font, brush, rect, sf);
-
-            // oddelovacia / zvýrazňovacia linka
-            if (bottomTabs)
+            if (selected)
             {
-                // ak je dole, zvýrazni hornú hranu
-                using (var pen = new Pen(selected ? Color.FromArgb(45, 120, 230) : Color.LightGray, selected ? 3 : 1))
-                    g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+                using var accent = new SolidBrush(ModernUi.Accent);
+                g.FillRectangle(accent, rect.Left, bottomTabs ? rect.Top : rect.Bottom - 3, rect.Width, 3);
             }
-            else
-            {
-                // ak je hore, zvýrazni spodnú hranu
-                using (var pen = new Pen(selected ? Color.FromArgb(45, 120, 230) : Color.LightGray, selected ? 3 : 1))
-                    g.DrawLine(pen, rect.Left, rect.Bottom - 1, rect.Right, rect.Bottom - 1);
-            }
+
+            using var font = new Font(tab.Font, selected ? FontStyle.Bold : FontStyle.Regular);
+            TextRenderer.DrawText(g, tab.TabPages[e.Index].Text, font, rect,
+                selected ? Color.FromArgb(31, 41, 51) : Color.FromArgb(82, 92, 105),
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -294,14 +297,6 @@ namespace OpenFTA
 
             }
 
-            if (e.Control && e.KeyCode == Keys.C)
-            {
-                // iba ak je focus na PictureBox
-
-                MessageBox.Show("Ctrl+C detected on PictureBox - Copying selected events.");
-
-
-            }
             pictureBox1.Invalidate();
         }
         private void pictureBox1_MouseEnter(object sender, EventArgs e)
@@ -377,7 +372,6 @@ namespace OpenFTA
              EngineLogic.MyDrawingEngine.PixelToRealPosition(e.Location, ref X, ref Y);
              String str = "X:" + X + ", Y:" + Y + ")";
              toolStripStatusLabelCoordinates.Text = str;*/
-            toolStripStatusLabelCoordinates.Text = "";
 
         }
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
@@ -396,6 +390,19 @@ namespace OpenFTA
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             EngineLogic.MyDrawingEngine.DrawFTA(e.Graphics);
+            UpdateStatusInfo();
+        }
+
+        /// <summary>Right part of the status bar: result of the top event, number of events and zoom.</summary>
+        private void UpdateStatusInfo()
+        {
+            FTAitem? top = EngineLogic.GetItem(EngineLogic.TopEventGuid);
+            string result = top != null && top.Value > 0
+                ? "Top event: " + EngineLogic.MyDrawingEngine.GetFrequencyText(top)
+                : "Top event: not computed";
+            string text = $"{result}    |    {EngineLogic.FTAStructure.Count} events    |    Zoom {EngineLogic.MyDrawingEngine.GlobalZoom:P0} ";
+            if (toolStripStatusLabelCoordinates.Text != text)
+                toolStripStatusLabelCoordinates.Text = text;
         }
 
         #endregion
@@ -848,44 +855,10 @@ namespace OpenFTA
                 }
             }
         }
+        /// <summary>Whole tree in the view, as large as the canvas allows (a view change, not an undo step).</summary>
         private void Centertree()
         {
-            if (EngineLogic.FTAStructure.Count == 0)
-                return;
-
-            SaveStateForUndo();
-
-            var topEvent = EngineLogic.FTAStructure.Values.FirstOrDefault(evt => evt.Parent == Guid.Empty);
-            if (topEvent == null)
-                return;
-
-            int minX = int.MaxValue, minY = int.MaxValue;
-            int maxX = int.MinValue, maxY = int.MinValue;
-            foreach (var evt in EngineLogic.FTAStructure.Values)
-            {
-                minX = Math.Min(minX, evt.X);
-                minY = Math.Min(minY, evt.Y);
-                maxX = Math.Max(maxX, evt.X + Constants.EventWidth);
-                maxY = Math.Max(maxY, evt.Y + Constants.EventHeight);
-            }
-
-            int treeWidth = maxX - minX;
-            int treeHeight = maxY - minY;
-
-            float scaleX = (float)pictureBox1.Width / treeWidth;
-            float scaleY = (float)pictureBox1.Height / treeHeight;
-            float newZoom = Math.Min(scaleX, scaleY) * 0.8f;
-
-            const float minZoom = 0.15f;
-            const float maxZoom = 5.00f;
-            newZoom = Math.Max(minZoom, Math.Min(maxZoom, newZoom));
-
-            int offsetX = (int)((pictureBox1.Width - treeWidth * newZoom) / 2 - minX * newZoom);
-            int offsetY = (int)((pictureBox1.Height - treeHeight * newZoom) / 2 - minY * newZoom);
-
-            EngineLogic.MyDrawingEngine.GlobalZoom = newZoom;
-            EngineLogic.MyDrawingEngine.offsetX = offsetX;
-            EngineLogic.MyDrawingEngine.offsetY = offsetY;
+            EngineLogic.MyDrawingEngine.FitToView(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
             pictureBox1.Invalidate();
         }
 
@@ -1180,6 +1153,7 @@ namespace OpenFTA
 
             toolStripStatusLabelFileName.Text = " |  File name: " + Path.GetFileName(WorkingFileName);
             toolStripStatusLabelWorkingDir.Text = " Working directory: " + WorkingDirectory;
+            UpdateStatusInfo();
 
 
             if (WorkingFileName.Length > 0)
@@ -1558,6 +1532,8 @@ namespace OpenFTA
             MyUIEngine.SetupModernGrid(dataGridViewImportanceMeasureResults);
             foreach (DataGridViewColumn column in dataGridViewImportanceMeasureResults.Columns)
                 column.DefaultCellStyle.NullValue = "n/a";   // measure not defined (frequency event)
+            if (dataGridViewImportanceMeasureResults.Columns["Event GUID"] is DataGridViewColumn guidColumn)
+                guidColumn.Visible = false;   // kept in the data and in the CSV export
 
             if (EngineLogic.MinimalCutSets.Count > 0)
                 mcsTreeView.ShowTree(EngineLogic);   // show the new importance measures in the MCS tree
@@ -1613,6 +1589,110 @@ namespace OpenFTA
             FormDbViewer dbViewer = new FormDbViewer(EngineLogic);
             dbViewer.panelButtons.Visible = false;
             dbViewer.ShowDialog();
+        }
+
+        /// <summary>Shortcuts of the whole window (work wherever the focus is).</summary>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            switch (keyData)
+            {
+                case Keys.Control | Keys.N:
+                    toolStripButtonNew_Click(this, EventArgs.Empty);
+                    return true;
+                case Keys.Control | Keys.O:
+                    toolStripButtonLoad_Click(this, EventArgs.Empty);
+                    return true;
+                case Keys.Control | Keys.S:
+                    toolStripButtonSave_Click(this, EventArgs.Empty);
+                    return true;
+                case Keys.F1:
+                    toolStripButtonHelp_Click(this, EventArgs.Empty);
+                    return true;
+                case Keys.F5:
+                    RunAnalysisOfSelectedTab();
+                    return true;
+                case Keys.Control | Keys.Oemplus:
+                case Keys.Control | Keys.Add:
+                    ZoomCanvas(1.2);
+                    return true;
+                case Keys.Control | Keys.OemMinus:
+                case Keys.Control | Keys.Subtract:
+                    ZoomCanvas(1 / 1.2);
+                    return true;
+                case Keys.Control | Keys.D0:
+                case Keys.Control | Keys.NumPad0:
+                    if (tabControl1.SelectedTab == tabPage1)
+                        toolStripButtonCenter_Click(this, EventArgs.Empty);
+                    return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        /// <summary>F5: the analysis that belongs to the selected tab.</summary>
+        private void RunAnalysisOfSelectedTab()
+        {
+            if (tabControl1.SelectedTab == tabPage1)
+                freqvencyToolStripMenuItem_Click(this, EventArgs.Empty);
+            else if (tabControl1.SelectedTab == tabPageMcsTree)
+            {
+                minimalCutSetToolStripMenuItem_Click(this, EventArgs.Empty);
+                tabControl1.SelectedTab = tabPageMcsTree;
+            }
+            else
+                toolStripButtonRunAnalysis_Click(this, EventArgs.Empty);
+        }
+
+        /// <summary>Zoom of the main diagram around the centre of the view.</summary>
+        private void ZoomCanvas(double factor)
+        {
+            if (tabControl1.SelectedTab != tabPage1)
+                return;
+            var d = EngineLogic.MyDrawingEngine;
+            double newZoom = Math.Clamp(d.GlobalZoom * factor, 0.1, 5.0);
+            double cx = pictureBox1.Width / 2.0, cy = pictureBox1.Height / 2.0;
+            d.offsetX = (int)(cx - (cx - d.offsetX) * newZoom / d.GlobalZoom);
+            d.offsetY = (int)(cy - (cy - d.offsetY) * newZoom / d.GlobalZoom);
+            d.GlobalZoom = newZoom;
+            pictureBox1.Invalidate();
+        }
+
+        /// <summary>
+        /// Shortcuts in the tool tips, and Help as a split button: the button opens the help,
+        /// the arrow offers the help and the About window.
+        /// </summary>
+        private void SetupShortcutTooltipsAndHelpMenu()
+        {
+            toolStripButtonNew.ToolTipText = "New (Ctrl+N)";
+            toolStripButtonLoad.ToolTipText = "Open (Ctrl+O)";
+            toolStripButtonSave.ToolTipText = "Save (Ctrl+S)";
+            toolStripButtonUndo.ToolTipText = "Undo (Ctrl+Z)";
+            toolStripButtonRedo.ToolTipText = "Redo (Ctrl+Y)";
+            toolStripButtonCopy.ToolTipText = "Copy (Ctrl+C)";
+            toolStripButtonPaste.ToolTipText = "Paste (Ctrl+V)";
+            toolStripButtonDelete.ToolTipText = "Delete (Del)";
+            toolStripButtonCenter.ToolTipText = "Center tree (Ctrl+0)";
+            toolStripButtonRunTopEventFreq.ToolTipText = "Run analysis (F5)";
+            toolStripButtonRunAnalysis.ToolTipText = "Run analysis (F5)";
+
+            var help = new ToolStripSplitButton(toolStripButtonHelp.Text, toolStripButtonHelp.Image)
+            {
+                ToolTipText = "Help (F1)",
+                DisplayStyle = toolStripButtonHelp.DisplayStyle,
+                ImageScaling = toolStripButtonHelp.ImageScaling,
+                ImageTransparentColor = toolStripButtonHelp.ImageTransparentColor,
+            };
+            help.ButtonClick += toolStripButtonHelp_Click;
+            help.DropDownItems.Add(new ToolStripMenuItem("Help", null, toolStripButtonHelp_Click) { ShortcutKeyDisplayString = "F1" });
+            help.DropDownItems.Add(new ToolStripSeparator());
+            help.DropDownItems.Add(new ToolStripMenuItem("About Open FTA", null, (_, _) =>
+            {
+                using var about = new AboutForm();
+                about.ShowDialog(this);
+            }));
+
+            int index = toolStrip1.Items.IndexOf(toolStripButtonHelp);
+            toolStrip1.Items.Remove(toolStripButtonHelp);
+            toolStrip1.Items.Insert(index, help);
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)

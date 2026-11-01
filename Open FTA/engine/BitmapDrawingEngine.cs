@@ -1,318 +1,141 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing.Drawing2D;
 
 namespace Open_FTA.engine
 {
+    /// <summary>
+    /// Gates and event symbols below the events (also used for the previews in the event editor).
+    /// Flat fill in the colour of the event type, darker outline. The geometry is relative to the
+    /// rectangle of the event the gate or symbol belongs to.
+    /// </summary>
     internal class BitmapDrawingEngine
     {
-         
-        private static BitmapDrawingEngine? _instance;
+        private static readonly Lazy<BitmapDrawingEngine> _instance = new(() => new BitmapDrawingEngine());
 
-        
-        private static readonly object _lock = new object();
+        private BitmapDrawingEngine() { }
 
-         
-        private BitmapDrawingEngine()
+        public static BitmapDrawingEngine Instance => _instance.Value;
+
+        public void DrawOrGate(Graphics g, Rectangle rect, Color? fill = null)
         {
-             
-        }
-
-         
-        public static BitmapDrawingEngine Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new BitmapDrawingEngine();
-                        }
-                    }
-                }
-                return _instance;
-            }
-        }
-
-        public void DrawOrGate(Graphics g, Rectangle rect)
-        {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-
             int x = (int)(rect.X + 0.35 * rect.Width);
             int y = (int)(rect.Y + rect.Height + 0.05 * rect.Height);
-
             int w = (int)(0.3 * rect.Width);
             int h1 = (int)(1.5 * w);
             int h2 = (int)(0.4 * w);
             int t = (int)(0.5 * (h1 - h2));
+            if (w <= 0)
+                return;
 
-            Rectangle adjustedRect = new Rectangle(x, y, w, h1 - h2);
-
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-              adjustedRect, Color.LightBlue, Color.DarkBlue, LinearGradientMode.ForwardDiagonal))
-            {
-                GraphicsPath path = new GraphicsPath();
-                path.AddArc(x, y, w, h1, 0, -180);
-                path.AddArc(x, y + t, w, h2, 0, -180);
-                path.CloseFigure(); // uzavrie cestu
-                g.FillPath(brush, path);
-            }
-
-
-            using (Pen linePen = new Pen(Color.Black, 1))
-            {
-                g.DrawArc(linePen, x, y, w, h1, 0, -180);
-                g.DrawArc(linePen, x, y + t, w, h2, 0, -180);
-
-            }
-
-            float centerX = x + w / 2f;
-            float centerY = y + (h2 / 2f) + (t / 4f);
-
+            using var path = new GraphicsPath();
+            path.AddArc(x, y, w, h1, 0, -180);          // outer curve, right -> top -> left
+            path.AddArc(x, y + t, w, h2, 180, 180);     // concave base, left -> right
+            path.CloseFigure();
 
             float textWidth = w * 0.6f;
             float textHeight = (h1 + h2 + t) * 0.45f;
-
-
-            Font scalableFont = FitFont(g, "OR", new Font("Arial", 30, FontStyle.Bold),
-                                        textWidth, textHeight);
-
-
-            StringFormat sf = new StringFormat()
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            };
-
-            using (Brush textBrush = new SolidBrush(Color.WhiteSmoke))
-            {
-                g.DrawString("OR", scalableFont, textBrush,
-                             new PointF(centerX, centerY), sf);
-            }
+            var centre = new PointF(x + w / 2f, y + h2 / 2f + t / 4f);
+            DrawGate(g, path, "OR", centre, textWidth, textHeight, fill ?? EventPalette.Intermediate);
         }
 
-        public void DrawANDGate(Graphics g, Rectangle rect)
+        public void DrawANDGate(Graphics g, Rectangle rect, Color? fill = null)
         {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-
             int x = (int)(rect.X + 0.35 * rect.Width);
             int y = (int)(rect.Y + rect.Height + 0.05 * rect.Height);
-
             int w = (int)(0.3 * rect.Width);
             int h1 = w;
             int h2 = (int)(0.4 * w);
             int t = (int)(0.5 * (h1 - h2));
+            if (w <= 0)
+                return;
 
-            Rectangle adjustedRect = new Rectangle(x, y, w, h1);
-
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-              adjustedRect, Color.LightBlue, Color.DarkBlue, LinearGradientMode.ForwardDiagonal))
-            {
-                GraphicsPath path = new GraphicsPath();
-                path.AddArc(x, y, w, h1, 0, -180);
-
-                Point p1 = new Point(x, y + (int)(h1 * 0.5));
-                Point p2 = new Point(x, y + (int)(h1 * 0.7));
-                path.AddLine(p1, p2);
-
-                p1 = new Point(x, y + (int)(h1 * 0.7));
-                p2 = new Point(x + w, y + (int)(h1 * 0.7));
-                path.AddLine(p1, p2);
-
-                p1 = new Point(x + w, y + (int)(h1 * 0.5));
-                p2 = new Point(x + w, y + (int)(h1 * 0.7));
-                path.AddLine(p1, p2);
-
-
-
-
-
-                //path.CloseFigure(); // uzavrie cestu
-                g.FillPath(brush, path);
-            }
-
-
-
-            using (Pen linePen = new Pen(Color.Black, 1))
-            {
-                g.DrawArc(linePen, x, y, w, h1, 0, -180);
-
-                Point orLeft = new Point(x, y + (int)(h1 * 0.7));
-                Point orRight = new Point(x + w, y + (int)(h1 * 0.7));
-                g.DrawLine(linePen, orLeft, orRight);
-
-                orLeft = new Point(x, y + (int)(h1 * 0.5));
-                orRight = new Point(x, y + (int)(h1 * 0.7));
-                g.DrawLine(linePen, orLeft, orRight);
-
-                orLeft = new Point(x + w, y + (int)(h1 * 0.5));
-                orRight = new Point(x + w, y + (int)(h1 * 0.7));
-                g.DrawLine(linePen, orLeft, orRight);
-            }
-
-            float centerX = x + w / 2f;
-            float centerY = y + (h2 / 2f) + (t / 1.5f);
-
+            int bottom = y + (int)(h1 * 0.7);
+            using var path = new GraphicsPath();
+            path.AddArc(x, y, w, h1, 0, -180);          // dome, right -> top -> left
+            path.AddLine(x, y + h1 / 2f, x, bottom);
+            path.AddLine(x, bottom, x + w, bottom);
+            path.CloseFigure();
 
             float textWidth = w * 0.8f;
             float textHeight = (h1 + h2 + t) * 0.65f;
-
-
-            Font scalableFont = FitFont(g, "AND", new Font("Arial", 30, FontStyle.Bold),
-                                        textWidth, textHeight);
-
-
-            StringFormat sf = new StringFormat()
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            };
-
-            using (Brush textBrush = new SolidBrush(Color.WhiteSmoke))
-            {
-                g.DrawString("AND", scalableFont, textBrush,
-                             new PointF(centerX, centerY), sf);
-            }
+            var centre = new PointF(x + w / 2f, y + h2 / 2f + t / 1.5f);
+            DrawGate(g, path, "AND", centre, textWidth, textHeight, fill ?? EventPalette.Intermediate);
         }
 
-        public void DrawEventIcon(Graphics g, Rectangle rect, string IconType)
+        private static void DrawGate(Graphics g, GraphicsPath path, string text, PointF centre,
+                                     float textWidth, float textHeight, Color fill)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            using (var brush = new SolidBrush(fill))
+                g.FillPath(brush, path);
+            using (var outline = new Pen(EventPalette.Darker(fill), 1f))
+                g.DrawPath(outline, path);
+
+            System.Drawing.Text.TextRenderingHint oldHint = g.TextRenderingHint;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            using Font font = FitFont(g, text, "Segoe UI Semibold", textWidth, textHeight);
+            using var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            g.DrawString(text, font, Brushes.White, centre, sf);
+            g.TextRenderingHint = oldHint;
+        }
+
+        /// <summary>
+        /// Symbol below an event: "Basic" (circle), "House", "Undeveloped" (diamond) or
+        /// "Transfer" (triangle, collapsed children).
+        /// </summary>
+        public void DrawEventIcon(Graphics g, Rectangle rect, string iconType, Color? fill = null)
         {
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             int x = (int)(rect.X + 0.4 * rect.Width);
             int y = (int)(rect.Y + rect.Height);
-
             int w = (int)(0.2 * rect.Width);
-            int h1 = w;
-            int h2 = (int)(0.4 * w);
             int t = (int)(0.5 * w);
+            if (w <= 0)
+                return;
 
-            using (Pen linePen = new Pen(Color.Black, 1))
+            using var path = new GraphicsPath();
+            Color colour;
+            if (iconType.Contains("Basic"))
             {
-                if (IconType.Contains("Basic"))
-                    g.DrawEllipse(linePen, x, y, w, w);
-
-                if (IconType.Contains("Undeveloped"))
-                {
-
-                    PointF[] pts = new PointF[]
-                        {
-                           new PointF(x+t, y ), // horný
-                           new PointF(x + t+t, y+t), // pravý
-                           new PointF(x+t, y + t+t), // dolný
-                           new PointF(x , y+t)  // ľavý
-                            };
-                    g.DrawPolygon(Pens.Black, pts);
-
-                }
-
-                if (IconType.Contains("House"))
-                {
-
-                    PointF[] pts = new PointF[]
-                        {
-                           new PointF(x+t, y ), // horný                          
-                           new PointF(x , y+t),  // ľavý
-                           new PointF(x , y+t+t),  // ľavýdolný
-                           new PointF(x+t+t , y+t+t),  // pravýdolný
-                           new PointF(x + t+t, y+t)
-                            };
-                    g.DrawPolygon(Pens.Black, pts);
-
-                }
-
-                Rectangle adjustedRect = new Rectangle(x, y, w + 10, w + 10);
-                using (LinearGradientBrush brush = new LinearGradientBrush(
-                 adjustedRect, Color.Red, Color.Black, LinearGradientMode.ForwardDiagonal))
-                {
-                    if (IconType.Contains("Basic"))
-                        g.FillEllipse(brush, x, y, w, w);
-
-                    if (IconType.Contains("Undeveloped"))
-                    {
-                        PointF[] pts = new PointF[]
-                            {
-                           new PointF(x+t, y ), // horný
-                           new PointF(x + t+t, y+t), // pravý
-                           new PointF(x+t, y + t+t), // dolný
-                           new PointF(x , y+t)  // ľavý
-                                };
-                        g.FillPolygon(brush, pts);
-                    }
-
-                    if (IconType.Contains("House"))
-                    {
-                        PointF[] pts = new PointF[]
-                            {
-                              new PointF(x+t, y ), // horný                          
-                           new PointF(x , y+t),  // ľavý
-                           new PointF(x , y+t+t),  // ľavýdolný
-                           new PointF(x+t+t , y+t+t),  // pravýdolný
-                           new PointF(x + t+t, y+t)
-                                };
-                        g.FillPolygon(brush, pts);
-                    }
-
-                    if (IconType.Contains("Transfer"))
-                    {
-                        PointF[] pts = new PointF[]
-                            {
-                              new PointF(x+t, y ), // horný                                                   
-                              new PointF(x , y+t+t),  // ľavýdolný
-                              new PointF(x+t+t , y+t+t),  // pravýdolný
-                         
-                                };
-                        g.FillPolygon(brush, pts);
-                    }
-
-                }
-
-                if (IconType.Contains("Transfer"))
-                {
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                adjustedRect, Color.Green, Color.DarkGreen, LinearGradientMode.ForwardDiagonal))
-                    {
-                        PointF[] pts = new PointF[]
-                        {
-                              new PointF(x+t, y ), // horný                                                   
-                              new PointF(x , y+t+t),  // ľavýdolný
-                              new PointF(x+t+t , y+t+t),  // pravýdolný
-
-                            };
-                        g.FillPolygon(brush, pts);
-                    }
-                }
-
+                path.AddEllipse(x, y, w, w);
+                colour = fill ?? EventPalette.Basic;
             }
+            else if (iconType.Contains("Undeveloped"))
+            {
+                path.AddPolygon(new PointF[] { new(x + t, y), new(x + 2 * t, y + t), new(x + t, y + 2 * t), new(x, y + t) });
+                colour = fill ?? EventPalette.Undeveloped;
+            }
+            else if (iconType.Contains("House"))
+            {
+                path.AddPolygon(new PointF[] { new(x + t, y), new(x, y + t), new(x, y + 2 * t), new(x + 2 * t, y + 2 * t), new(x + 2 * t, y + t) });
+                colour = fill ?? EventPalette.House;
+            }
+            else if (iconType.Contains("Transfer"))
+            {
+                path.AddPolygon(new PointF[] { new(x + t, y), new(x, y + 2 * t), new(x + 2 * t, y + 2 * t) });
+                colour = fill ?? EventPalette.Intermediate;
+            }
+            else
+                return;
 
+            using (var brush = new SolidBrush(colour))
+                g.FillPath(brush, path);
+            using (var outline = new Pen(EventPalette.Darker(colour), 1f))
+                g.DrawPath(outline, path);
         }
 
-        private Font FitFont(Graphics g, string text, Font baseFont, float maxWidth, float maxHeight)
+        /// <summary>Largest font (from 30 pt down) of the family whose text fits into the given size.</summary>
+        private static Font FitFont(Graphics g, string text, string family, float maxWidth, float maxHeight)
         {
-            float size = baseFont.Size;
-
-            while (true)
+            for (float size = 30f; size > 2f; size -= 0.5f)
             {
-                using (Font testFont = new Font(baseFont.FontFamily, size, baseFont.Style))
-                {
-                    SizeF textSize = g.MeasureString(text, testFont);
-
-                    if (textSize.Width <= maxWidth && textSize.Height <= maxHeight)
-                        return new Font(baseFont.FontFamily, size, baseFont.Style);
-
-                    size -= 0.5f;
-                    if (size < 2f)
-                        return new Font(baseFont.FontFamily, 2f, baseFont.Style);
-                }
+                var font = new Font(family, size, FontStyle.Regular);
+                SizeF textSize = g.MeasureString(text, font);
+                if (textSize.Width <= maxWidth && textSize.Height <= maxHeight)
+                    return font;
+                font.Dispose();
             }
+            return new Font(family, 2f, FontStyle.Regular);
         }
     }
-
 }

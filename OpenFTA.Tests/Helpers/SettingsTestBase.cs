@@ -22,6 +22,7 @@ public abstract class SettingsTestBase : IDisposable
         Settings.SortingAlgoVersion = SortingStrategy.ALGOII_centered;
         Settings.GateANDFrequencyHandling = GateFrequencyHandling.Allow;
         Settings.GateORFrequencyHandling = GateFrequencyHandling.Allow;
+        Settings.EventStyle = EventStyle.Header;
     }
 
     /// <summary>P = 1 - exp(-f*t) and P(A OR B) = PA + PB - PA*PB.</summary>

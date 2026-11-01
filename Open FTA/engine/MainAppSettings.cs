@@ -1,7 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Drawing.Design;
-using System.Drawing.Drawing2D;
-using System.Xml.Serialization;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -33,8 +30,9 @@ public class MainAppSettings
     public bool Technicalgates { get; set; } = false;
 
     [Category("Display settings")]
-    [DisplayName("Event pen type")]
-    public PenSettings ItemPen { get; set; } = new PenSettings();
+    [DisplayName("Event style")]
+    [Description("Header - tag band coloured by event type, Minimal - colour stripe with tag and value labels, Clean - tinted tag and value rows")]
+    public EventStyle EventStyle { get; set; } = EventStyle.Header;
 
     [Category("Display settings")]
     [DisplayName("Default event width")]
@@ -127,7 +125,7 @@ public class MainAppSettings
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
-        Converters = { new JsonStringEnumConverter(), new ColorJsonConverter() },
+        Converters = { new JsonStringEnumConverter() },
     };
 
     /// <summary>Saves all settings. Errors are ignored (settings are not critical).</summary>
@@ -181,47 +179,4 @@ public class MainAppSettings
             Console.WriteLine("Settings could not be loaded, defaults are used: " + ex.Message);
         }
     }
-}
-
-
-[Serializable]
-[TypeConverter(typeof(ExpandableObjectConverter))]
-public class PenSettings
-{
-    // Farba pera
-    [XmlIgnore] // Farbu budeme serializovať ako ARGB
-
-    [Editor(typeof(System.Drawing.Design.ColorEditor), typeof(UITypeEditor))]
-    public Color Color { get; set; } = Color.Blue;
-
-    public float Width { get; set; } = 1.0f;
-
-    public DashStyle DashStyle { get; set; } = DashStyle.Solid;
-
-    [Browsable(false)]
-    [JsonIgnore]
-    public Pen Pen => new Pen(Color, Width) { DashStyle = this.DashStyle };
-
-    public override string ToString()
-    {
-        string s = $"Color: {Color}, Width: {Width}, DashStyle: {DashStyle}";
-        return (s);
-    }
-}
-
-
-/// <summary>Stores a Color as "#AARRGGBB" in JSON.</summary>
-public sealed class ColorJsonConverter : JsonConverter<Color>
-{
-    public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        string? text = reader.GetString();
-        if (text != null && text.StartsWith('#') && text.Length == 9 &&
-            uint.TryParse(text.AsSpan(1), System.Globalization.NumberStyles.HexNumber, null, out uint argb))
-            return Color.FromArgb(unchecked((int)argb));
-        throw new JsonException($"Invalid color value: {text}");
-    }
-
-    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options) =>
-        writer.WriteStringValue($"#{value.ToArgb():X8}");
 }
