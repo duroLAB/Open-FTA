@@ -4,7 +4,9 @@
 
 Being open-source allows for further development of the application, verification and auditing of calculations, and adaptation to specific user needs. It can be used in **research projects** and in the **educational process**, for example in courses such as safety engineering.  
 
-The foundation of the application is based on the diploma thesis of M. Doller: [“Design of a Software System for Fault Tree Analysis”](https://kis.cvt.stuba.sk/arl-stu/sk/detail-stu_us_cat-stuzp105108-Navrh-softveroveho-systemu-na-analyzu-stromu-poruch/).  
+Open FTA was conceived and designed by **Juraj Labovský** (Slovak University of Technology in Bratislava).
+
+The first version of the application was created within the diploma thesis of M. Doller, [“Design of a Software System for Fault Tree Analysis”](https://kis.cvt.stuba.sk/arl-stu/sk/detail-stu_us_cat-stuzp105108-Navrh-softveroveho-systemu-na-analyzu-stromu-poruch/), supervised by J. Labovský.
 
 ---
 

@@ -88,9 +88,11 @@ dotnet publish "Open FTA\Open FTA.csproj" -c Release -p:PublishProfile=FolderPro
 
 See [Changelog.md](Open%20FTA/Changelog.md) for the list of changes in each version.
 
-## Background
+## Author
 
-The application is based on the diploma thesis of M. Doller: [“Design of a Software System for Fault Tree Analysis”](https://kis.cvt.stuba.sk/arl-stu/sk/detail-stu_us_cat-stuzp105108-Navrh-softveroveho-systemu-na-analyzu-stromu-poruch/) (Slovak University of Technology in Bratislava).
+Open FTA was conceived and designed by **Juraj Labovský** (Slovak University of Technology in Bratislava).
+
+The first version of the application was created within the diploma thesis of M. Doller, [“Design of a Software System for Fault Tree Analysis”](https://kis.cvt.stuba.sk/arl-stu/sk/detail-stu_us_cat-stuzp105108-Navrh-softveroveho-systemu-na-analyzu-stromu-poruch/), supervised by J. Labovský.
 
 ## License
 
