@@ -62,6 +62,11 @@ public class MainAppSettings
     public DisplayMetricType DisplayedMetric { get; set; } = DisplayMetricType.BIM;
 
     [Category("Display settings")]
+    [DisplayName("Metric display")]
+    [Description("How the Displayed Metric is shown on basic events: CardRow - in the bottom row of the event with a thin bar along its bottom edge, Badge - coloured label on the bottom right corner of the event")]
+    public MetricDisplayStyle MetricDisplay { get; set; } = MetricDisplayStyle.CardRow;
+
+    [Category("Display settings")]
     [DisplayName("Show event frequency")]
     [Description("Controls how event frequency is displayed: only for top events, for all events, or hidden")]
     public FrequencyDisplayMode FrequencyDisplayMode { get; set; } = FrequencyDisplayMode.alwaysHidden;

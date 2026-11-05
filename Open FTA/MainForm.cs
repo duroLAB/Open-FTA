@@ -152,6 +152,7 @@ namespace OpenFTA
                 }
             }
 
+            ApplyIcons();
             SetupShortcutTooltipsAndHelpMenu();
 
             // Flat tool strips, Explorer look of the tree and of the file list
@@ -1654,6 +1655,44 @@ namespace OpenFTA
             d.offsetY = (int)(cy - (cy - d.offsetY) * newZoom / d.GlobalZoom);
             d.GlobalZoom = newZoom;
             pictureBox1.Invalidate();
+        }
+
+        /// <summary>Icons of the tool bars and of the context menu of the tree in one style (AppIcons).</summary>
+        private void ApplyIcons()
+        {
+            (ToolStripItem Item, AppIcon Icon)[] toolBars =
+            {
+                (toolStripButtonNew, AppIcon.New), (toolStripButtonSave, AppIcon.Save), (toolStripButtonLoad, AppIcon.Open),
+                (toolStripButtonUndo, AppIcon.Undo), (toolStripButtonRedo, AppIcon.Redo),
+                (toolStripDropDownButtonEvaluate, AppIcon.Evaluate), (toolStripButtonExportImage, AppIcon.SaveImage),
+                (toolStripButtonrReport, AppIcon.Report), (toolStripButton1, AppIcon.Database),
+                (toolStripButtonSettings, AppIcon.Settings), (toolStripButtonHelp, AppIcon.Help),
+                (toolStripButtonAddBasicEvent, AppIcon.AddBasicEvent), (toolStripButtonAddIntermediateEvent, AppIcon.AddEvent),
+                (toolStripButtonDelete, AppIcon.Delete), (toolStripButtonEdit, AppIcon.Edit),
+                (toolStripButtonCopy, AppIcon.Copy), (toolStripButtonPaste, AppIcon.Paste),
+                (toolStripButtonCenter, AppIcon.Center), (toolStripButtonSort, AppIcon.Sort),
+                (toolStripButtonRunTopEventFreq, AppIcon.Run), (toolStripButtonRunAnalysis, AppIcon.Run),
+                (toolStripButtonExportToCSV, AppIcon.Export),
+            };
+            foreach (var (item, icon) in toolBars)
+                AppIcons.Apply(item, icon, this);
+
+            (ToolStripItem Item, AppIcon Icon)[] workingDirectory =
+            {
+                (toolStripButtonSelectWorkingDirectory, AppIcon.FolderOpen), (toolStripButtonCreateWorkingDirectory, AppIcon.NewFolder),
+                (toolStripButtonOpenDirectory, AppIcon.OpenInExplorer), (toolStripButtonArchive, AppIcon.Archive),
+            };
+            foreach (var (item, icon) in workingDirectory)
+                AppIcons.Apply(item, icon, this, 18);
+
+            (ToolStripItem Item, AppIcon Icon)[] contextMenu =
+            {
+                (toolStripMenuItem_NEWBasic, AppIcon.AddBasicEvent), (toolStripMenuItem_NEWIE, AppIcon.AddEvent),
+                (toolStripMenuItem_EDIT, AppIcon.Edit), (toolStripMenuItem_DELETE, AppIcon.Delete),
+                (toolStripMenuItem_COPY, AppIcon.Copy), (toolStripMenuItem_PASTE, AppIcon.Paste),
+            };
+            foreach (var (item, icon) in contextMenu)
+                AppIcons.Apply(item, icon, this, 16);
         }
 
         /// <summary>

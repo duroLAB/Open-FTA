@@ -14,6 +14,12 @@ namespace Open_FTA.forms
             InitializeComponent();
             this.Icon = Resources.Main;
             Text = "Reliability database – " + DBEngine.Instance.FilePath;
+            AppIcons.Apply(toolStripButton1, AppIcon.Add, this);
+            AppIcons.Apply(toolStripButton2, AppIcon.Edit, this);
+            AppIcons.Apply(toolStripButton4, AppIcon.Delete, this);
+            AppIcons.Apply(toolStripButtonAddFrequency, AppIcon.Add, this);
+            AppIcons.Apply(toolStripButtonEditFrequency, AppIcon.Edit, this);
+            AppIcons.Apply(toolStripButton3, AppIcon.Delete, this);
             u = new UIEngine(EngineLogic);
             u.MakeTabControlModern(tabControlMain);
             //            u.SetupModernGrid(dataGridView1);

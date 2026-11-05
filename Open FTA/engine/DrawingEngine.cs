@@ -59,13 +59,13 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         if (TopEvent == null)
             TopEvent = DrawingStructure.First().Value;
 
+        _metrics = ComputeMetrics();
         DrawBackGround(e);
         //DrawEvents(e,EngineLogic.GetItem(EngineLogic.TopEventGuid));
         DrawEvents(e, TopEvent,true);
         
 
         DrawLinesAndGates(e);
-        DrawProgressBars(e);
     }
 
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
@@ -153,7 +153,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                          || (mode == FrequencyDisplayMode.topEventsOnly && !isTopEvent);
 
         using Pen? mcsPen = inHighlightedMcs ? new Pen(EventPalette.Mcs, 2f) : null;
-        DrawCard(g, evt, r, MainAppSettings.Instance.EventStyle, isTopEvent, mcsPen, isSelected, isHover, hideValue);
+        MetricInfo? metric = _metrics.TryGetValue(evt, out MetricInfo m) ? m : null;
+        DrawCard(g, evt, r, MainAppSettings.Instance.EventStyle, isTopEvent, mcsPen, isSelected, isHover, hideValue, metric);
         DrawTypeIcon(g, evt, r);
     }
 
@@ -214,7 +215,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     /// in all events; it is reduced only when the text does not fit.
     /// </summary>
     private void DrawCard(Graphics g, FTAitem evt, Rectangle r, EventStyle style, bool isTopEvent,
-                                Pen? mcsPen, bool isSelected, bool isHover, bool hideValue)
+                                Pen? mcsPen, bool isSelected, bool isHover, bool hideValue, MetricInfo? metric = null)
     {
         float k = r.Height / 90f;
         int Px(float v) => Math.Max(1, (int)Math.Round(v * k));
@@ -231,6 +232,11 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             using (var white = new SolidBrush(Color.White))
                 g.FillPath(white, card);
 
+            // importance measure in the bottom row (CardRow) or as a badge on the corner (Badge)
+            bool metricInRow = metric != null && MainAppSettings.Instance.MetricDisplay == MetricDisplayStyle.CardRow;
+            bool metricBadge = metric != null && MainAppSettings.Instance.MetricDisplay == MetricDisplayStyle.Badge;
+            bool showRow = !hideValue || metricInRow;
+
             Rectangle tagRect, nameRect, valueRect = Rectangle.Empty;
             Color tagColor, valueColor, borderColor;
             string nameFamily = "Segoe UI Semibold";
@@ -243,14 +249,14 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     int band = Px(18);
                     tagRect = new Rectangle(r.X, r.Y, r.Width, band);
                     FillClipped(g, card, tagRect, typeColor);
-                    if (!hideValue)
+                    if (showRow)
                     {
                         valueRect = new Rectangle(r.X, r.Bottom - band, r.Width, band);
                         FillClipped(g, card, valueRect, Color.FromArgb(241, 243, 245));
                         using var sep = new Pen(Color.FromArgb(222, 226, 230));
                         g.DrawLine(sep, r.X, valueRect.Y, r.Right, valueRect.Y);
                     }
-                    nameRect = Rectangle.FromLTRB(r.X + Px(5), tagRect.Bottom, r.Right - Px(5), hideValue ? r.Bottom : valueRect.Top);
+                    nameRect = Rectangle.FromLTRB(r.X + Px(5), tagRect.Bottom, r.Right - Px(5), showRow ? valueRect.Top : r.Bottom);
                     (tagColor, valueColor, borderColor) = (Color.White, CardValueText, Color.FromArgb(150, 160, 172));
                     break;
                 }
@@ -260,9 +266,9 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     FillClipped(g, card, new Rectangle(r.X, r.Y, stripe, r.Height), typeColor);
                     tagRect = new Rectangle(r.X + Px(11), r.Y + Px(3), r.Width - Px(16), Px(16));
                     tagAlign = StringAlignment.Near;
-                    if (!hideValue)
+                    if (showRow)
                         valueRect = new Rectangle(r.X + stripe, r.Bottom - Px(20), r.Width - stripe, Px(14));
-                    nameRect = Rectangle.FromLTRB(r.X + stripe + Px(4), r.Y + Px(18), r.Right - Px(4), hideValue ? r.Bottom - Px(4) : r.Bottom - Px(22));
+                    nameRect = Rectangle.FromLTRB(r.X + stripe + Px(4), r.Y + Px(18), r.Right - Px(4), showRow ? r.Bottom - Px(22) : r.Bottom - Px(4));
                     (tagColor, valueColor, borderColor) = (typeColor, CleanAccent, Color.FromArgb(203, 210, 217));
                     break;
                 }
@@ -274,17 +280,26 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
                     FillClipped(g, card, tagRect, tint);
                     using var sep = new Pen(Color.FromArgb(196, 212, 232));
                     g.DrawLine(sep, r.X, tagRect.Bottom, r.Right, tagRect.Bottom);
-                    if (!hideValue)
+                    if (showRow)
                     {
                         valueRect = new Rectangle(r.X, r.Bottom - band, r.Width, band);
                         FillClipped(g, card, valueRect, tint);
                         g.DrawLine(sep, r.X, valueRect.Y, r.Right, valueRect.Y);
                     }
-                    nameRect = Rectangle.FromLTRB(r.X + Px(5), tagRect.Bottom, r.Right - Px(5), hideValue ? r.Bottom : valueRect.Top);
+                    nameRect = Rectangle.FromLTRB(r.X + Px(5), tagRect.Bottom, r.Right - Px(5), showRow ? valueRect.Top : r.Bottom);
                     nameFamily = "Segoe UI";
                     (tagColor, valueColor, borderColor) = (CleanAccent, CleanAccent, Color.FromArgb(74, 111, 165));
                     break;
                 }
+            }
+
+            // thin bar along the bottom edge: position of the measure between min and max
+            if (metricInRow)
+            {
+                int barHeight = Px(3);
+                FillClipped(g, card, new Rectangle(r.X, r.Bottom - barHeight, r.Width, barHeight), Color.FromArgb(226, 230, 236));
+                int fill = Math.Max(barHeight, (int)(r.Width * Math.Max(metric!.Value.Position, 0.02f)));
+                FillClipped(g, card, new Rectangle(r.X, r.Bottom - barHeight, fill, barHeight), MetricColor(metric.Value.Position));
             }
 
             // ---- state and border (green border of a highlighted minimal cut set stays) ----
@@ -320,23 +335,42 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             using (var b = new SolidBrush(CardText))
                 g.DrawString(name, f, b, nameRect, centred);
 
-            if (!hideValue)
+            if (showRow)
             {
-                string value = GetFrequencyText(evt);
-                oneLine.Alignment = StringAlignment.Center;
-                using Font f = FitFont(g, value, valueRect, "Segoe UI", FontStyle.Regular, 9f * k, singleLine: true);
-                if (style == EventStyle.Minimal)
+                // text stays above the metric bar along the bottom edge
+                Rectangle row = metricInRow && style != EventStyle.Minimal
+                    ? Rectangle.FromLTRB(valueRect.X, valueRect.Y, valueRect.Right, valueRect.Bottom - Px(2))
+                    : valueRect;
+                // with the measure in the row: value of the event on the left, measure on the right
+                Rectangle valueArea = metricInRow
+                    ? Rectangle.FromLTRB(row.X + Px(6), row.Y, row.X + (int)(row.Width * 0.56), row.Bottom)
+                    : row;
+
+                if (!hideValue)
                 {
-                    // value as a pill
-                    float w = Math.Min(valueRect.Width - Px(4), g.MeasureString(value, f).Width + Px(10));
-                    var pill = new Rectangle((int)(valueRect.X + (valueRect.Width - w) / 2), valueRect.Y, (int)w, valueRect.Height);
-                    using GraphicsPath pillPath = GetRoundedRectangle(pill, Math.Max(1, pill.Height / 2));
-                    using (var fill = new SolidBrush(Color.FromArgb(232, 240, 250)))
-                        g.FillPath(fill, pillPath);
+                    string value = GetFrequencyText(evt);
+                    oneLine.Alignment = metricInRow ? StringAlignment.Near : StringAlignment.Center;
+                    using Font f = FitFont(g, value, valueArea, "Segoe UI", FontStyle.Regular, 9f * k, singleLine: true);
+                    if (style == EventStyle.Minimal)
+                    {
+                        // value as a pill
+                        float w = Math.Min(valueArea.Width - Px(4), g.MeasureString(value, f).Width + Px(10));
+                        float x = metricInRow ? valueArea.X - Px(4) : valueArea.X + (valueArea.Width - w) / 2;
+                        var pill = new Rectangle((int)x, row.Y, (int)w, row.Height);
+                        using GraphicsPath pillPath = GetRoundedRectangle(pill, Math.Max(1, pill.Height / 2));
+                        using (var pillFill = new SolidBrush(Color.FromArgb(232, 240, 250)))
+                            g.FillPath(pillFill, pillPath);
+                    }
+                    using var b = new SolidBrush(valueColor);
+                    g.DrawString(value, f, b, valueArea, oneLine);
                 }
-                using var b = new SolidBrush(valueColor);
-                g.DrawString(value, f, b, valueRect, oneLine);
+
+                if (metricInRow)
+                    DrawMetricText(g, Rectangle.FromLTRB(row.X + Px(6), row.Y, row.Right - Px(6), row.Bottom), metric!.Value, k, centred: hideValue);
             }
+
+            if (metricBadge)
+                DrawMetricBadge(g, r, metric!.Value, k);
         }
         finally
         {
@@ -474,13 +508,24 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         path.CloseFigure();
         return path;
     }
-    private void DrawProgressBars(Graphics g)
+    /// <summary>Displayed importance measure of a basic event: name, value and position between min and max (0..1).</summary>
+    private readonly record struct MetricInfo(string Label, string Value, float Position);
+
+    private Dictionary<FTAitem, MetricInfo> _metrics = new();
+
+    /// <summary>
+    /// Values of the measure chosen in Settings (Displayed Metric) for the visible basic events, with their
+    /// position between the smallest and the largest value. Empty when no measure is shown, when there are no
+    /// values (measures not computed, n/a) or when all values are equal.
+    /// </summary>
+    private Dictionary<FTAitem, MetricInfo> ComputeMetrics()
     {
-        if (MainAppSettings.Instance.DisplayedMetric == DisplayMetricType.None)
-            return;
+        var result = new Dictionary<FTAitem, MetricInfo>();
+        DisplayMetricType metric = MainAppSettings.Instance.DisplayedMetric;
+        if (metric == DisplayMetricType.None)
+            return result;
 
-
-        Func<FTAitem, double> selector = MainAppSettings.Instance.DisplayedMetric switch
+        Func<FTAitem, double> selector = metric switch
         {
             DisplayMetricType.BIM => (i) => i.BIM,
             DisplayMetricType.CIM => (i) => i.CIM,
@@ -490,42 +535,78 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
             _ => (i) => 0
         };
 
-        // 2️⃣ Získame zoznam hodnôt metriky
-        var metricValues = DrawingStructure.Values
+        var values = DrawingStructure.Values
             .Select(selector)
             .Where(v => v != 0 && double.IsFinite(v))   // NaN = n/a, infinity cannot be scaled
             .ToList();
-
-        if (!metricValues.Any())
-            return;
-
-        double min = metricValues.Min();
-        double max = metricValues.Max();
-
+        if (values.Count == 0)
+            return result;
+        double min = values.Min();
+        double max = values.Max();
         if (max == 0 || min == max)
-            return;
+            return result;
 
-        // 3️⃣ Prejdeme udalosti
-        foreach (var evtPair in DrawingStructure)
+        foreach (FTAitem evt in DrawingStructure.Values)
         {
-            FTAitem evt = evtPair.Value;
-
-            if (evt.ItemType >= 2 && !evt.IsHidden)
-            {
-                double value = selector(evt); // použitie funkcie
-
-                if (value == 0 || !double.IsFinite(value))
-                    continue;
-
-                double percent = 100 * (value - min) / (max - min);
-
-                Rectangle r = RealPositionToPixel(new Rectangle(
-                    evt.X, evt.Y + MetricBarTop, Constants.EventWidth, MetricBarHeight));
-
-                // the bar (length, colour) shows the position between min and max, the text the value
-                DrawMetricBar(g, r, (float)percent, MainAppSettings.Instance.DisplayedMetric.ToString(), value.ToString("G4"));
-            }
+            if (evt.ItemType < 2 || evt.IsHidden)
+                continue;
+            double value = selector(evt);
+            if (value == 0 || !double.IsFinite(value))
+                continue;
+            result[evt] = new MetricInfo(metric.ToString(), value.ToString("G4"), (float)((value - min) / (max - min)));
         }
+        return result;
+    }
+
+    /// <summary>Light to deep orange with the position of the value between min and max.</summary>
+    private static Color MetricColor(float position)
+    {
+        float p = Math.Clamp(position, 0f, 1f);
+        Color lo = Color.FromArgb(250, 205, 160), hi = Color.FromArgb(217, 72, 15);
+        return Color.FromArgb((int)(lo.R + (hi.R - lo.R) * p), (int)(lo.G + (hi.G - lo.G) * p), (int)(lo.B + (hi.B - lo.B) * p));
+    }
+
+    /// <summary>"BIM 0.999": name in grey and value in bold, right-aligned in the area or centred.</summary>
+    private static void DrawMetricText(Graphics g, Rectangle area, MetricInfo metric, float k, bool centred)
+    {
+        float px = Math.Max(1f, 8.5f * k);
+        using var labelFont = new Font("Segoe UI Semibold", px, FontStyle.Regular, GraphicsUnit.Pixel);
+        using var valueFont = new Font("Segoe UI", px, FontStyle.Bold, GraphicsUnit.Pixel);
+        using var sf = new StringFormat(StringFormat.GenericTypographic)
+        { LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap };
+
+        float labelWidth = g.MeasureString(metric.Label, labelFont, PointF.Empty, sf).Width;
+        float valueWidth = g.MeasureString(metric.Value, valueFont, PointF.Empty, sf).Width;
+        float gap = 3 * k;
+        float x = centred
+            ? area.X + (area.Width - labelWidth - gap - valueWidth) / 2
+            : area.Right - valueWidth - gap - labelWidth;
+
+        using var labelBrush = new SolidBrush(Color.FromArgb(100, 110, 122));
+        using var valueBrush = new SolidBrush(Color.FromArgb(31, 41, 51));
+        g.DrawString(metric.Label, labelFont, labelBrush, new RectangleF(x, area.Y, labelWidth + 1, area.Height), sf);
+        g.DrawString(metric.Value, valueFont, valueBrush, new RectangleF(x + labelWidth + gap, area.Y, valueWidth + 2, area.Height), sf);
+    }
+
+    /// <summary>Badge "BIM 0.999" on the bottom right corner of the event, coloured by the position of the value.</summary>
+    private void DrawMetricBadge(Graphics g, Rectangle r, MetricInfo metric, float k)
+    {
+        string text = metric.Label + " " + metric.Value;
+        using var font = new Font("Segoe UI Semibold", Math.Max(1f, 8.5f * k), FontStyle.Regular, GraphicsUnit.Pixel);
+        int h = Math.Max(4, (int)Math.Round(15 * k));
+        int w = Math.Max(h, (int)Math.Ceiling(g.MeasureString(text, font).Width + 8 * k));
+        var badge = new Rectangle(r.Right - w + (int)Math.Round(6 * k), r.Bottom - h / 2 + (int)Math.Round(2 * k), w, h);
+
+        using (GraphicsPath path = GetRoundedRectangle(badge, Math.Max(1, h / 2)))
+        {
+            using (var fill = new SolidBrush(MetricColor(metric.Position)))
+                g.FillPath(fill, path);
+            using (var outline = new Pen(Color.White, Math.Max(1f, 1.2f * k)))
+                g.DrawPath(outline, path);
+        }
+        using var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap };
+        using var textBrush = new SolidBrush(metric.Position > 0.45f ? Color.White : Color.FromArgb(90, 50, 20));
+        g.DrawString(text, font, textBrush, badge, sf);
     }
 
     private void DrawLinesAndGates(Graphics g)
@@ -714,74 +795,8 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         return subtree;
     }
 
-    // Metric of a basic event at the height of its symbol (model units relative to the event):
-    // "BIM [=====]  (symbol)  3" - nothing is drawn lower than the symbol itself
+    /// <summary>Height of the symbols below the events (model units).</summary>
     private static int SymbolHeight => (int)(0.2 * Constants.EventWidth);
-    private const int MetricBarHeight = 12;
-    private static int MetricBarTop => Constants.EventHeight + (SymbolHeight - MetricBarHeight) / 2;
-
-    /// <summary>
-    /// Left of the symbol: name of the measure and a thin bar (light to deep orange) showing the
-    /// position of the value between min and max; right of the symbol: the value.
-    /// </summary>
-    private static void DrawMetricBar(Graphics g, Rectangle rect, float percent, string label, string value)
-    {
-        if (rect.Width <= 0 || rect.Height <= 0)
-            return;
-        float k = rect.Height / (float)MetricBarHeight;
-        float p = Math.Clamp(percent, 0f, 100f) / 100f;
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-
-        // the symbol is drawn from 0.4 to 0.6 of the event width
-        var leftZone = Rectangle.FromLTRB(rect.X, rect.Y, rect.X + (int)(0.37 * rect.Width), rect.Bottom);
-        var rightZone = Rectangle.FromLTRB(rect.X + (int)(0.63 * rect.Width), rect.Y, rect.Right, rect.Bottom);
-
-        System.Drawing.Text.TextRenderingHint oldHint = g.TextRenderingHint;
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        float fontPx = Math.Max(1f, 8.5f * k);
-        using var labelFont = new Font("Segoe UI Semibold", fontPx, FontStyle.Regular, GraphicsUnit.Pixel);
-        using var valueFont = new Font("Segoe UI", fontPx, FontStyle.Bold, GraphicsUnit.Pixel);
-        using var labelBrush = new SolidBrush(Color.FromArgb(100, 110, 122));
-        using var valueBrush = new SolidBrush(Color.FromArgb(31, 41, 51));
-        using var left = new StringFormat(StringFormatFlags.NoWrap) { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
-        using var right = new StringFormat(StringFormatFlags.NoWrap) { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter };
-
-        float labelWidth = g.MeasureString(label, labelFont).Width;
-        g.DrawString(label, labelFont, labelBrush, leftZone, left);
-        g.DrawString(value, valueFont, valueBrush, rightZone, right);
-        g.TextRenderingHint = oldHint;
-
-        int barLeft = (int)(leftZone.X + labelWidth + 2 * k);
-        int barRight = leftZone.Right;
-        if (barRight - barLeft < 4)
-            return;   // too small to show the bar
-        int track = Math.Max(2, (int)Math.Round(5 * k));
-        int barY = rect.Y + (rect.Height - track) / 2;
-
-        var trackRect = new Rectangle(barLeft, barY, barRight - barLeft, track);
-        using (GraphicsPath path = RoundedBar(trackRect))
-        using (var brush = new SolidBrush(Color.FromArgb(226, 230, 236)))
-            g.FillPath(brush, path);
-
-        Color lo = Color.FromArgb(250, 205, 160), hi = Color.FromArgb(217, 72, 15);
-        Color fill = Color.FromArgb(
-            (int)(lo.R + (hi.R - lo.R) * p), (int)(lo.G + (hi.G - lo.G) * p), (int)(lo.B + (hi.B - lo.B) * p));
-        var fillRect = new Rectangle(barLeft, barY, Math.Max(track, (int)(trackRect.Width * Math.Max(p, 0.02f))), track);
-        using (GraphicsPath path = RoundedBar(fillRect))
-        using (var brush = new SolidBrush(fill))
-            g.FillPath(brush, path);
-    }
-
-    /// <summary>Rectangle with fully rounded ends.</summary>
-    private static GraphicsPath RoundedBar(Rectangle r)
-    {
-        var path = new GraphicsPath();
-        int d = Math.Max(1, Math.Min(r.Height, r.Width));
-        path.AddArc(r.X, r.Y, d, r.Height, 90, 180);
-        path.AddArc(r.Right - d, r.Y, d, r.Height, 270, 180);
-        path.CloseFigure();
-        return path;
-    }
 
     public void Mouse_DragEvent(Point mouseCoordinates)
     {

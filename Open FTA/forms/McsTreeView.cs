@@ -36,6 +36,9 @@ namespace Open_FTA.forms
             var export = new ToolStripButton("Export image", Resources.TakeSnapshot) { ImageTransparentColor = Color.Magenta, ImageScaling = ToolStripItemImageScaling.None };
             export.Click += (s, e) => ExportImage();
 
+            AppIcons.Apply(run, AppIcon.Run, this);
+            AppIcons.Apply(center, AppIcon.Center, this);
+            AppIcons.Apply(export, AppIcon.SaveImage, this);
             toolStrip.Items.AddRange(new ToolStripItem[] { run, new ToolStripSeparator(), center, export });
 
             // Fill control first, then the top tool strip (WinForms docks the last added control first)

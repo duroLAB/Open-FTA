@@ -23,6 +23,7 @@ public abstract class SettingsTestBase : IDisposable
         Settings.GateANDFrequencyHandling = GateFrequencyHandling.Allow;
         Settings.GateORFrequencyHandling = GateFrequencyHandling.Allow;
         Settings.EventStyle = EventStyle.Header;
+        Settings.MetricDisplay = MetricDisplayStyle.CardRow;
     }
 
     /// <summary>P = 1 - exp(-f*t) and P(A OR B) = PA + PB - PA*PB.</summary>

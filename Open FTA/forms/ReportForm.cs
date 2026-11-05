@@ -12,13 +12,31 @@ namespace Open_FTA.forms
             InitializeComponent();
             this.Icon = Resources.Main;
             this.Load += Form1_Load;
+            AppIcons.Apply(toolStripButtonSave, AppIcon.Save, this);
+            AppIcons.Apply(toolStripButtonWord, AppIcon.Word, this);
+            AppIcons.Apply(toolStripButtonExportToPDF, AppIcon.Export, this);
+            AppIcons.Apply(toolStripButtonPrint, AppIcon.Print, this);
         }
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-            await webView21.EnsureCoreWebView2Async();
+            bool ready = await WebViewSetup.TryInitializeAsync(webView21, this, "the report",
+                ("Open the report in the web browser", OpenInBrowser));
+            if (!ready)
+            {
+                Close();
+                return;
+            }
 
             webView21.NavigateToString(html);
+        }
+
+        /// <summary>Report as an HTML file in the default web browser (when WebView2 is not available).</summary>
+        private void OpenInBrowser()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "OpenFTA-report.html");
+            File.WriteAllText(path, html, Encoding.UTF8);
+            WebViewSetup.OpenInShell(path);
         }
 
 
@@ -82,9 +100,9 @@ namespace Open_FTA.forms
             }
         }
 
-        private async void toolStripButtonPrint_Click(object sender, EventArgs e)
+        private void toolStripButtonPrint_Click(object sender, EventArgs e)
         {
-            webView21.CoreWebView2.ShowPrintUI();
+            webView21.CoreWebView2?.ShowPrintUI();
 
 
 
@@ -92,11 +110,8 @@ namespace Open_FTA.forms
 
         private async Task ExportWebViewToPdfAsync()
         {
-            // Ensure CoreWebView2 is initialized
             if (webView21.CoreWebView2 == null)
-            {
-                await webView21.EnsureCoreWebView2Async();
-            }
+                return;
 
             // Show Save File dialog
             SaveFileDialog saveFileDialog = new SaveFileDialog

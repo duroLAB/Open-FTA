@@ -35,8 +35,13 @@ namespace Open_FTA.forms
 
             treeView1.ExpandAll();
 
-            // inicializácia WebView2
-            await webView21.EnsureCoreWebView2Async();
+            bool ready = await WebViewSetup.TryInitializeAsync(webView21, this, "the help",
+                ("Open the help in the web browser", () => WebViewSetup.OpenInShell(WriteHelpPage("MainWindowOverview.md") ?? helpFolder)));
+            if (!ready)
+            {
+                Close();
+                return;
+            }
             webView21.CoreWebView2.NavigationStarting += Core_NavigationStarting;
 
 
@@ -65,10 +70,37 @@ namespace Open_FTA.forms
             }
         }
 
-        private async Task LoadMarkdown(string fileName, string anchor = null)
+        private Task LoadMarkdown(string fileName, string anchor = null)
+        {
+            if (webView21.CoreWebView2 == null)
+                return Task.CompletedTask;
+            string? tempFile = WriteHelpPage(fileName);
+            if (tempFile == null)
+                return Task.CompletedTask;
+
+            webView21.CoreWebView2.Navigate(tempFile);
+
+            // Po načítaní skoč na anchor
+            if (!string.IsNullOrEmpty(anchor))
+            {
+                webView21.CoreWebView2.NavigationCompleted += (s, e) =>
+                {
+                    try
+                    {
+                        webView21.CoreWebView2.ExecuteScriptAsync(
+                            $"location.hash = '#{anchor}';");
+                    }
+                    catch { }
+                };
+            }
+            return Task.CompletedTask;
+        }
+
+        /// <summary>Help page converted from Markdown to a temporary HTML file; null if the page does not exist.</summary>
+        private string? WriteHelpPage(string fileName)
         {
             string path = Path.Combine(helpFolder, fileName);
-            if (!File.Exists(path)) return;
+            if (!File.Exists(path)) return null;
 
             string markdown = File.ReadAllText(path);
 
@@ -101,23 +133,7 @@ pre {{ background:#272822; color:#f8f8f2; padding:15px; border-radius:6px; overf
 
             string tempFile = Path.Combine(Path.GetTempPath(), "help_temp.html");
             File.WriteAllText(tempFile, finalHtml);
-
-            await webView21.EnsureCoreWebView2Async();
-            webView21.CoreWebView2.Navigate(tempFile);
-
-            // Po načítaní skoč na anchor
-            if (!string.IsNullOrEmpty(anchor))
-            {
-                webView21.CoreWebView2.NavigationCompleted += (s, e) =>
-                {
-                    try
-                    {
-                        webView21.CoreWebView2.ExecuteScriptAsync(
-                            $"location.hash = '#{anchor}';");
-                    }
-                    catch { }
-                };
-            }
+            return tempFile;
         }
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)

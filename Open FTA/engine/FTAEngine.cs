@@ -45,6 +45,9 @@ public enum FrequencyDisplayMode { topEventsOnly, allEvents, alwaysHidden }
 
 /// <summary>Look of the event cards (Settings: Event style).</summary>
 public enum EventStyle { Header, Minimal, Clean }
+
+/// <summary>How the displayed importance measure is shown on basic events (Settings: Metric display).</summary>
+public enum MetricDisplayStyle { CardRow, Badge }
 public class FTAlogic
 {
     public DrawingEngine MyDrawingEngine;
