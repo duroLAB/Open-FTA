@@ -343,10 +343,11 @@ namespace OpenFTA
 
             }
 
-            if (textBoxTag.Text.Contains(" "))
+            string? tagError = TagValidation.GetError(textBoxTag.Text);
+            if (tagError != null)
             {
 
-                errorProvider1.SetError(textBoxTag, "TAG must be a single word; no spaces allowed.");
+                errorProvider1.SetError(textBoxTag, tagError);
                 textBoxTag.BackColor = Color.MistyRose;
                 res = false;
 

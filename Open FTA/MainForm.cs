@@ -879,6 +879,9 @@ namespace OpenFTA
         {
 
 
+            if (!EngineLogic.PerformFullTest(forMinimalCutSets: true))
+                return;
+
             EngineLogic.GenerateHTMLreport();
             mcsTreeView.ShowTree(EngineLogic);   // report regenerates MCS and importance measures
 
@@ -1316,7 +1319,7 @@ namespace OpenFTA
 
         private void minimalCutSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!EngineLogic.PerformFullTest())
+            if (!EngineLogic.PerformFullTest(forMinimalCutSets: true))
                 return;
 
 
@@ -1484,7 +1487,7 @@ namespace OpenFTA
 
         private void importanceMeasureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!EngineLogic.PerformFullTest())
+            if (!EngineLogic.PerformFullTest(forMinimalCutSets: true))
                 return;
 
             DataTable dt = new DataTable();

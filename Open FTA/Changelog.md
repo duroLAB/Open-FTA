@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New look of selected events (accent border, focus ring, tinted tag row) and of the event under the mouse (accent border, raised shadow). Hover and selection are not drawn into exported images. The tree is no longer repainted on every mouse move over an empty area.
 
 ### Fixed
+- Tags with a space or with the characters + * ( ) broke the minimal cut set analysis. The event editor rejects such tags (also empty ones), and the minimal cut set analysis, importance measures and the report list the events with such tags instead of giving wrong results.
+- Names, tags, descriptions and references with the characters & < > broke the HTML report; they are now escaped.
 - Opening the report or the help on a computer without the Microsoft Edge WebView2 Runtime ended with an unhandled exception (FileNotFoundException 0x80070002). A message now explains what is missing, links to the download page and offers to open the report or the help in the web browser. WebView2 keeps its data in `%LocalAppData%\OpenFTA\WebView2`, so it also works when the application is in a read-only folder.
 - Minimal cut set table showed raw floating-point values (e.g. 0.030000000000000002); frequency is shown with 4 and contribution with 3 significant digits.
 - Title of the report window.

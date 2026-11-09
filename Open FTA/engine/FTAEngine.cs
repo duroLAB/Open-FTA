@@ -1295,8 +1295,8 @@ public class FTAlogic
         string tempTag = "";
         if(GbG.Tag!=null)
         if (GbG.Tag.Length > 0)
-            tempTag = " (" + GbG.Tag + ")";
-        html += "    <h2>"+GbG.Name+ tempTag+"</h2>";
+            tempTag = " (" + Html(GbG.Tag) + ")";
+        html += "    <h2>"+Html(GbG.Name)+ tempTag+"</h2>";
 
         string freqText = McsTopValueType switch
         {
@@ -1368,8 +1368,8 @@ public class FTAlogic
 
 
             temp = "<tr><td>";
-            temp += Event.Tag;
-            temp += "</td><td>" + Event.Name + "</td ><td>" + Event.Description + "</td ><td>";
+            temp += Html(Event.Tag);
+            temp += "</td><td>" + Html(Event.Name) + "</td ><td>" + Html(Event.Description) + "</td ><td>";
 
             string freqText = Event.ValueType switch
             {
@@ -1408,7 +1408,7 @@ public class FTAlogic
         temp = "\n <h2>References</h2>";
         temp += "<ul>";
         foreach (var line in bibliography)
-            temp += "<li>" + line + "</li>";
+            temp += "<li>" + Html(line) + "</li>";
         temp += "</ul>";
 
         html.AppendLine(temp);
@@ -1459,9 +1459,9 @@ public class FTAlogic
             if (mcs.Events.Count == 0)
                 continue;
 
-            temp = "<tr><td>" + mcs.Name + "</td><td>";
+            temp = "<tr><td>" + Html(mcs.Name) + "</td><td>";
             foreach (var evt in mcs.Events)
-                temp += "{" + evt.Name + "} - ";
+                temp += "{" + Html(evt.Name) + "} - ";
             temp = temp.Remove(temp.Length - 2);
             temp += "</td><td>";
 
@@ -1566,7 +1566,7 @@ public class FTAlogic
                 double rrwValue = ComputeRRW(evt);
                 double fvValue = ComputeFV(evt);
 
-                temp = "<td>" + evt.Name + "</td><td>" + evt.Tag + "</td>";
+                temp = "<td>" + Html(evt.Name) + "</td><td>" + Html(evt.Tag) + "</td>";
                 temp += "<td>" + FormatMeasure(bimValue) + "</td>";
                 temp += "<td>" + FormatMeasure(cimValue) + "</td>";
                 temp += "<td>" + FormatMeasure(rawValue) + "</td>";
@@ -1601,6 +1601,16 @@ public class FTAlogic
         return basicEvents;
     }
     // --- From P, R, λ to  f (v 1/y) ---
+
+    /// <summary>
+    /// Text of the user (names, tags, references) safe for the HTML report: &amp; &lt; &gt; escaped.
+    /// The text is only used as element content, never in attributes, so quotes can stay as they are.
+    /// </summary>
+    internal static string Html(string? text) =>
+        string.IsNullOrEmpty(text) ? "" : text
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;");
 
     public List<string> GenerateListofreferences()
     {
@@ -1763,12 +1773,25 @@ public class FTAlogic
 
 
     List<MessageItem> ErrorMessages = new List<MessageItem>();
-    public bool PerformFullTest()
+    /// <summary>Checks the tree before an analysis and shows the messages, if any.</summary>
+    /// <param name="forMinimalCutSets">Also check the tags used in the minimal cut set expression (MCS, importance measures, report).</param>
+    public bool PerformFullTest(bool forMinimalCutSets = false)
+    {
+        bool res = CheckTree(forMinimalCutSets);
+        if (ErrorMessages.Count > 0) ErrorDialog.ShowMessages(ErrorMessages);
+        return res;
+    }
+
+    /// <summary>Checks of the tree before an analysis; the messages are left in ErrorMessages (no dialog).</summary>
+    internal bool CheckTree(bool forMinimalCutSets = false)
     {
         ErrorMessages.Clear();
 
 
         bool res = true;
+
+        if (forMinimalCutSets && !PerformTestTags())
+            res = false;
 
         if (!PerformTestHasbasicEvents())
         {
@@ -1789,10 +1812,22 @@ public class FTAlogic
                     res = false; 
             }
 
-        if (ErrorMessages.Count>0) ErrorDialog.ShowMessages(ErrorMessages);
-
         return (res);
     }
+    private bool PerformTestTags()
+    {
+        var invalid = TagValidation.FindInvalidBasicEventTags(FTAStructure.Values);
+        foreach (var item in invalid)
+        {
+            string txt = "Event: " + item.Name + " (" + item.Tag + "): " + TagValidation.GetError(item.Tag);
+            ErrorMessages.Add(new MessageItem(MessageType.Error, txt));
+        }
+        if (invalid.Count > 0)
+            ErrorMessages.Add(new MessageItem(MessageType.Info,
+                "The minimal cut set analysis uses the tags of basic events. Edit the tags: one word, without spaces and without + * ( )."));
+        return invalid.Count == 0;
+    }
+
     private bool PerformTestHasbasicEvents()
     {
         bool res = true;
