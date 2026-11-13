@@ -128,6 +128,28 @@ public class FTAlogic
         return false;
     }
 
+    /// <summary>
+    /// Text describing what the user edits and what is saved in the file: structure, names, tags, gates,
+    /// descriptions, references, input values of basic events, positions and collapsed branches.
+    /// Results of calculations, selection and the view are not included, so two equal fingerprints mean
+    /// there is nothing new to save.
+    /// </summary>
+    public string ContentFingerprint()
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        foreach (FTAitem e in FTAStructure.Values.OrderBy(e => e.GuidCode))
+        {
+            sb.Append(e.GuidCode).Append('|').Append(e.Parent).Append('|').Append(e.ItemType).Append('|').Append(e.Gate)
+              .Append('|').Append(e.Name).Append('|').Append(e.Tag).Append('|').Append(e.Description).Append('|').Append(e.Reference)
+              .Append('|').Append(e.X).Append('|').Append(e.Y).Append('|').Append(e.IsHidden);
+            if (e.ItemType > 1)   // input of basic events; values of gates are results
+                sb.Append('|').Append(e.Value.ToString("R", inv)).Append('|').Append(e.ValueType).Append('|').Append(e.ValueUnit);
+            sb.Append('\n');
+        }
+        return sb.ToString();
+    }
+
     public void CreateNewTopEvent()
     {
         FTAitem FI = new FTAitem();

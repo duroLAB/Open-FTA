@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Unsaved changes: the title shows * and Open FTA asks whether to save them before closing, opening another file or starting a new tree.
 - Keyboard shortcuts: Ctrl+N (new), Ctrl+O (open), Ctrl+S (save), F5 (analysis of the selected tab), F1 (help), Ctrl+plus / Ctrl+minus (zoom), Ctrl+0 (center the tree); shortcuts are shown in the tool tips.
 - About window (Help → About Open FTA) with the version, author, licence and links to the source code and to the thesis.
 
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New look of selected events (accent border, focus ring, tinted tag row) and of the event under the mouse (accent border, raised shadow). Hover and selection are not drawn into exported images. The tree is no longer repainted on every mouse move over an empty area.
 
 ### Fixed
+- After saving, the file was not remembered: the title stayed "(unsaved)" and the next save offered the default name. The message box after every save was removed.
 - Tags with a space or with the characters + * ( ) broke the minimal cut set analysis. The event editor rejects such tags (also empty ones), and the minimal cut set analysis, importance measures and the report list the events with such tags instead of giving wrong results.
 - Names, tags, descriptions and references with the characters & < > broke the HTML report; they are now escaped.
 - Opening the report or the help on a computer without the Microsoft Edge WebView2 Runtime ended with an unhandled exception (FileNotFoundException 0x80070002). A message now explains what is missing, links to the download page and offers to open the report or the help in the web browser. WebView2 keeps its data in `%LocalAppData%\OpenFTA\WebView2`, so it also works when the application is in a read-only folder.

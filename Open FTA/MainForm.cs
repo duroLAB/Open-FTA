@@ -92,7 +92,15 @@ namespace OpenFTA
 
             // Saved settings (loaded by MainAppSettings.Instance) - event sizes and spacing
             GetAppSetings();
-            FormClosing += (s, e) => MainAppSettings.Instance.Save();
+            FormClosing += (s, e) =>
+            {
+                if (!ConfirmDiscardChanges())
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                MainAppSettings.Instance.Save();
+            };
 
             mcsTreeView = new McsTreeView { Dock = DockStyle.Fill };
             mcsTreeView.RunAnalysisRequested += (s, e) =>
@@ -168,6 +176,7 @@ namespace OpenFTA
             toolStripStatusLabelCoordinates.Spring = true;
             toolStripStatusLabelCoordinates.TextAlign = ContentAlignment.MiddleRight;
 
+            MarkAsSaved();
             UpdateMainFormControls();
 
         }
@@ -404,6 +413,7 @@ namespace OpenFTA
             string text = $"{result}    |    {EngineLogic.FTAStructure.Count} events    |    Zoom {EngineLogic.MyDrawingEngine.GlobalZoom:P0} ";
             if (toolStripStatusLabelCoordinates.Text != text)
                 toolStripStatusLabelCoordinates.Text = text;
+            UpdateTitle();
         }
 
         #endregion
@@ -411,32 +421,21 @@ namespace OpenFTA
         #region Controls
         private void toolStripButtonSave_Click(object sender, EventArgs e)
         {
-            /*SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-            sfd.Title = "Save FTAStructure";
-            sfd.FileName = "ftastructure.xml";
+            SaveFile();
+        }
 
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    List<FTAitem> list = EngineLogic.ConvertStructureToList();
-                    XmlSerializer serializer = new XmlSerializer(typeof(List<FTAitem>));
+        /// <summary>Content of the tree when it was last loaded or saved (see FTAlogic.ContentFingerprint).</summary>
+        private string savedFingerprint = "";
 
-                    using (FileStream fs = new FileStream(sfd.FileName, FileMode.Create))
-                    {
-                        serializer.Serialize(fs, list);
-                    }
+        /// <summary>True when the tree has changes that are not saved.</summary>
+        private bool IsModified => EngineLogic.ContentFingerprint() != savedFingerprint;
 
-                    MessageBox.Show("Structure saved successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error saving structure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }*/
+        private void MarkAsSaved() => savedFingerprint = EngineLogic.ContentFingerprint();
 
-            SaveFileDialog sfd = new SaveFileDialog();
+        /// <summary>Saves the tree to a file chosen by the user; false when cancelled or failed.</summary>
+        private bool SaveFile()
+        {
+            using SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
             sfd.Title = "Save FTAStructure";
             sfd.FileName = "ftastructure.fta";
@@ -445,33 +444,80 @@ namespace OpenFTA
             if (WorkingFileName.Length > 0)
                 sfd.FileName = Path.GetFileName(WorkingFileName);
 
-            if (sfd.ShowDialog() == DialogResult.OK)
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return false;
+
+            try
             {
-                try
+                SaveTreeClass saveData = new SaveTreeClass
                 {
-                    SaveTreeClass saveData = new SaveTreeClass
-                    {
-                        Zoom = EngineLogic.MyDrawingEngine.GlobalZoom,
-                        OffsetX = EngineLogic.MyDrawingEngine.offsetX,
-                        OffsetY = EngineLogic.MyDrawingEngine.offsetY,
-                        FtaStructure = EngineLogic.FTAStructure
-                        //FtaStructure = EngineLogic.MCSStructure
-                    };
-
-                    saveData.SaveToFile(sfd.FileName);
-
-
-                    MessageBox.Show("Structure saved successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error saving structure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                    Zoom = EngineLogic.MyDrawingEngine.GlobalZoom,
+                    OffsetX = EngineLogic.MyDrawingEngine.offsetX,
+                    OffsetY = EngineLogic.MyDrawingEngine.offsetY,
+                    FtaStructure = EngineLogic.FTAStructure
+                };
+                saveData.SaveToFile(sfd.FileName);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving structure: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // the saved file is the current one (title, next save, list of files)
+            WorkingFileName = sfd.FileName;
+            WorkingDirectory = Path.GetDirectoryName(sfd.FileName) ?? WorkingDirectory;
+            MarkAsSaved();
+            try { LoadFiles(WorkingDirectory); } catch (Exception) { }
+            UpdateMainFormControls();
+            return true;
+        }
+
+        /// <summary>
+        /// Before the tree is replaced (new, open, close): asks whether to save unsaved changes.
+        /// False when the user cancels or the save is cancelled.
+        /// </summary>
+        private bool ConfirmDiscardChanges()
+        {
+            if (!IsModified)
+                return true;
+
+            string name = WorkingFileName.Length > 0 ? Path.GetFileName(WorkingFileName) : "the new fault tree";
+            var save = new TaskDialogButton("Save");
+            var dontSave = new TaskDialogButton("Don't save");
+            var page = new TaskDialogPage
+            {
+                Caption = "Open FTA",
+                Heading = $"Do you want to save changes to {name}?",
+                Text = "Your changes will be lost if you don't save them.",
+                Icon = TaskDialogIcon.Warning,
+                AllowCancel = true,
+                DefaultButton = save,
+            };
+            page.Buttons.Add(save);
+            page.Buttons.Add(dontSave);
+            page.Buttons.Add(TaskDialogButton.Cancel);
+
+            TaskDialogButton result = TaskDialog.ShowDialog(this, page);
+            if (result == save)
+                return SaveFile();
+            return result == dontSave;
+        }
+
+        /// <summary>Window title with the file name and * for unsaved changes.</summary>
+        private void UpdateTitle()
+        {
+            string name = WorkingFileName.Length > 0 ? Path.GetFileName(WorkingFileName) : "(unsaved)";
+            string title = "Open FTA - " + name + (IsModified ? " *" : "");
+            if (Text != title)
+                Text = title;
         }
 
         private void toolStripButtonLoad_Click(object sender, EventArgs e)
         {
+            if (!ConfirmDiscardChanges())
+                return;
+
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "fta files (*.fta)|*.fta|All files (*.*)|*.*";
             ofd.Title = "Open FTAStructure";
@@ -521,6 +567,7 @@ namespace OpenFTA
 
 
 
+                MarkAsSaved();
                 try
                 {
                     WorkingFileName = fullpath;
@@ -1160,12 +1207,7 @@ namespace OpenFTA
             UpdateStatusInfo();
 
 
-            if (WorkingFileName.Length > 0)
-            {
-                Text = "Open FTA - " + Path.GetFileName(WorkingFileName);
-            }
-            else
-                Text = "Open FTA - (unsaved)";
+            UpdateTitle();
         }
 
         private void UpdateMainFormControls_EventsAreSelected()
@@ -1560,6 +1602,8 @@ namespace OpenFTA
 
         private void toolStripButtonNew_Click(object sender, EventArgs e)
         {
+            if (!ConfirmDiscardChanges())
+                return;
             newFile();
         }
 
@@ -1583,6 +1627,7 @@ namespace OpenFTA
             MyUIEngine.FillTreeView(treeView1);
 
             WorkingFileName = "";
+            MarkAsSaved();
 
             UpdateMainFormControls();
 
@@ -1846,7 +1891,7 @@ namespace OpenFTA
             string fileName = item.Text; // názov súboru
 
             string fullPath = Path.Combine(WorkingDirectory, fileName);
-            if (File.Exists(fullPath))
+            if (File.Exists(fullPath) && ConfirmDiscardChanges())
             {
                 LoadFile(fullPath);
             }
