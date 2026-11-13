@@ -1312,7 +1312,7 @@ public class FTAlogic
 
         html= "    <h1>Top Event</h1>";
 
-        FTAitem GbG = FTAStructure.First().Value;
+        FTAitem GbG = GetItem(TopEventGuid);
 
         string tempTag = "";
         if(GbG.Tag!=null)
@@ -2003,6 +2003,9 @@ public class FTAlogic
             MyDrawingEngine.SetStructure(FTAStructure);
         }
 
+        // Every layout arranges the whole tree, so it is drawn from the real top event
+        MyDrawingEngine.TopEvent = GetItem(TopEventGuid);
+
         
     }
 
@@ -2017,7 +2020,7 @@ public class FTAlogic
         FindAllChilren(FTAStructure);
 
         TemActualX = 0;
-        PrepareTreeForAlign(FTAStructure.Values.First(), 0);
+        PrepareTreeForAlign(GetItem(TopEventGuid), 0);
 
 
         AssignLevelsToAllEvents();

@@ -57,7 +57,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
         TopEvent = top;
 
         if (TopEvent == null)
-            TopEvent = DrawingStructure.First().Value;
+            TopEvent = GetRoot();
 
         _metrics = ComputeMetrics();
         DrawBackGround(e);
@@ -71,7 +71,7 @@ public class DrawingEngine(FTAlogic f, Dictionary<Guid, FTAitem> structure)
     public void SetStructure(Dictionary<Guid, FTAitem> structure) //Switch between Minimalcutset drawing and Treedrawing
     {
         DrawingStructure = structure;
-        TopEvent = structure.First().Value;
+        TopEvent = GetRoot();
     }
 
     private static readonly Color CanvasColor = Color.FromArgb(245, 247, 250);

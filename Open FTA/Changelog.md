@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Own records in the reliability database were lost: `MainAppDB.db` next to the exe was overwritten by every build and by an update. The database is now kept in `%AppData%\OpenFTA\MainAppDB.db`; on first start it is created as a copy of the shipped database. Records added in an earlier version are in `MainAppDB.db` next to the old `Open FTA.exe` – copy that file to `%AppData%\OpenFTA\` (before the first start of the new version) to keep them.
 - The reliability database window shows its title and the path of the database file.
 - Adding and deleting events left the parent's list of children out of date until the tree view was refreshed; events linked only by their parent could stay in the structure after their parent was deleted. A tag given when adding an event was ignored.
+- Undo and redo did not restore changes made in the event editor (name, tag, value, gate, …): the undo step was saved only after the change, also when the editor was cancelled. Undo now keeps independent copies of the events, an edit is one undo step (none when nothing changed), and opening a file clears the undo history of the previous one.
+- The report and the drawing could use another event as the top event when the top event was not the first event in the file.
+- Sort with a selected event drew the tree only from that event, so events outside its branch disappeared with the ALGO I and ALGO II layouts.
 
 ## [1.1.0] - 2026-10-25
 

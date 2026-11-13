@@ -124,6 +124,17 @@
 
         return copy;
     }
+
+    /// <summary>
+    /// Independent copy of the event with the same GUID (used by undo and redo):
+    /// later changes of the original do not change the copy and vice versa.
+    /// </summary>
+    public FTAitem Clone()
+    {
+        var copy = (FTAitem)MemberwiseClone();
+        copy.Children = new List<Guid>(Children);
+        return copy;
+    }
 }
 
 

@@ -37,8 +37,7 @@ namespace OpenFTA
         TabPage tabPageMcsTree;
         McsTreeView mcsTreeView;
 
-        private Stack<List<FTAitem>> undoStack = new Stack<List<FTAitem>>();
-        private Stack<List<FTAitem>> redoStack = new Stack<List<FTAitem>>();
+        private readonly UndoHistory undoHistory = new UndoHistory();
 
 
 
@@ -557,6 +556,7 @@ namespace OpenFTA
                 }
 
                 EngineLogic.TopEventGuid = root.GuidCode;
+                undoHistory.Clear();                  // steps of the previous file
                 EngineLogic.MinimalCutSets.Clear();   // MCS of the previous file
                 ClearAnalysisResults();
                 EngineLogic.FindAllChilren();
@@ -629,10 +629,7 @@ namespace OpenFTA
 
         private void SaveStateForUndo()
         {
-            List<FTAitem> currentState = EngineLogic.ConvertStructureToList();
-
-            undoStack.Push(currentState);
-            redoStack.Clear();
+            undoHistory.Record(EngineLogic);
         }
 
         private void toolStripButtonCenter_Click(object sender, EventArgs e)
@@ -651,11 +648,9 @@ namespace OpenFTA
             /* EngineLogic.FTAStructure = new Dictionary<Guid, FTAitem>(EngineLogic.MCSStructure);
              EngineLogic.FindAllChilren(EngineLogic.FTAStructure);*/
 
-            if (EngineLogic.SelectedEvents.Count == 1)
-                EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.SelectedEvents[0];
-            else
-                EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
-
+            // The layout always arranges the whole tree, so it is drawn from the real top event
+            // (drawing from the selected event hid the events outside its branch).
+            EngineLogic.MyDrawingEngine.TopEvent = EngineLogic.GetItem(EngineLogic.TopEventGuid);
 
 
 
@@ -747,6 +742,10 @@ namespace OpenFTA
 
             if (DialogResult.OK == edit.ShowDialog())
             {
+                // Undo step with the state before the change, only if the dialog changed something
+                UndoHistory.State before = UndoHistory.Capture(EngineLogic);
+                string fingerprintBefore = EngineLogic.ContentFingerprint();
+
                 if (isNew)
                 {
                     Guid A = EngineLogic.AddNewEvent(selectedEvent.GuidCode, "", 0, 0, 0);
@@ -758,12 +757,14 @@ namespace OpenFTA
                     ReadInfoFromEditForm(edit, selectedEvent);
                 }
 
+                if (EngineLogic.ContentFingerprint() != fingerprintBefore)
+                    undoHistory.Record(before);
+
                 MyUIEngine.FillTreeView(treeView1);
                 EngineLogic.AssignLevelsToAllEvents();
                 pictureBox1.Invalidate();
             }
             UpdateMainFormControls();
-            SaveStateForUndo();
         }
 
         void CreateNewEvent(FTAitem parent, bool Basis)
@@ -820,43 +821,20 @@ namespace OpenFTA
 
         private void Undo()
         {
-            if (undoStack.Count > 0)
-            {
-                List<FTAitem> currentState = EngineLogic.ConvertStructureToList();
-                redoStack.Push(currentState);
-                List<FTAitem> prevState = undoStack.Pop();
-
-                EngineLogic.FTAStructure.Clear();
-                foreach (FTAitem item in prevState)
-                {
-                    EngineLogic.FTAStructure[item.GuidCode] = item;
-                }
-
-                EngineLogic.FindAllChilren();
-                EngineLogic.AssignLevelsToAllEvents();
-                MyUIEngine.FillTreeView(treeView1);
-                pictureBox1.Invalidate();
-            }
+            if (undoHistory.Undo(EngineLogic))
+                RefreshAfterUndoRedo();
         }
 
         private void Redo()
         {
-            if (redoStack.Count > 0)
-            {
-                List<FTAitem> currentState = EngineLogic.ConvertStructureToList();
-                undoStack.Push(currentState);
-                List<FTAitem> nextState = redoStack.Pop();
-                EngineLogic.FTAStructure.Clear();
-                foreach (FTAitem item in nextState)
-                {
-                    EngineLogic.FTAStructure[item.GuidCode] = item;
-                }
+            if (undoHistory.Redo(EngineLogic))
+                RefreshAfterUndoRedo();
+        }
 
-                EngineLogic.FindAllChilren();
-                EngineLogic.AssignLevelsToAllEvents();
-                MyUIEngine.FillTreeView(treeView1);
-                pictureBox1.Invalidate();
-            }
+        private void RefreshAfterUndoRedo()
+        {
+            MyUIEngine.FillTreeView(treeView1);
+            pictureBox1.Invalidate();
         }
 
         private void ReadInfoFromEditForm(FormEditEvent edit, FTAitem item)
@@ -1191,15 +1169,8 @@ namespace OpenFTA
             toolStripMenuItem_EDIT.Enabled = toolStripButtonEdit.Enabled;
 
 
-            if (undoStack.Count > 0)
-                toolStripButtonUndo.Enabled = true;
-            else
-                toolStripButtonUndo.Enabled = false;
-
-            if (redoStack.Count > 0)
-                toolStripButtonRedo.Enabled = true;
-            else
-                toolStripButtonRedo.Enabled = false;
+            toolStripButtonUndo.Enabled = undoHistory.CanUndo;
+            toolStripButtonRedo.Enabled = undoHistory.CanRedo;
 
 
             toolStripStatusLabelFileName.Text = " |  File name: " + Path.GetFileName(WorkingFileName);
@@ -1609,8 +1580,7 @@ namespace OpenFTA
 
         private void newFile()
         {
-            undoStack.Clear();
-            redoStack.Clear();
+            undoHistory.Clear();
 
             EngineLogic = new FTAlogic();
             ClearAnalysisResults();
