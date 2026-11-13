@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-13
+
 ### Added
 - Unsaved changes: the title shows * and Open FTA asks whether to save them before closing, opening another file or starting a new tree.
 - Keyboard shortcuts: Ctrl+N (new), Ctrl+O (open), Ctrl+S (save), F5 (analysis of the selected tab), F1 (help), Ctrl+plus / Ctrl+minus (zoom), Ctrl+0 (center the tree); shortcuts are shown in the tool tips.

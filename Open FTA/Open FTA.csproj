@@ -13,7 +13,7 @@
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <InvariantGlobalization>false</InvariantGlobalization>
 
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
 
     <!--   <Configuration>Release</Configuration>
     <DebugType>none</DebugType>

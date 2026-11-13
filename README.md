@@ -55,7 +55,9 @@ Because it is open source, the calculations can be checked and audited, and the 
 3. Look at the result of the top event in the tree and browse the tabs **Minimal Cut Sets**, **Minimal Cut Set Tree** and **Importance measure**.
 4. Click **Report** to create a report, or **Save image** to export the tree.
 
-Under **Settings** you can choose the calculation options, the base time unit, the size and spacing of events and the layout algorithm. Settings are kept after restart.
+Under **Settings** you can choose the calculation options, the base time unit, the look, size and spacing of events and the layout algorithm. Settings are kept after restart.
+
+Keyboard shortcuts: Ctrl+N (new), Ctrl+O (open), Ctrl+S (save), F5 (analysis), F1 (help), Ctrl+plus / Ctrl+minus (zoom), Ctrl+0 (center the tree).
 
 ## Building from source
 
